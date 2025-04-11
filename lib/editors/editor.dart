@@ -1,14 +1,16 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/game.dart';
-import 'package:flame/input.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+
+import 'editor_config.dart';
+import 'state_machines/selection_state_machine.dart';
+import 'state_machines/state_machines.dart';
 
 class Editor extends StatelessWidget {
   const Editor({super.key});
@@ -21,15 +23,136 @@ class Editor extends StatelessWidget {
       backdrop: Background(),
     );
 
-    return Center(
-      child: Container(constraints: BoxConstraints.loose(Size.square(500)), child: GameWidget(game: EditorGame(world: camera.world, camera: camera))),
-    );
+    return GameWidget(game: EditorGame(world: camera.world, camera: camera));
   }
 }
 
 class Background extends CustomPainterComponent {}
 
-class EditorGame extends FlameGame with PanDetector, ScaleDetector, KeyboardEvents, PointerMoveCallbacks {
+class EditorStateMachineGame extends FlameGame
+    with TapDetector, SecondaryTapDetector, PanDetector, ScaleDetector, MouseMovementDetector, DragCallbacks, KeyboardEvents {
+  EditorStateMachineGame({super.children, super.world, super.camera});
+
+  late BaseStateMachine stateMachine = SelectionStateMachine(this);
+
+  // TapDetector
+  @override
+  void onTap() {
+    stateMachine.onTap();
+  }
+
+  @override
+  void onTapDown(TapDownInfo info) {
+    stateMachine.onTapDown(info);
+  }
+
+  @override
+  void onTapUp(TapUpInfo info) {
+    stateMachine.onTapUp(info);
+  }
+
+  @override
+  void onTapCancel() {
+    stateMachine.onTapCancel();
+  }
+
+  // SecondaryTapDetector
+  @override
+  void onSecondaryTapDown(TapDownInfo info) {
+    stateMachine.onSecondaryTapDown(info);
+  }
+
+  @override
+  void onSecondaryTapUp(TapUpInfo info) {
+    stateMachine.onSecondaryTapUp(info);
+  }
+
+  @override
+  void onSecondaryTapCancel() {
+    stateMachine.onSecondaryTapCancel();
+  }
+
+  // PanDetector
+  @override
+  void onPanStart(DragStartInfo info) {
+    stateMachine.onPanStart(info);
+  }
+
+  @override
+  void onPanDown(DragDownInfo info) {
+    stateMachine.onPanDown(info);
+  }
+
+  @override
+  void onPanUpdate(DragUpdateInfo info) {
+    stateMachine.onPanUpdate(info);
+  }
+
+  @override
+  void onPanEnd(DragEndInfo info) {
+    stateMachine.onPanEnd(info);
+  }
+
+  @override
+  void onPanCancel() {
+    stateMachine.onPanCancel();
+  }
+
+  // ScaleDetector
+  @override
+  void onScaleStart(ScaleStartInfo info) {
+    stateMachine.onScaleStart(info);
+  }
+
+  @override
+  void onScaleUpdate(ScaleUpdateInfo info) {
+    stateMachine.onScaleUpdate(info);
+  }
+
+  @override
+  void onScaleEnd(ScaleEndInfo info) {
+    stateMachine.onScaleEnd(info);
+  }
+
+  // MouseMovementDetector
+  @override
+  void onMouseMove(PointerHoverInfo info) {
+    stateMachine.onMouseMove(info);
+  }
+
+  // DragCallbacks
+  @override
+  void onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
+    stateMachine.onDragStart(event);
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    super.onDragUpdate(event);
+    stateMachine.onDragUpdate(event);
+  }
+
+  @override
+  void onDragEnd(DragEndEvent event) {
+    super.onDragEnd(event);
+    stateMachine.onDragEnd(event);
+  }
+
+  @override
+  void onDragCancel(DragCancelEvent event) {
+    super.onDragCancel(event);
+    stateMachine.onDragCancel(event);
+  }
+
+  // KeyboardEvents
+  @override
+  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    return stateMachine.onKeyEvent(event, keysPressed);
+  }
+}
+
+class EditorGame extends EditorStateMachineGame {
   EditorGame({super.children, super.world, super.camera});
 
   @override
@@ -40,101 +163,31 @@ class EditorGame extends FlameGame with PanDetector, ScaleDetector, KeyboardEven
     camera.viewfinder.anchor = Anchor.topLeft;
     camera.viewfinder.position = -camera.visibleWorldRect.center.toVector2();
 
-    add(FpsTextComponent(position: camera.viewport.size..[0] = 0));
+    add(FpsTextComponent(position: camera.viewport.size..[0] = 0, textRenderer: TextPaint(style: TextStyle(color: Colors.black))));
 
     return super.onLoad();
   }
 
   @override
-  Color backgroundColor() => Color(0xffffffff);
-
-  @override
-  void onPanUpdate(DragUpdateInfo info) {
-    camera.viewfinder.position -= info.delta.global / camera.viewfinder.zoom;
-  }
-
-  late double startZoom;
-  late Vector2 startPivot;
-
-  @override
-  void onScaleStart(ScaleStartInfo info) {
-    startPivot = camera.globalToLocal(info.eventPosition.widget);
-    startZoom = camera.viewfinder.zoom;
-  }
-
-  @override
-  void onScaleUpdate(ScaleUpdateInfo info) {
-    final scaleFactor = info.scale.global;
-    if (!scaleFactor.isIdentity()) {
-      final worldOffset = info.eventPosition.widget;
-      final newZoom = startZoom * scaleFactor.x;
-
-      zoomAtPoint(camera.viewfinder, newZoom.clamp(0.1, 10), startPivot, worldOffset);
-    } else {
-      throw RangeError("scaleFactor: $scaleFactor");
-    }
-  }
-
-  // pivot 是鼠标在 canvas 画布中的位置
-  // offset 是鼠标在 canvas 组件上的位置
-  void zoomAtPoint(Viewfinder viewfinder, double newZoom, Vector2 pivot, Vector2 offset) {
-    final newPosition = pivot - (offset / newZoom);
-    viewfinder.zoom = newZoom;
-    viewfinder.position = newPosition;
-  }
-
-  @override
-  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    // print("onKeyEvent");
-    // print(keysPressed);
-    if (event is KeyDownEvent && keysPressed.containsAll(LogicalKeyboardKey.meta.synonyms)) {
-      if (event.logicalKey == LogicalKeyboardKey.equal) {
-        print("ADD");
-      }
-
-      if (event.logicalKey == LogicalKeyboardKey.minus) {
-        print("SUB");
-      }
-    }
-
-    return super.onKeyEvent(event, keysPressed);
-  }
-
-  Vector2 mousePosition = Vector2.zero();
-
-  @override
-  void onPointerMove(event) async {
-    mousePosition = camera.globalToLocal(event.canvasPosition);
-    super.onPointerMove(event);
-  }
+  Color backgroundColor() => kEditorBackgroundColor;
 }
 
 class EditorWorld extends World with HasGameReference<EditorGame> {
-  final Grid grid = Grid(gap: 20, dotSize: 1);
-  final Axis axis = Axis(axisLength: 40, axisWidth: 1);
+  final Grid grid = Grid(dotGap: kEditorDotGap, dotSize: kEditorDotSize);
+
+  final Axis axis = Axis(axisLength: kEditorAxisLength, axisWidth: kEditorAxisWidth);
 
   @override
   FutureOr<void> onLoad() {
     addAll([grid, axis]);
     return super.onLoad();
   }
-
-  // void renderMousePosition(Canvas canvas) {
-  //   final paragraphBuilder =
-  //       ui.ParagraphBuilder(ui.ParagraphStyle())
-  //         ..pushStyle(ui.TextStyle(color: Color(0xffff4500)))
-  //         ..addText(game.mousePosition.toString());
-
-  //   final paragraph = paragraphBuilder.build();
-  //   paragraph.layout(ui.ParagraphConstraints(width: game.canvasSize.x));
-  //   canvas.drawParagraph(paragraph, game.mousePosition.toOffset());
-  // }
 }
 
 class Grid extends PositionComponent with HasGameReference<EditorGame> {
-  Grid({required this.gap, required this.dotSize});
+  Grid({required this.dotGap, required this.dotSize});
 
-  final double gap;
+  final double dotGap;
 
   final double dotSize;
 
@@ -144,8 +197,8 @@ class Grid extends PositionComponent with HasGameReference<EditorGame> {
     final double zoom = game.camera.viewfinder.zoom;
 
     final double gap = switch (zoom) {
-      < 1.0 => this.gap / ((zoom * 10).floorToDouble() / 10),
-      >= 1.0 => this.gap / zoom.floorToDouble(),
+      < 1.0 => dotGap / ((zoom * kMaxZoom).floorToDouble() / kMaxZoom),
+      >= 1.0 => dotGap / zoom.floorToDouble(),
       double() => throw UnimplementedError(),
     };
 
@@ -154,7 +207,7 @@ class Grid extends PositionComponent with HasGameReference<EditorGame> {
     final dots = createGridDots(visibleWorldRect, gap);
 
     final double strokeWidth = switch (zoom) {
-      < 1.0 => dotSize / ((zoom * 10).floorToDouble() / 10),
+      < 1.0 => dotSize / ((zoom * kMaxZoom).floorToDouble() / kMaxZoom),
       >= 1.0 => dotSize / zoom.floorToDouble(),
       double() => throw UnimplementedError(),
     };
@@ -193,19 +246,19 @@ class Axis extends PositionComponent with HasGameReference<EditorGame> {
 
   final double axisWidth;
 
-  final Paint _paint = Paint()..color = Color(0xffff4500);
+  final Paint _paint = Paint()..color = kEditorAxisColor;
 
   void renderAxis(Canvas canvas) {
     final zoom = game.camera.viewfinder.zoom;
 
     final double strokeWidth = switch (zoom) {
-      < 1.0 => axisWidth / ((zoom * 10).floorToDouble() / 10),
+      < 1.0 => axisWidth / ((zoom * kMaxZoom).floorToDouble() / kMaxZoom),
       >= 1.0 => axisWidth / zoom.floorToDouble(),
       double() => throw UnimplementedError(),
     };
 
     final double length = switch (zoom) {
-      < 1.0 => axisLength / ((zoom * 10).floorToDouble() / 10),
+      < 1.0 => axisLength / ((zoom * kMaxZoom).floorToDouble() / kMaxZoom),
       >= 1.0 => axisLength / zoom.floorToDouble(),
       double() => throw UnimplementedError(),
     };
