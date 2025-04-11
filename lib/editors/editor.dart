@@ -21,11 +21,8 @@ class Editor extends StatelessWidget {
       backdrop: Background(),
     );
 
-    return Container(
-      //
-      width: 500,
-      height: 300,
-      child: GameWidget(game: EditorGame(world: camera.world, camera: camera)),
+    return Center(
+      child: Container(constraints: BoxConstraints.loose(Size.square(500)), child: GameWidget(game: EditorGame(world: camera.world, camera: camera))),
     );
   }
 }
@@ -41,8 +38,10 @@ class EditorGame extends FlameGame with PanDetector, ScaleDetector, KeyboardEven
   @override
   FutureOr<void> onLoad() {
     camera.viewfinder.anchor = Anchor.topLeft;
+    camera.viewfinder.position = -camera.visibleWorldRect.center.toVector2();
 
-    FpsTextComponent(position: camera.visibleWorldRect.bottomLeft.toVector2()).addToParent(this);
+    add(FpsTextComponent(position: camera.viewport.size..[0] = 0));
+
     return super.onLoad();
   }
 
@@ -51,8 +50,6 @@ class EditorGame extends FlameGame with PanDetector, ScaleDetector, KeyboardEven
 
   @override
   void onPanUpdate(DragUpdateInfo info) {
-    // print(a);
-
     camera.viewfinder.position -= info.delta.global / camera.viewfinder.zoom;
   }
 
@@ -71,7 +68,8 @@ class EditorGame extends FlameGame with PanDetector, ScaleDetector, KeyboardEven
     if (!scaleFactor.isIdentity()) {
       final worldOffset = info.eventPosition.widget;
       final newZoom = startZoom * scaleFactor.x;
-      zoomAtPoint(camera.viewfinder, newZoom, startPivot, worldOffset);
+
+      zoomAtPoint(camera.viewfinder, newZoom.clamp(0.1, 10), startPivot, worldOffset);
     } else {
       throw RangeError("scaleFactor: $scaleFactor");
     }
@@ -112,52 +110,115 @@ class EditorGame extends FlameGame with PanDetector, ScaleDetector, KeyboardEven
 }
 
 class EditorWorld extends World with HasGameReference<EditorGame> {
-  @override
-  void render(Canvas canvas) {
-    renderGrid(canvas);
-    renderCenterAxis(canvas);
-    renderMousePosition(canvas);
+  final Grid grid = Grid(gap: 20, dotSize: 1);
+  final Axis axis = Axis(axisLength: 40, axisWidth: 1);
 
-    super.render(canvas);
+  @override
+  FutureOr<void> onLoad() {
+    addAll([grid, axis]);
+    return super.onLoad();
   }
 
+  // void renderMousePosition(Canvas canvas) {
+  //   final paragraphBuilder =
+  //       ui.ParagraphBuilder(ui.ParagraphStyle())
+  //         ..pushStyle(ui.TextStyle(color: Color(0xffff4500)))
+  //         ..addText(game.mousePosition.toString());
+
+  //   final paragraph = paragraphBuilder.build();
+  //   paragraph.layout(ui.ParagraphConstraints(width: game.canvasSize.x));
+  //   canvas.drawParagraph(paragraph, game.mousePosition.toOffset());
+  // }
+}
+
+class Grid extends PositionComponent with HasGameReference<EditorGame> {
+  Grid({required this.gap, required this.dotSize});
+
+  final double gap;
+
+  final double dotSize;
+
+  final Paint _paint = Paint();
+
   void renderGrid(Canvas canvas) {
-    final Paint paint = Paint();
-    final double gap = 125;
+    final double zoom = game.camera.viewfinder.zoom;
+
+    final double gap = switch (zoom) {
+      < 1.0 => this.gap / ((zoom * 10).floorToDouble() / 10),
+      >= 1.0 => this.gap / zoom.floorToDouble(),
+      double() => throw UnimplementedError(),
+    };
 
     final visibleWorldRect = game.camera.visibleWorldRect;
 
-    final topLeft = visibleWorldRect.topLeft;
-    final bottomRight = visibleWorldRect.bottomRight;
+    final dots = createGridDots(visibleWorldRect, gap);
+
+    final double strokeWidth = switch (zoom) {
+      < 1.0 => dotSize / ((zoom * 10).floorToDouble() / 10),
+      >= 1.0 => dotSize / zoom.floorToDouble(),
+      double() => throw UnimplementedError(),
+    };
+
+    _paint.strokeWidth = strokeWidth;
+    canvas.drawPoints(ui.PointMode.points, dots, _paint);
+  }
+
+  List<Offset> createGridDots(Rect rect, double gap) {
+    final topLeft = rect.topLeft;
+    final bottomRight = rect.bottomRight;
+
+    final Set<Offset> dots = {};
 
     final start = topLeft - (topLeft % gap) + Offset(gap, gap);
     for (double dx = start.dx; dx <= bottomRight.dx; dx += gap) {
-      canvas.drawLine(Offset(dx, topLeft.dy), Offset(dx, bottomRight.dy), paint);
+      for (double dy = start.dy; dy <= bottomRight.dy; dy += gap) {
+        dots.add(Offset(dx, dy));
+      }
     }
 
-    for (double dy = start.dy; dy <= bottomRight.dy; dy += gap) {
-      canvas.drawLine(Offset(topLeft.dx, dy), Offset(bottomRight.dx, dy), paint);
-    }
+    return dots.toList();
   }
 
-  void renderCenterAxis(Canvas canvas) {
-    final paint =
-        Paint()
-          ..color = Color(0xffff4500)
-          ..strokeWidth = 2;
+  @override
+  void render(Canvas canvas) {
+    renderGrid(canvas);
+    super.render(canvas);
+  }
+}
 
-    canvas.drawLine(Offset(-125, 0), Offset(125, 0), paint);
-    canvas.drawLine(Offset(0, -125), Offset(0, 125), paint);
+class Axis extends PositionComponent with HasGameReference<EditorGame> {
+  Axis({required this.axisLength, required this.axisWidth});
+
+  final double axisLength;
+
+  final double axisWidth;
+
+  final Paint _paint = Paint()..color = Color(0xffff4500);
+
+  void renderAxis(Canvas canvas) {
+    final zoom = game.camera.viewfinder.zoom;
+
+    final double strokeWidth = switch (zoom) {
+      < 1.0 => axisWidth / ((zoom * 10).floorToDouble() / 10),
+      >= 1.0 => axisWidth / zoom.floorToDouble(),
+      double() => throw UnimplementedError(),
+    };
+
+    final double length = switch (zoom) {
+      < 1.0 => axisLength / ((zoom * 10).floorToDouble() / 10),
+      >= 1.0 => axisLength / zoom.floorToDouble(),
+      double() => throw UnimplementedError(),
+    };
+
+    _paint.strokeWidth = strokeWidth;
+
+    canvas.drawLine(Offset(-length, 0), Offset(length, 0), _paint);
+    canvas.drawLine(Offset(0, -length), Offset(0, length), _paint);
   }
 
-  void renderMousePosition(Canvas canvas) {
-    final paragraphBuilder =
-        ui.ParagraphBuilder(ui.ParagraphStyle())
-          ..pushStyle(ui.TextStyle(color: Color(0xffff4500)))
-          ..addText(game.mousePosition.toString());
-
-    final paragraph = paragraphBuilder.build();
-    paragraph.layout(ui.ParagraphConstraints(width: game.canvasSize.x));
-    canvas.drawParagraph(paragraph, game.mousePosition.toOffset());
+  @override
+  void render(Canvas canvas) {
+    renderAxis(canvas);
+    super.render(canvas);
   }
 }
