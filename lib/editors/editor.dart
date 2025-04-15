@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:blueprint_master/extensions/extensions.dart';
+import 'package:blueprint_master/layouts/cubits/cubits.dart';
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'editor_config.dart';
-import 'state_machines/selection_state_machine.dart';
 import 'state_machines/state_machines.dart';
 
 class Editor extends StatelessWidget {
@@ -17,142 +17,21 @@ class Editor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final camera = CameraComponent(
-      //
-      world: EditorWorld(),
-      backdrop: Background(),
-    );
+    // final camera = CameraComponent(
+    //   //
+    //   world: EditorWorld(),
+    //   backdrop: Background(),
+    // );
 
-    return GameWidget(game: EditorGame(world: camera.world, camera: camera));
+    final drawCubit = context.watch<DrawCubit>();
+
+    return GameWidget(game: drawCubit.game);
   }
 }
 
 class Background extends CustomPainterComponent {}
 
-class EditorStateMachineGame extends FlameGame
-    with TapDetector, SecondaryTapDetector, PanDetector, ScaleDetector, MouseMovementDetector, DragCallbacks, KeyboardEvents {
-  EditorStateMachineGame({super.children, super.world, super.camera});
-
-  late BaseStateMachine stateMachine = SelectionStateMachine(this);
-
-  // TapDetector
-  @override
-  void onTap() {
-    stateMachine.onTap();
-  }
-
-  @override
-  void onTapDown(TapDownInfo info) {
-    stateMachine.onTapDown(info);
-  }
-
-  @override
-  void onTapUp(TapUpInfo info) {
-    stateMachine.onTapUp(info);
-  }
-
-  @override
-  void onTapCancel() {
-    stateMachine.onTapCancel();
-  }
-
-  // SecondaryTapDetector
-  @override
-  void onSecondaryTapDown(TapDownInfo info) {
-    stateMachine.onSecondaryTapDown(info);
-  }
-
-  @override
-  void onSecondaryTapUp(TapUpInfo info) {
-    stateMachine.onSecondaryTapUp(info);
-  }
-
-  @override
-  void onSecondaryTapCancel() {
-    stateMachine.onSecondaryTapCancel();
-  }
-
-  // PanDetector
-  @override
-  void onPanStart(DragStartInfo info) {
-    stateMachine.onPanStart(info);
-  }
-
-  @override
-  void onPanDown(DragDownInfo info) {
-    stateMachine.onPanDown(info);
-  }
-
-  @override
-  void onPanUpdate(DragUpdateInfo info) {
-    stateMachine.onPanUpdate(info);
-  }
-
-  @override
-  void onPanEnd(DragEndInfo info) {
-    stateMachine.onPanEnd(info);
-  }
-
-  @override
-  void onPanCancel() {
-    stateMachine.onPanCancel();
-  }
-
-  // ScaleDetector
-  @override
-  void onScaleStart(ScaleStartInfo info) {
-    stateMachine.onScaleStart(info);
-  }
-
-  @override
-  void onScaleUpdate(ScaleUpdateInfo info) {
-    stateMachine.onScaleUpdate(info);
-  }
-
-  @override
-  void onScaleEnd(ScaleEndInfo info) {
-    stateMachine.onScaleEnd(info);
-  }
-
-  // MouseMovementDetector
-  @override
-  void onMouseMove(PointerHoverInfo info) {
-    stateMachine.onMouseMove(info);
-  }
-
-  // DragCallbacks
-  @override
-  void onDragStart(DragStartEvent event) {
-    super.onDragStart(event);
-    stateMachine.onDragStart(event);
-  }
-
-  @override
-  void onDragUpdate(DragUpdateEvent event) {
-    super.onDragUpdate(event);
-    stateMachine.onDragUpdate(event);
-  }
-
-  @override
-  void onDragEnd(DragEndEvent event) {
-    super.onDragEnd(event);
-    stateMachine.onDragEnd(event);
-  }
-
-  @override
-  void onDragCancel(DragCancelEvent event) {
-    super.onDragCancel(event);
-    stateMachine.onDragCancel(event);
-  }
-
-  // KeyboardEvents
-  @override
-  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    return stateMachine.onKeyEvent(event, keysPressed);
-  }
-}
-
-class EditorGame extends EditorStateMachineGame {
+class EditorGame extends StateMachineGame {
   EditorGame({super.children, super.world, super.camera});
 
   @override
@@ -160,12 +39,13 @@ class EditorGame extends EditorStateMachineGame {
 
   @override
   FutureOr<void> onLoad() {
+    super.onLoad();
+
     camera.viewfinder.anchor = Anchor.topLeft;
     camera.viewfinder.position = -camera.visibleWorldRect.center.toVector2();
+    camera.viewfinder.zoom = zoomCubit.state;
 
     add(FpsTextComponent(position: camera.viewport.size..[0] = 0, textRenderer: TextPaint(style: TextStyle(color: Colors.black))));
-
-    return super.onLoad();
   }
 
   @override
@@ -194,23 +74,11 @@ class Grid extends PositionComponent with HasGameReference<EditorGame> {
   final Paint _paint = Paint();
 
   void renderGrid(Canvas canvas) {
-    final double zoom = game.camera.viewfinder.zoom;
-
-    final double gap = switch (zoom) {
-      < 1.0 => dotGap / ((zoom * kMaxZoom).floorToDouble() / kMaxZoom),
-      >= 1.0 => dotGap / zoom.floorToDouble(),
-      double() => throw UnimplementedError(),
-    };
-
+    final double gap = game.camera.viewfinder.getLogicSize(dotGap);
     final visibleWorldRect = game.camera.visibleWorldRect;
 
     final dots = createGridDots(visibleWorldRect, gap);
-
-    final double strokeWidth = switch (zoom) {
-      < 1.0 => dotSize / ((zoom * kMaxZoom).floorToDouble() / kMaxZoom),
-      >= 1.0 => dotSize / zoom.floorToDouble(),
-      double() => throw UnimplementedError(),
-    };
+    final double strokeWidth = game.camera.viewfinder.getLogicSize(dotSize);
 
     _paint.strokeWidth = strokeWidth;
     canvas.drawPoints(ui.PointMode.points, dots, _paint);
@@ -249,19 +117,8 @@ class Axis extends PositionComponent with HasGameReference<EditorGame> {
   final Paint _paint = Paint()..color = kEditorAxisColor;
 
   void renderAxis(Canvas canvas) {
-    final zoom = game.camera.viewfinder.zoom;
-
-    final double strokeWidth = switch (zoom) {
-      < 1.0 => axisWidth / ((zoom * kMaxZoom).floorToDouble() / kMaxZoom),
-      >= 1.0 => axisWidth / zoom.floorToDouble(),
-      double() => throw UnimplementedError(),
-    };
-
-    final double length = switch (zoom) {
-      < 1.0 => axisLength / ((zoom * kMaxZoom).floorToDouble() / kMaxZoom),
-      >= 1.0 => axisLength / zoom.floorToDouble(),
-      double() => throw UnimplementedError(),
-    };
+    final double strokeWidth = game.camera.viewfinder.getLogicSize(axisWidth);
+    final double length = game.camera.viewfinder.getLogicSize(axisLength);
 
     _paint.strokeWidth = strokeWidth;
 
