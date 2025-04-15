@@ -71,6 +71,12 @@ class _ToolBarState extends State<ToolBar> {
           tooltip: "Rectange",
         ),
         IconButton(onPressed: drawCubit.enterPolygon, isSelected: drawCubit.state is PolygonStateMachine, icon: const Icon(Icons.tab), tooltip: "Polygon"),
+        IconButton(
+          onPressed: drawCubit.enterCircle,
+          isSelected: drawCubit.state is CircleStateMachine,
+          icon: const Icon(Icons.circle_outlined),
+          tooltip: "Circle",
+        ),
       ],
     );
   }

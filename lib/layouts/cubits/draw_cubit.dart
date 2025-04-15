@@ -23,6 +23,10 @@ class DrawCubit extends Cubit<BaseStateMachine> {
   void enterPolygon() {
     emit(PolygonStateMachine(game));
   }
+
+  void enterCircle() {
+    emit(CircleStateMachine(game));
+  }
 }
 
 final DrawCubit drawCubit = DrawCubit();
