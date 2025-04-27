@@ -1,7 +1,35 @@
+import 'dart:ui';
+
 import 'package:flame/components.dart';
 
 class PolylineShape extends ShapeComponent {
-  PolylineShape(this.vertices);
+  PolylineShape(
+    this.vertices, {
+    super.position,
+    super.size,
+    super.scale,
+    super.angle,
+    super.anchor,
+    super.children,
+    super.priority,
+    super.key,
+    super.paint,
+    super.paintLayers,
+  }) {
+    _path = Path();
+    _path.moveTo(vertices[0].x, vertices[0].y);
+    for (int i = 1; i < vertices.length; i++) {
+      _path.lineTo(vertices[i].x, vertices[i].y);
+    }
+  }
 
   final List<Vector2> vertices;
+
+  late Path _path;
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawPath(_path, paint);
+    super.render(canvas);
+  }
 }

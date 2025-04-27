@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/widgets.dart';
+
 import 'gdsii.dart';
 import 'gdsii_read_utils.dart';
 
@@ -39,16 +41,48 @@ abstract class StructBuilder<T> {
     return readString(data);
   }
 
-  void handlePresentation(ByteData data) {
-    print("Presentation");
+  (int, Alignment) handlePresentation(ByteData data) {
+    final flags = data.getUint8(1);
+
+    final size = (flags & int.parse("00110000", radix: 2)) >>> 4;
+    final vertical = (flags & int.parse("0001100", radix: 2)) >>> 2;
+    final horizontal = (flags & int.parse("0000011", radix: 2));
+
+    final alignment = Alignment(
+      switch (horizontal) {
+        0 => -1,
+        1 => 0,
+        2 => 1,
+        (_) => throw UnimplementedError("horizontal: $horizontal"),
+      },
+      switch (vertical) {
+        0 => -1,
+        1 => 0,
+        2 => 1,
+        (_) => throw UnimplementedError("vertical: $vertical"),
+      },
+    );
+
+    return (size, alignment);
   }
 
   void handlePathtype(ByteData data) {
-    print("Pathtype");
+    // print("Pathtype");
   }
 
-  void handleWidth(ByteData data) {
-    print("Width");
+  int handleWidth(ByteData data) {
+    // print("Width");
+    // print(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+    final width = data.getInt32(0);
+    return width;
+  }
+
+  void handleBgnextn(ByteData data) {
+    // print("bgnextn");
+  }
+
+  void handleEndextn(ByteData data) {
+    // print("Endextn");
   }
 
   bool handleStrans(ByteData data) {
@@ -75,6 +109,14 @@ abstract class StructBuilder<T> {
   num handleAngle(ByteData data) {
     final angle = readf64(data);
     return angle;
+  }
+
+  (int, int) handleColrow(ByteData data) {
+    final int offset = (data.lengthInBytes / 2).round();
+    final col = data.getInt16(0);
+    final row = data.getInt16(offset);
+    // 最大不超过 2 ** 15
+    return (col, row);
   }
 
   List<Point> handleXY(ByteData data) {
@@ -152,11 +194,26 @@ class BoundaryStructBuilder extends StructBuilder<BoundaryStruct> {
 }
 
 class TextStruct extends Struct {
-  TextStruct({required this.layer, required this.texttype, required this.vMirror, required this.string, required this.points});
+  TextStruct({
+    required this.layer,
+    required this.texttype,
+    required this.size,
+    required this.alignment,
+    required this.width,
+    required this.vMirror,
+    required this.string,
+    required this.points,
+  });
 
   final int layer;
 
   final int texttype;
+
+  final int size;
+
+  final Alignment alignment;
+
+  final int width;
 
   final bool vMirror;
 
@@ -171,6 +228,12 @@ class TextStructBuilder extends StructBuilder<TextStruct> {
   late int layer = 0;
 
   late int texttype = 0;
+
+  late int size = 0;
+
+  late Alignment alignment = Alignment.topLeft;
+
+  late int width = 0;
 
   late bool vMirror = false;
 
@@ -207,7 +270,9 @@ class TextStructBuilder extends StructBuilder<TextStruct> {
 
       case GdsRecordType.presentation:
         {
-          handlePresentation(data);
+          final result = handlePresentation(data);
+          size = result.$1;
+          alignment = result.$2;
           break;
         }
       case GdsRecordType.pathtype:
@@ -217,7 +282,7 @@ class TextStructBuilder extends StructBuilder<TextStruct> {
         }
       case GdsRecordType.width:
         {
-          handleWidth(data);
+          width = handleWidth(data);
           break;
         }
       case GdsRecordType.strans:
@@ -256,7 +321,97 @@ class TextStructBuilder extends StructBuilder<TextStruct> {
 
   @override
   TextStruct build() {
-    return TextStruct(layer: layer, texttype: texttype, vMirror: vMirror, string: string, points: points);
+    return TextStruct(layer: layer, texttype: texttype, size: size, alignment: alignment, width: width, vMirror: vMirror, string: string, points: points);
+  }
+}
+
+class PathStruct extends Struct {
+  PathStruct({required this.layer, required this.datatype, required this.width, required this.points});
+
+  final int layer;
+
+  final int datatype;
+
+  final int width;
+
+  final List<Point> points;
+}
+
+class PathStructBuilder extends StructBuilder<PathStruct> {
+  PathStructBuilder();
+
+  late int layer = 0;
+
+  late int datatype = 0;
+
+  late int width = 0;
+
+  late List<Point> points;
+
+  @override
+  void handle(GdsRecordType type, ByteData data) {
+    switch (type) {
+      case GdsRecordType.elflags:
+        {
+          handleElflags(data);
+          break;
+        }
+
+      case GdsRecordType.plex:
+        {
+          handlePlex(data);
+          break;
+        }
+
+      case GdsRecordType.layer:
+        {
+          layer = handleLayer(data);
+          break;
+        }
+
+      case GdsRecordType.datatype:
+        {
+          datatype = handleDatatype(data);
+          break;
+        }
+
+      case GdsRecordType.pathtype:
+        {
+          handlePathtype(data);
+          break;
+        }
+      case GdsRecordType.width:
+        {
+          width = handleWidth(data);
+          break;
+        }
+
+      case GdsRecordType.bgnextn:
+        {
+          handleBgnextn(data);
+          break;
+        }
+
+      case GdsRecordType.endextn:
+        {
+          handleEndextn(data);
+          break;
+        }
+
+      case GdsRecordType.xy:
+        {
+          points = handleXY(data);
+          break;
+        }
+
+      default:
+        throw UnimplementedError("$runtimeType: ${type.name}");
+    }
+  }
+
+  @override
+  PathStruct build() {
+    return PathStruct(layer: layer, datatype: datatype, width: width, points: points);
   }
 }
 
@@ -332,7 +487,15 @@ class SRefStructBuilder extends StructBuilder<SRefStruct> {
 }
 
 class ARefStruct extends Struct {
-  ARefStruct({required this.name, required this.vMirror, required this.magnification, required this.angle, required this.points});
+  ARefStruct({
+    required this.name,
+    required this.vMirror,
+    required this.magnification,
+    required this.angle,
+    required this.col,
+    required this.row,
+    required this.points,
+  });
 
   final String name;
 
@@ -341,6 +504,10 @@ class ARefStruct extends Struct {
   final num magnification;
 
   final num angle;
+
+  final int col;
+
+  final int row;
 
   final List<Point> points;
 }
@@ -356,6 +523,8 @@ class ARefStructBuilder extends StructBuilder<ARefStruct> {
 
   late num angle = 0;
 
+  late (int, int) colrow;
+
   late List<Point> points;
 
   @override
@@ -367,11 +536,6 @@ class ARefStructBuilder extends StructBuilder<ARefStruct> {
           break;
         }
 
-      case GdsRecordType.colrow:
-        {
-          print("colrow");
-          break;
-        }
       case GdsRecordType.strans:
         {
           vMirror = handleStrans(data);
@@ -390,6 +554,12 @@ class ARefStructBuilder extends StructBuilder<ARefStruct> {
           break;
         }
 
+      case GdsRecordType.colrow:
+        {
+          colrow = handleColrow(data);
+          break;
+        }
+
       case GdsRecordType.xy:
         {
           points = handleXY(data);
@@ -403,6 +573,6 @@ class ARefStructBuilder extends StructBuilder<ARefStruct> {
 
   @override
   ARefStruct build() {
-    return ARefStruct(name: name, vMirror: vMirror, magnification: magnification, angle: angle, points: points);
+    return ARefStruct(name: name, vMirror: vMirror, magnification: magnification, angle: angle, col: colrow.$1, row: colrow.$2, points: points);
   }
 }

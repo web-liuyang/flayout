@@ -458,8 +458,7 @@ Gdsii readGdsii(String path) {
         })(),
       GdsRecordType.path =>
         (() {
-          print("path");
-          // builder = BoundaryStructBuilder();
+          builder = PathStructBuilder();
         })(),
       GdsRecordType.sref =>
         (() {
@@ -467,7 +466,6 @@ Gdsii readGdsii(String path) {
         })(),
       GdsRecordType.aref =>
         (() {
-          print("aref");
           builder = ARefStructBuilder();
         })(),
 

@@ -5,9 +5,11 @@ import 'package:blueprint_master/editors/shapes/shapes.dart';
 import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:blueprint_master/layouts/cubits/cubits.dart';
 import 'package:flame/components.dart';
+import 'package:flame/experimental.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/game.dart';
 import 'package:flame/palette.dart';
+import 'package:flame/sprite.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -46,57 +48,10 @@ class EditorGame extends StateMachineGame {
     camera.viewfinder.position = -camera.visibleWorldRect.center.toVector2();
     camera.viewfinder.zoom = zoomCubit.state;
 
-    camera.viewfinder.position = Vector2(-8200, -1000);
+    // camera.viewfinder.position = Vector2(-8200, -1000);
 
     add(FpsTextComponent(position: camera.viewport.size..[0] = 0, textRenderer: TextPaint(style: TextStyle(color: Colors.black))));
     print("EditorGame onLoad");
-    paintGdsii();
-  }
-
-  late double units;
-
-  late Gdsii gdsii;
-
-  void paintGdsii() {
-    // gdsii = readGdsii('/Users/liuyang/Desktop/store/blueprint_master/test/mmi.gds');
-    // TODO
-    // gdsii = readGdsii('/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_2X2.py.gds');
-    gdsii = readGdsii('/Users/liuyang/Desktop/xiaoyao/ansys/WBBC2017_top_180531.gds');
-    // gdsii = readGdsii('/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_8X8.py.gds');
-    units = gdsii.units;
-    // final String cellName = Utf8Codec().decode([77, 109, 105, 0]); // "Mmi";
-    // final Cell cell = gdsii.cells.firstWhere((item) => item.name == cellName);
-    // paintCell(cell, Vector2.zero());
-
-    gdsii.cells.indexed.forEach((item) {
-      final (int index, Cell element) = item;
-      print("$index: ${element.name}");
-    });
-
-    paintCell(gdsii.cells[0], Vector2.zero());
-  }
-
-  void paintCell(Cell cell, Vector2 offset) {
-    cell.srefs.forEach((struct) {
-      if (struct is SRefStruct) {
-        final cell = gdsii.cells.firstWhere((item) => item.name == struct.name);
-        paintCell(cell, struct.points.first.toVector2() + offset);
-      }
-
-      if (struct is TextStruct) {
-        final points = struct.points;
-        assert(points.length == 1, "Text points length must be 1");
-        final position = points.first.toVector2() * units + (offset * units);
-        final text = struct.string;
-        final regular = TextPaint(style: TextStyle(color: BasicPalette.black.paint().color, fontSize: zoomCubit.state * 12));
-        world.add(TextComponent(text: text, position: position, textRenderer: regular));
-      }
-
-      if (struct is BoundaryStruct) {
-        final vertices = struct.points.toVector2s().map((e) => e * units + (offset * units)).toList();
-        world.add(PolygonShape(vertices, paint: BasicPalette.black.paint()));
-      }
-    });
   }
 
   @override
@@ -111,7 +66,102 @@ class EditorWorld extends World with HasGameReference<EditorGame> {
   @override
   FutureOr<void> onLoad() {
     addAll([grid, axis]);
+
+    paintGdsii();
     return super.onLoad();
+  }
+
+  late double units;
+
+  late Gdsii gdsii;
+
+  void paintGdsii() {
+    // gdsii = readGdsii('/Users/liuyang/Desktop/store/blueprint_master/test/mmi.gds');
+    // TODO
+    // gdsii = readGdsii('/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_2X2.py.gds');
+    // gdsii = readGdsii('/Users/liuyang/Desktop/xiaoyao/ansys/WBBC2017_top_180531.gds');
+    gdsii = readGdsii('/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_8X8.py.gds');
+    units = gdsii.units;
+    // final String cellName = Utf8Codec().decode([77, 109, 105, 0]); // "Mmi";
+    // final Cell cell = gdsii.cells.firstWhere((item) => item.name == cellName);
+    // paintCell(cell, Vector2.zero());
+
+    gdsii.cells.indexed.forEach((item) {
+      final (int index, Cell element) = item;
+      print("$index: ${element.name}");
+    });
+
+    // paintCell(gdsii.cells[287], Vector2.zero());
+    // paintCell(gdsii.cells[477], Vector2.zero());
+    Stopwatch stopwatch = Stopwatch()..start();
+    final PositionComponent component = PositionComponent(position: Vector2.zero());
+    paintCell(gdsii.cells[0], component);
+
+    // ClipComponent clipComponent = ClipComponent.rectangle(position: Vector2.zero(), size: Vector2(2000, 1000));
+    // clipComponent.add(component);
+    // add(clipComponent);
+
+    add(component);
+
+    stopwatch.stop();
+    print('init speed: ${stopwatch.elapsedMilliseconds}ms');
+  }
+
+  final Map<String, Component> shapes = {};
+
+  final Paint _paint = BasicPalette.black.paint();
+
+  void paintCell(Cell cell, Component parent) {
+    final PositionComponent component = PositionComponent();
+    parent.add(component);
+    shapes[cell.name] = component;
+
+    cell.srefs.forEach((struct) {
+      // if (struct is TextStruct) {
+      //   final points = struct.points;
+      //   assert(points.length == 1, "Text points length must be 1");
+      //   final position = points.first.toVector2() * units;
+      //   final text = struct.string;
+      //   final regular = TextPaint(style: TextStyle(color: _paint.color, fontSize: zoomCubit.state * 12));
+
+      //   component.add(TextShape(text: text, position: position, textRenderer: regular));
+      // }
+
+      if (struct is BoundaryStruct) {
+        final vertices = struct.points.toVector2s().map((e) => e * units).toList(growable: false);
+
+        component.add(PolygonShape(vertices, paint: _paint));
+      }
+
+      // if (struct is PathStruct) {
+      //   final vertices = struct.points.toVector2s().map((e) => e * units).toList();
+
+      //   component.add(PolylineShape(vertices.getRange(0, 4).toList(growable: false), paint: _paint));
+      // }
+
+      if (struct is SRefStruct) {
+        final cell = gdsii.cells.firstWhere((item) => item.name == struct.name);
+        if (cell.srefs.isNotEmpty) {
+          final shape = shapes[cell.name];
+          final position = struct.points.first.toVector2();
+          if (shape != null) {
+            final group = PositionComponent(position: position * units);
+            group.add(shape);
+            component.add(group);
+          } else {
+            final group = PositionComponent(position: position * units);
+            paintCell(cell, group);
+            component.add(group);
+          }
+        }
+      }
+
+      if (struct is ARefStruct) {
+        // print("ARefStruct");
+        // final cell = gdsii.cells.firstWhere((item) => item.name == struct.name);
+        // paintCell(cell, struct.points.first.toVector2() + offset);
+      }
+    });
   }
 }
 

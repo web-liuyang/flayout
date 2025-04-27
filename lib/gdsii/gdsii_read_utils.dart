@@ -58,11 +58,13 @@ String readString(ByteData data) {
 Iterable<(GdsRecordType, ByteData)> recordReader(File file) sync* {
   final Uint8List bytes = file.readAsBytesSync();
   final ByteData stream = ByteData.view(bytes.buffer);
-  final length = stream.lengthInBytes;
+  final int length = stream.lengthInBytes;
   final Set<GdsRecordType> records = {};
 
   for (int offset = 0; offset < length;) {
     final currentRecordSize = stream.getUint16(offset);
+    if (currentRecordSize == 0) break;
+
     final type = stream.getUint16(offset + 2);
     final GdsRecordType? gdsRecordType = GdsRecordType.normalize(type);
     if (gdsRecordType == null) throw UnimplementedError("type: $type");
