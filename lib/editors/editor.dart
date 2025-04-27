@@ -1,14 +1,19 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:blueprint_master/editors/shapes/shapes.dart';
 import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:blueprint_master/layouts/cubits/cubits.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/game.dart';
+import 'package:flame/palette.dart';
+import 'package:flame/text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../gdsii/builder.dart';
+import '../gdsii/gdsii.dart';
 import 'editor_config.dart';
 import 'state_machines/state_machines.dart';
 
@@ -17,11 +22,7 @@ class Editor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final camera = CameraComponent(
-    //   //
-    //   world: EditorWorld(),
-    //   backdrop: Background(),
-    // );
+    print("Editor Builder");
 
     final drawCubit = context.watch<DrawCubit>();
 
@@ -35,7 +36,7 @@ class EditorGame extends StateMachineGame {
   EditorGame({super.children, super.world, super.camera});
 
   @override
-  bool get debugMode => true;
+  bool get debugMode => false;
 
   @override
   FutureOr<void> onLoad() {
@@ -45,7 +46,57 @@ class EditorGame extends StateMachineGame {
     camera.viewfinder.position = -camera.visibleWorldRect.center.toVector2();
     camera.viewfinder.zoom = zoomCubit.state;
 
+    camera.viewfinder.position = Vector2(-8200, -1000);
+
     add(FpsTextComponent(position: camera.viewport.size..[0] = 0, textRenderer: TextPaint(style: TextStyle(color: Colors.black))));
+    print("EditorGame onLoad");
+    paintGdsii();
+  }
+
+  late double units;
+
+  late Gdsii gdsii;
+
+  void paintGdsii() {
+    // gdsii = readGdsii('/Users/liuyang/Desktop/store/blueprint_master/test/mmi.gds');
+    // TODO
+    // gdsii = readGdsii('/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_2X2.py.gds');
+    gdsii = readGdsii('/Users/liuyang/Desktop/xiaoyao/ansys/WBBC2017_top_180531.gds');
+    // gdsii = readGdsii('/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_8X8.py.gds');
+    units = gdsii.units;
+    // final String cellName = Utf8Codec().decode([77, 109, 105, 0]); // "Mmi";
+    // final Cell cell = gdsii.cells.firstWhere((item) => item.name == cellName);
+    // paintCell(cell, Vector2.zero());
+
+    gdsii.cells.indexed.forEach((item) {
+      final (int index, Cell element) = item;
+      print("$index: ${element.name}");
+    });
+
+    paintCell(gdsii.cells[0], Vector2.zero());
+  }
+
+  void paintCell(Cell cell, Vector2 offset) {
+    cell.srefs.forEach((struct) {
+      if (struct is SRefStruct) {
+        final cell = gdsii.cells.firstWhere((item) => item.name == struct.name);
+        paintCell(cell, struct.points.first.toVector2() + offset);
+      }
+
+      if (struct is TextStruct) {
+        final points = struct.points;
+        assert(points.length == 1, "Text points length must be 1");
+        final position = points.first.toVector2() * units + (offset * units);
+        final text = struct.string;
+        final regular = TextPaint(style: TextStyle(color: BasicPalette.black.paint().color, fontSize: zoomCubit.state * 12));
+        world.add(TextComponent(text: text, position: position, textRenderer: regular));
+      }
+
+      if (struct is BoundaryStruct) {
+        final vertices = struct.points.toVector2s().map((e) => e * units + (offset * units)).toList();
+        world.add(PolygonShape(vertices, paint: BasicPalette.black.paint()));
+      }
+    });
   }
 
   @override
@@ -132,3 +183,16 @@ class Axis extends PositionComponent with HasGameReference<EditorGame> {
     super.render(canvas);
   }
 }
+
+
+
+
+
+// 1. 属性栏重排
+// 2. 资源栏
+//   2.1 搜索框 后面加个有无符号的筛选
+//   2.2 PDK Design 增加搜索框
+//   2.3 Symbol Parameters 无法点击添加参数
+
+// 3. 扫描
+//   3.1 添加参数后可以进行删除

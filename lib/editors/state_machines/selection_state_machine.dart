@@ -37,13 +37,4 @@ class SelectionStateMachine extends BaseStateMachine {
       throw RangeError("scaleFactor: $scaleFactor");
     }
   }
-
-  @override
-  void onScaleEnd(ScaleEndInfo info) {}
-
-  void zoomAtPoint(Viewfinder viewfinder, double newZoom, Vector2 pivot, Vector2 offset) {
-    final newPosition = pivot - (offset / newZoom);
-    viewfinder.zoom = newZoom;
-    viewfinder.position = newPosition;
-  }
 }

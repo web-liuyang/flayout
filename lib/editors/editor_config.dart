@@ -1,9 +1,9 @@
 import 'dart:ui';
 
-final double kMaxZoom = 10;
-final double kMinZoom = 0.1;
+final double kMaxZoom = 1000;
+final double kMinZoom = 0.001;
 
-final double kEditorDotGap = 20;
+final double kEditorDotGap = 40;
 final double kEditorDotSize = 1;
 final double kEditorAxisLength = 40;
 final double kEditorAxisWidth = 1;

@@ -28,4 +28,5 @@ class ZoomCubit extends Cubit<double> {
   }
 }
 
-final ZoomCubit zoomCubit = ZoomCubit(1);
+// final ZoomCubit zoomCubit = ZoomCubit(1);
+final ZoomCubit zoomCubit = ZoomCubit(0.06);
