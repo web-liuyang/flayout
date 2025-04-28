@@ -497,7 +497,7 @@ class ARefStruct extends Struct {
     required this.colSpacing,
     required this.row,
     required this.rowSpacing,
-    required this.points,
+    required this.offset,
   });
 
   final String name;
@@ -516,7 +516,7 @@ class ARefStruct extends Struct {
 
   final double rowSpacing;
 
-  final List<Point> points;
+  final Point offset;
 }
 
 class ARefStructBuilder extends StructBuilder<ARefStruct> {
@@ -583,7 +583,6 @@ class ARefStructBuilder extends StructBuilder<ARefStruct> {
     final [offset, totalColOffset, totalRowOffset] = points;
     final colSpacing = ((totalColOffset - offset).toVector2() / colrow.$1.toDouble()).x;
     final rowSpacing = ((totalRowOffset - offset).toVector2() / colrow.$2.toDouble()).y;
-
     return ARefStruct(
       name: name,
       vMirror: vMirror,
@@ -593,7 +592,7 @@ class ARefStructBuilder extends StructBuilder<ARefStruct> {
       colSpacing: colSpacing,
       row: colrow.$2,
       rowSpacing: rowSpacing,
-      points: points,
+      offset: offset,
     );
   }
 }

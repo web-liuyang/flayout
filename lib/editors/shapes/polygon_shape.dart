@@ -18,11 +18,19 @@ class PolygonShape extends PolygonComponent with HasVisibility, HasGameReference
     super.paintLayers,
     super.key,
     super.shrinkToBounds,
-  });
+  }) {
+    _absoluteRect = toAbsoluteRect();
+  }
 
-  // @override
-  // bool get isVisible {
-  //   final canSee = game.camera.canSee(this);
-  //   return canSee;
-  // }
+  late Rect _absoluteRect;
+
+  @override
+  bool get isVisible {
+    // final range = cellLevelCubit.state;
+    // if (priority < range.min || priority > range.max) return false;
+
+    final canSee = game.camera.canSee(this);
+    // final canSee = game.camera.visibleWorldRect.overlaps(_absoluteRect);
+    return canSee;
+  }
 }

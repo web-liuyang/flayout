@@ -27,7 +27,7 @@ class _LayoutState extends State<Layout> {
           child: Row(
             children: [
               Container(decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))), child: ResourcePanel()),
-              Expanded(child: MultiBlocProvider(providers: [BlocProvider.value(value: drawCubit)], child: Editor())),
+              Expanded(child: MultiBlocProvider(providers: [BlocProvider.value(value: drawCubit), BlocProvider.value(value: cellLevelCubit)], child: Editor())),
               Container(decoration: BoxDecoration(border: Border(left: BorderSide(width: 1))), child: PropertyPanel()),
             ],
           ),

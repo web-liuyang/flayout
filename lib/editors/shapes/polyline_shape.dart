@@ -22,11 +22,15 @@ class PolylineShape extends ShapeComponent with HasVisibility, HasGameReference<
     for (int i = 1; i < vertices.length; i++) {
       _path.lineTo(vertices[i].x, vertices[i].y);
     }
+
+    _absoluteRect = toAbsoluteRect();
   }
 
   final List<Vector2> vertices;
 
   late Path _path;
+
+  late Rect _absoluteRect;
 
   @override
   void render(Canvas canvas) {
@@ -34,9 +38,10 @@ class PolylineShape extends ShapeComponent with HasVisibility, HasGameReference<
     super.render(canvas);
   }
 
-  // @override
-  // bool get isVisible {
-  //   final canSee = game.camera.canSee(this);
-  //   return canSee;
-  // }
+  @override
+  bool get isVisible {
+    // final canSee = game.camera.canSee(this);
+    final canSee = game.camera.visibleWorldRect.overlaps(_absoluteRect);
+    return canSee;
+  }
 }

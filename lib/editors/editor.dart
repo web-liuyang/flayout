@@ -6,11 +6,9 @@ import 'package:blueprint_master/editors/shapes/shapes.dart';
 import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:blueprint_master/layouts/cubits/cubits.dart';
 import 'package:flame/components.dart';
-import 'package:flame/experimental.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/game.dart';
 import 'package:flame/palette.dart';
-import 'package:flame/sprite.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -44,7 +42,6 @@ class EditorGame extends StateMachineGame {
   @override
   FutureOr<void> onLoad() {
     super.onLoad();
-
     camera.viewfinder.anchor = Anchor.topLeft;
     camera.viewfinder.position = -camera.visibleWorldRect.center.toVector2();
     camera.viewfinder.zoom = zoomCubit.state;
@@ -79,41 +76,28 @@ class EditorWorld extends World with HasGameReference<EditorGame> {
   Map<String, Cell> cells = {};
 
   void paintGdsii() async {
-    final prefix = Platform.isWindows ? r"C:\Users\xiaoyao\Desktop\ansys" : "/Users/xiaoyao/Desktop/ansys";
+    final prefix = Platform.isWindows ? r"C:\Users\xiaoyao\Desktop\ansys" : "/Users/liuyang/Desktop/xiaoyao/ansys/";
 
-    // gdsii = readGdsii('$prefix/mmi.gds');
+    gdsii = readGdsii('$prefix/mmi.gds');
     // gdsii = readGdsii('$prefix/MZI_SYSTEM_FOR_2X2.py.gds');
     // gdsii = readGdsii('/Users/liuyang/Desktop/xiaoyao/ansys/WBBC2017_top_180531.gds');
     gdsii = readGdsii('$prefix/MZI_SYSTEM_FOR_8X8.py.gds');
     units = gdsii.units;
-    // final String cellName = Utf8Codec().decode([77, 109, 105, 0]); // "Mmi";
-    // final Cell cell = gdsii.cells.firstWhere((item) => item.name == cellName);
-    // paintCell(cell, Vector2.zero());
+    print("units: $units");
 
     gdsii.cells.indexed.forEach((item) {
       final (int index, Cell element) = item;
       cells[element.name] = element;
-      print("$index: ${element.name}");
+      // print("$index: ${element.name}");
     });
 
     final int cellCount = gdsii.cells.map((item) => item.name).toSet().length;
 
-    // paintCell(gdsii.cells[287], Vector2.zero());
-    // paintCell(gdsii.cells[477], Vector2.zero());
     Stopwatch stopwatch = Stopwatch()..start();
-
-    // ClipComponent clipComponent = ClipComponent.rectangle(position: Vector2.zero(), size: Vector2(2000, 1000));
-    // clipComponent.add(component);
-    // add(clipComponent);
-
-    final component = paintCell(gdsii.cells[0]);
+    final component = paintCell(gdsii.cells[0], 0);
     addAll(component);
 
-    // print();
     print("cellCount: $cellCount");
-    print("shapes length: ${shapes.length}");
-    print("shapes.keys.toSet().length; ${shapes.keys.toSet().length}");
-    print("comps.length: ${comps.length}");
     stopwatch.stop();
 
     print('init speed: ${stopwatch.elapsedMilliseconds}ms');
@@ -121,11 +105,15 @@ class EditorWorld extends World with HasGameReference<EditorGame> {
 
   final Map<String, List<PositionComponent>> shapes = {};
 
-  final Paint _paint = BasicPalette.black.paint();
+  // final Paint _paint = BasicPalette.black.paint();
+  final Paint _paint =
+      BasicPalette.black.paint()
+        ..filterQuality = FilterQuality.low
+        ..style = PaintingStyle.stroke;
 
   final List<PositionComponent> comps = [];
 
-  List<PositionComponent> paintCell(Cell cell) {
+  List<PositionComponent> paintCell(Cell cell, int deep) {
     final List<PositionComponent> graphics = [];
 
     for (final struct in cell.srefs) {
@@ -136,19 +124,19 @@ class EditorWorld extends World with HasGameReference<EditorGame> {
         final text = struct.string;
         final regular = TextPaint(style: TextStyle(color: _paint.color, fontSize: zoomCubit.state * 12));
 
-        final component = (TextShape(text: text, position: position, textRenderer: regular));
+        final component = (TextShape(text: text, position: position, textRenderer: regular, priority: deep));
         graphics.add(component);
       }
 
       if (struct is BoundaryStruct) {
         final vertices = struct.points.toVector2s().map((e) => e * units).toList(growable: false);
-        final component = (PolygonShape(vertices, paint: _paint));
+        final component = (PolygonShape(vertices, paint: _paint, priority: deep));
         graphics.add(component);
       }
 
       if (struct is PathStruct) {
         final vertices = struct.points.toVector2s().map((e) => e * units).toList();
-        final component = (PolylineShape(vertices, paint: _paint));
+        final component = (PolylineShape(vertices, paint: _paint, priority: deep));
         graphics.add(component);
       }
 
@@ -157,138 +145,51 @@ class EditorWorld extends World with HasGameReference<EditorGame> {
         final shape = shapes[struct.name];
         if (shape != null) {
           final List<PositionComponent> children = shapes[struct.name]!;
-          final GroupShape groupShape = GroupShape(position: position)..addAll(children);
+          final GroupShape groupShape = GroupShape(position: position, children: children, priority: deep);
           graphics.add(groupShape);
         } else {
           final Cell cell = cells[struct.name]!;
-          final List<PositionComponent> children = paintCell(cell);
+          final List<PositionComponent> children = paintCell(cell, deep + 1);
           shapes[struct.name] = children;
-          final GroupShape groupShape = GroupShape(position: position)..addAll(children);
+          final GroupShape groupShape = GroupShape(position: position, children: children, priority: deep);
           graphics.add(groupShape);
         }
       }
 
       if (struct is ARefStruct) {
-        print(struct.name);
-        print(struct.col);
+        final String cellName = struct.name;
+        final shape = shapes[cellName];
+
+        List<PositionComponent> children = [];
+
+        if (shape != null) {
+          children = shapes[cellName]!;
+        } else {
+          final Cell cell = cells[cellName]!;
+          children = paintCell(cell, deep + 1);
+          shapes[cellName] = children;
+        }
+
+        final int col = struct.col;
+        final int row = struct.row;
+        final List<GroupShape> repetitions = [];
+        for (int i = 0; i < col; i++) {
+          final double colOffset = (i) * struct.colSpacing;
+          for (int j = 0; j < row; j++) {
+            final double rowOffset = (j) * struct.rowSpacing;
+            final Vector2 pos = Vector2(colOffset, rowOffset) * units;
+            repetitions.add(GroupShape(position: pos, children: children, priority: deep + 1));
+          }
+        }
+
+        final localPosition = struct.offset.toVector2() * units;
+        final GroupShape groupShape = GroupShape(position: localPosition, children: repetitions, priority: deep);
+
+        graphics.add(groupShape);
       }
     }
 
-    // groupShape.addAll(graphics);
     return graphics;
-  }
-
-  // PositionComponent paintCell3(Cell cell) {
-  //   final GroupShape groupShape = GroupShape();
-  //   final List<PositionComponent> graphics = [];
-
-  //   for (final struct in cell.srefs) {
-  //     if (struct is TextStruct) {
-  //       final points = struct.points;
-  //       assert(points.length == 1, "Text points length must be 1");
-  //       final position = points.first.toVector2() * units;
-  //       final text = struct.string;
-  //       final regular = TextPaint(style: TextStyle(color: _paint.color, fontSize: zoomCubit.state * 12));
-
-  //       final component = (TextShape(text: text, position: position, textRenderer: regular));
-  //       graphics.add(component);
-  //     }
-
-  //     if (struct is BoundaryStruct) {
-  //       final vertices = struct.points.toVector2s().map((e) => e * units).toList(growable: false);
-  //       final component = (PolygonShape(vertices, paint: _paint));
-  //       graphics.add(component);
-  //     }
-
-  //     if (struct is PathStruct) {
-  //       final vertices = struct.points.toVector2s().map((e) => e * units).toList();
-  //       final component = (PolylineShape(vertices.getRange(0, 4).toList(growable: false), paint: _paint));
-  //       graphics.add(component);
-  //     }
-
-  //     if (struct is SRefStruct) {
-  //       final position = struct.points.first.toVector2() * units;
-  //       final shape = shapes[struct.name];
-  //       if (shape != null) {
-  //         final PositionComponent child = shapes[struct.name]!;
-  //         final GroupShape groupShape = GroupShape(position: position)..add(child);
-  //         graphics.add(groupShape);
-  //       } else {
-  //         final Cell cell = cells[struct.name]!;
-  //         final PositionComponent child = paintCell(cell);
-  //         final GroupShape groupShape = GroupShape(position: position)..add(child);
-  //         graphics.add(groupShape);
-  //         shapes[struct.name] = child;
-  //       }
-  //     }
-  //   }
-
-  //   groupShape.addAll(graphics);
-  //   return groupShape;
-  // }
-
-  // void paintCell2(Cell cell, Vector2 position) {
-  //   PositionComponent? component;
-  //   for (final struct in cell.srefs) {
-  //     if (struct is TextStruct) {
-  //       final points = struct.points;
-  //       assert(points.length == 1, "Text points length must be 1");
-  //       final position = points.first.toVector2() * units;
-  //       final text = struct.string;
-  //       final regular = TextPaint(style: TextStyle(color: _paint.color, fontSize: zoomCubit.state * 12));
-
-  //       component = (TextShape(text: text, position: position, textRenderer: regular));
-  //     }
-
-  //     if (struct is BoundaryStruct) {
-  //       final vertices = struct.points.toVector2s().map((e) => e * units).toList(growable: false);
-  //       component = (PolygonShape(vertices, paint: _paint));
-  //     }
-
-  //     if (struct is PathStruct) {
-  //       final vertices = struct.points.toVector2s().map((e) => e * units).toList();
-
-  //       component = (PolylineShape(vertices.getRange(0, 4).toList(growable: false), paint: _paint));
-  //     }
-
-  //     if (component != null) {
-  //       shapes[cell.name] = component;
-  //       comps.add(component);
-  //     }
-
-  //     if (struct is SRefStruct) {
-  //       final cell = gdsii.cells.firstWhere((item) => item.name == struct.name);
-  //       final shape = shapes[cell.name];
-  //       final localPosition = struct.points.first.toVector2();
-  //       if (shape != null) {
-  //         final group = GroupShape(position: localPosition * units);
-  //         group.add(shape);
-  //         comps.add(group);
-  //       } else {
-  //         paintCell2(cell, localPosition * units);
-  //       }
-  //     }
-
-  //     if (struct is ARefStruct) {
-  //       // print("ARefStruct");
-  //       // final cell = gdsii.cells.firstWhere((item) => item.name == struct.name);
-  //       // paintCell(cell, struct.points.first.toVector2() + offset);
-  //     }
-  //   }
-  // }
-
-  @override
-  void render(ui.Canvas canvas) {
-    // final visibles = comps.where((item) => item is PolygonShape && item.isVisible);
-    // print("visibles.length: ${visibles.length}");
-    // final component = paintCell(gdsii.cells[0]);
-    // final old = game.findByKey(ComponentKey.named("root"));
-    // remove(old);
-
-    // add(PositionComponent(key: ComponentKey.named("root"))..add(component));
-    // print(component);
-    // component.render(canvas);
-    super.render(canvas);
   }
 }
 

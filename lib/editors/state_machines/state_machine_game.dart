@@ -130,7 +130,6 @@ class StateMachineGame extends FlameGame
   @override
   void onMouseMove(PointerHoverInfo info) {
     super.onMouseMove(info);
-
     final position = camera.viewfinder.globalToLocal(info.eventPosition.widget);
     mouseCubit.update(position);
 
