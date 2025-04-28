@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:blueprint_master/extensions/point_extension.dart';
 import 'package:flutter/widgets.dart';
 
 import 'gdsii.dart';
@@ -493,7 +494,9 @@ class ARefStruct extends Struct {
     required this.magnification,
     required this.angle,
     required this.col,
+    required this.colSpacing,
     required this.row,
+    required this.rowSpacing,
     required this.points,
   });
 
@@ -507,7 +510,11 @@ class ARefStruct extends Struct {
 
   final int col;
 
+  final double colSpacing;
+
   final int row;
+
+  final double rowSpacing;
 
   final List<Point> points;
 }
@@ -573,6 +580,20 @@ class ARefStructBuilder extends StructBuilder<ARefStruct> {
 
   @override
   ARefStruct build() {
-    return ARefStruct(name: name, vMirror: vMirror, magnification: magnification, angle: angle, col: colrow.$1, row: colrow.$2, points: points);
+    final [offset, totalColOffset, totalRowOffset] = points;
+    final colSpacing = ((totalColOffset - offset).toVector2() / colrow.$1.toDouble()).x;
+    final rowSpacing = ((totalRowOffset - offset).toVector2() / colrow.$2.toDouble()).y;
+
+    return ARefStruct(
+      name: name,
+      vMirror: vMirror,
+      magnification: magnification,
+      angle: angle,
+      col: colrow.$1,
+      colSpacing: colSpacing,
+      row: colrow.$2,
+      rowSpacing: rowSpacing,
+      points: points,
+    );
   }
 }

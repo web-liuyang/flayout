@@ -25,16 +25,31 @@ class SelectionStateMachine extends BaseStateMachine {
     startZoom = game.camera.viewfinder.zoom;
   }
 
+  final defaultFactor = Vector2.all(1);
+
+  final step = 0.05;
+
   @override
   void onScaleUpdate(ScaleUpdateInfo info) {
     final scaleFactor = info.scale.global;
-    if (!scaleFactor.isIdentity()) {
-      final worldOffset = info.eventPosition.widget;
-      final newZoom = (startZoom * scaleFactor.x).clamp(kMinZoom, kMaxZoom);
+    // if (scaleFactor == defaultFactor) return;
 
-      zoomCubit.zoomAt(newZoom, startPivot, worldOffset);
-    } else {
-      throw RangeError("scaleFactor: $scaleFactor");
-    }
+    final worldOffset = info.eventPosition.widget;
+    final newZoom = (startZoom * scaleFactor.x).clamp(kMinZoom, kMaxZoom);
+
+    zoomCubit.zoomAt(newZoom, startPivot, worldOffset);
+  }
+
+  @override
+  void onScroll(PointerScrollInfo info) {
+    // - Zoom In
+    // + Zoom Out
+    final sign = info.scrollDelta.global.y.sign;
+    final delta = (-sign) * step;
+    final pivot = game.camera.globalToLocal(info.eventPosition.widget);
+    final worldOffset = info.eventPosition.widget;
+    final newZoom = (zoomCubit.state + delta).clamp(kMinZoom, kMaxZoom);
+    // print(newZoom);
+    zoomCubit.zoomAt(newZoom, pivot, worldOffset);
   }
 }

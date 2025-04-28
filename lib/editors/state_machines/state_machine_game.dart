@@ -1,5 +1,6 @@
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flame_bloc/flame_bloc.dart';
@@ -8,7 +9,7 @@ import '../../layouts/cubits/cubits.dart';
 import 'state_machines.dart';
 
 class StateMachineGame extends FlameGame
-    with TapDetector, SecondaryTapDetector, PanDetector, ScaleDetector, MouseMovementDetector, DragCallbacks, KeyboardEvents {
+    with TapDetector, SecondaryTapDetector, PanDetector, ScaleDetector, MouseMovementDetector, ScrollDetector, DragCallbacks, KeyboardEvents {
   StateMachineGame({super.children, super.world, super.camera});
 
   late BaseStateMachine stateMachine = SelectionStateMachine(this);
@@ -134,6 +135,11 @@ class StateMachineGame extends FlameGame
     mouseCubit.update(position);
 
     stateMachine.onMouseMove(info);
+  }
+
+  @override
+  void onScroll(PointerScrollInfo info) {
+    stateMachine.onScroll(info);
   }
 
   // DragCallbacks

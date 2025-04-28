@@ -47,6 +47,8 @@ abstract class BaseStateMachine {
     mouseCubit.update(position);
   }
 
+  void onScroll(PointerScrollInfo info) {}
+
   void onDragStart(DragStartEvent event) {}
 
   void onDragUpdate(DragUpdateEvent event) {}

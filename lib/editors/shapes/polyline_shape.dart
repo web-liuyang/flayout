@@ -1,8 +1,9 @@
 import 'dart:ui';
 
+import 'package:blueprint_master/editors/editors.dart';
 import 'package:flame/components.dart';
 
-class PolylineShape extends ShapeComponent {
+class PolylineShape extends ShapeComponent with HasVisibility, HasGameReference<EditorGame> {
   PolylineShape(
     this.vertices, {
     super.position,
@@ -32,4 +33,10 @@ class PolylineShape extends ShapeComponent {
     canvas.drawPath(_path, paint);
     super.render(canvas);
   }
+
+  // @override
+  // bool get isVisible {
+  //   final canSee = game.camera.canSee(this);
+  //   return canSee;
+  // }
 }

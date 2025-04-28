@@ -1,11 +1,10 @@
 import 'dart:ui';
 
 import 'package:blueprint_master/editors/editors.dart';
+import 'package:blueprint_master/layouts/cubits/cubits.dart';
 import 'package:flame/components.dart';
 
-final a = Aabb2.minMax(Vector2(0, 0), Vector2.all(500));
-
-class PolygonShape extends PolygonComponent with HasVisibility {
+class PolygonShape extends PolygonComponent with HasVisibility, HasGameReference<EditorGame> {
   PolygonShape(
     super.vertices, {
     super.position,
@@ -21,10 +20,9 @@ class PolygonShape extends PolygonComponent with HasVisibility {
     super.shrinkToBounds,
   });
 
-  @override
-  bool get isVisible {
-    // return vertices.any(a.containsVector2);
-
-    return false;
-  }
+  // @override
+  // bool get isVisible {
+  //   final canSee = game.camera.canSee(this);
+  //   return canSee;
+  // }
 }
