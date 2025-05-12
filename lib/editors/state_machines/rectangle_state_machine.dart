@@ -1,130 +1,130 @@
-import 'package:blueprint_master/extensions/extensions.dart';
-import 'package:blueprint_master/layouts/cubits/cubits.dart';
-import 'package:flame/components.dart';
-import 'package:flame/events.dart';
-import 'package:flutter/material.dart';
+// import 'package:blueprint_master/extensions/extensions.dart';
+// import 'package:blueprint_master/layouts/cubits/cubits.dart';
+// import 'package:flame/components.dart';
+// import 'package:flame/events.dart';
+// import 'package:flutter/material.dart';
 
-import '../editors.dart';
-import '../shapes/shapes.dart';
-import 'state_machines.dart';
+// import '../editors.dart';
+// import '../shapes/shapes.dart';
+// import 'state_machines.dart';
 
-class RectangleStateMachine extends BaseStateMachine {
-  RectangleStateMachine(super.game);
+// class RectangleStateMachine extends BaseStateMachine {
+//   RectangleStateMachine(super.game);
 
-  late _DrawState _state = _DrawInitState(this);
+//   late _DrawState _state = _DrawInitState(this);
 
-  late final _RectangleDraftComponent _component = _RectangleDraftComponent();
+//   late final _RectangleDraftComponent _component = _RectangleDraftComponent();
 
-  @override
-  void onTapDown(TapDownInfo info) {
-    if (!game.world.contains(_component)) game.world.add(_component);
-    super.onTapDown(info);
-    _state.onTapDown(info);
-  }
+//   @override
+//   void onTapDown(TapDownInfo info) {
+//     if (!game.world.contains(_component)) game.world.add(_component);
+//     super.onTapDown(info);
+//     _state.onTapDown(info);
+//   }
 
-  @override
-  void onMouseMove(PointerHoverInfo info) {
-    super.onMouseMove(info);
-    _state.onMouseMove(info);
-  }
+//   @override
+//   void onMouseMove(PointerHoverInfo info) {
+//     super.onMouseMove(info);
+//     _state.onMouseMove(info);
+//   }
 
-  @override
-  void done() {
-    super.done();
+//   @override
+//   void done() {
+//     super.done();
 
-    final rectangle = RectangleShape.fromRect(_component.rect!);
-    game.world.add(rectangle);
+//     final rectangle = RectangleShape.fromRect(_component.rect!);
+//     game.world.add(rectangle);
 
-    _component.reset();
-    game.world.remove(_component);
+//     _component.reset();
+//     game.world.remove(_component);
 
-    _state = _DrawInitState(this);
-  }
+//     _state = _DrawInitState(this);
+//   }
 
-  @override
-  void exit() {
-    super.exit();
+//   @override
+//   void exit() {
+//     super.exit();
 
-    if (game.world.contains(_component)) {
-      _component.reset();
-      game.world.remove(_component);
-    }
+//     if (game.world.contains(_component)) {
+//       _component.reset();
+//       game.world.remove(_component);
+//     }
 
-    drawCubit.enterSelection();
-  }
-}
+//     drawCubit.enterSelection();
+//   }
+// }
 
-class _DrawState {
-  _DrawState(this.stateMachine);
+// class _DrawState {
+//   _DrawState(this.stateMachine);
 
-  final RectangleStateMachine stateMachine;
+//   final RectangleStateMachine stateMachine;
 
-  StateMachineGame get game => stateMachine.game;
+//   StateMachineGame get game => stateMachine.game;
 
-  _RectangleDraftComponent get component => stateMachine._component;
+//   _RectangleDraftComponent get component => stateMachine._component;
 
-  void onTapDown(TapDownInfo info) {}
+//   void onTapDown(TapDownInfo info) {}
 
-  void onMouseMove(PointerHoverInfo info) {}
-}
+//   void onMouseMove(PointerHoverInfo info) {}
+// }
 
-class _DrawInitState extends _DrawState {
-  _DrawInitState(super.stateMachine);
+// class _DrawInitState extends _DrawState {
+//   _DrawInitState(super.stateMachine);
 
-  @override
-  void onTapDown(TapDownInfo info) {
-    super.onTapDown(info);
+//   @override
+//   void onTapDown(TapDownInfo info) {
+//     super.onTapDown(info);
 
-    final Vector2 position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
-    component.start = position;
-    component.end = position;
+//     final Vector2 position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
+//     component.start = position;
+//     component.end = position;
 
-    stateMachine._state = _DrawStartedState(stateMachine);
-  }
-}
+//     stateMachine._state = _DrawStartedState(stateMachine);
+//   }
+// }
 
-class _DrawStartedState extends _DrawInitState {
-  _DrawStartedState(super.stateMachine);
+// class _DrawStartedState extends _DrawInitState {
+//   _DrawStartedState(super.stateMachine);
 
-  @override
-  void onTapDown(TapDownInfo info) {
-    stateMachine.done();
-  }
+//   @override
+//   void onTapDown(TapDownInfo info) {
+//     stateMachine.done();
+//   }
 
-  @override
-  void onMouseMove(PointerHoverInfo info) {
-    super.onMouseMove(info);
-    final position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
-    component.end = position;
-  }
-}
+//   @override
+//   void onMouseMove(PointerHoverInfo info) {
+//     super.onMouseMove(info);
+//     final position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
+//     component.end = position;
+//   }
+// }
 
-class _RectangleDraftComponent extends Component with HasGameRef<EditorGame> {
-  _RectangleDraftComponent();
+// class _RectangleDraftComponent extends Component with HasGameRef<EditorGame> {
+//   _RectangleDraftComponent();
 
-  Vector2? start;
+//   Vector2? start;
 
-  Vector2? end;
+//   Vector2? end;
 
-  Rect? get rect => start != null && end != null ? Rect.fromPoints(start!.toOffset(), end!.toOffset()) : null;
+//   Rect? get rect => start != null && end != null ? Rect.fromPoints(start!.toOffset(), end!.toOffset()) : null;
 
-  final Paint _paint =
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..color = Colors.black;
+//   final Paint _paint =
+//       Paint()
+//         ..style = PaintingStyle.stroke
+//         ..color = Colors.black;
 
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    if (start == null || end == null) return;
+//   @override
+//   void render(Canvas canvas) {
+//     super.render(canvas);
+//     if (start == null || end == null) return;
 
-    _paint.strokeWidth = game.camera.viewfinder.getLogicSize(1);
-    final Rect rect = Rect.fromPoints(start!.toOffset(), end!.toOffset());
-    canvas.drawRect(rect, _paint);
-  }
+//     _paint.strokeWidth = game.camera.viewfinder.getLogicSize(1);
+//     final Rect rect = Rect.fromPoints(start!.toOffset(), end!.toOffset());
+//     canvas.drawRect(rect, _paint);
+//   }
 
-  void reset() {
-    start = null;
-    end = null;
-  }
-}
+//   void reset() {
+//     start = null;
+//     end = null;
+//   }
+// }

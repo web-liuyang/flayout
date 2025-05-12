@@ -14,5 +14,8 @@
 		<!-- 文件资源 -->
 		<key>com.apple.security.files.user-selected.read-write</key>
 		<true />
+		<!-- Impeller -->
+		<key>FLTEnableImpeller</key>
+		<true />
 	</dict>
 </plist>

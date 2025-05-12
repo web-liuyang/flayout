@@ -1,4 +1,4 @@
-import 'package:flame/game.dart';
+// import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -21,13 +21,15 @@ class _LayoutState extends State<Layout> {
         // //
         Container(
           decoration: BoxDecoration(border: Border(bottom: BorderSide(width: 1))),
-          child: MultiBlocProvider(providers: [BlocProvider.value(value: drawCubit)], child: ToolBar()),
+          // child: MultiBlocProvider(providers: [BlocProvider.value(value: drawCubit)], child: ToolBar()),
+          child: ToolBar(),
         ),
         Expanded(
           child: Row(
             children: [
               Container(decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))), child: ResourcePanel()),
-              Expanded(child: MultiBlocProvider(providers: [BlocProvider.value(value: drawCubit), BlocProvider.value(value: cellLevelCubit)], child: Editor())),
+              // Expanded(child: MultiBlocProvider(providers: [], child: Editor())),
+              Expanded(child: Editor()),
               Container(decoration: BoxDecoration(border: Border(left: BorderSide(width: 1))), child: PropertyPanel()),
             ],
           ),
@@ -51,32 +53,32 @@ class ToolBar extends StatefulWidget {
 class _ToolBarState extends State<ToolBar> {
   @override
   Widget build(BuildContext context) {
-    final DrawCubit drawCubit = context.watch<DrawCubit>();
+    // final DrawCubit drawCubit = context.watch<DrawCubit>();
     // print("_ToolBarState");
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         //
-        IconButton(
-          onPressed: drawCubit.enterSelection,
-          isSelected: drawCubit.state is SelectionStateMachine,
-          icon: const Icon(Icons.north_west),
-          tooltip: "Selection",
-        ),
-        IconButton(
-          onPressed: drawCubit.enterRectangle,
-          isSelected: drawCubit.state is RectangleStateMachine,
-          icon: const Icon(Icons.rectangle_outlined),
-          tooltip: "Rectange",
-        ),
-        IconButton(onPressed: drawCubit.enterPolygon, isSelected: drawCubit.state is PolygonStateMachine, icon: const Icon(Icons.tab), tooltip: "Polygon"),
-        IconButton(
-          onPressed: drawCubit.enterCircle,
-          isSelected: drawCubit.state is CircleStateMachine,
-          icon: const Icon(Icons.circle_outlined),
-          tooltip: "Circle",
-        ),
+        // IconButton(
+        //   onPressed: drawCubit.enterSelection,
+        //   isSelected: drawCubit.state is SelectionStateMachine,
+        //   icon: const Icon(Icons.north_west),
+        //   tooltip: "Selection",
+        // ),
+        // IconButton(
+        //   onPressed: drawCubit.enterRectangle,
+        //   isSelected: drawCubit.state is RectangleStateMachine,
+        //   icon: const Icon(Icons.rectangle_outlined),
+        //   tooltip: "Rectange",
+        // ),
+        // IconButton(onPressed: drawCubit.enterPolygon, isSelected: drawCubit.state is PolygonStateMachine, icon: const Icon(Icons.tab), tooltip: "Polygon"),
+        // IconButton(
+        //   onPressed: drawCubit.enterCircle,
+        //   isSelected: drawCubit.state is CircleStateMachine,
+        //   icon: const Icon(Icons.circle_outlined),
+        //   tooltip: "Circle",
+        // ),
       ],
     );
   }
@@ -123,13 +125,13 @@ class _StatusBarState extends State<StatusBar> {
     final MouseCubit mouseCubit = context.watch<MouseCubit>();
     final ZoomCubit scaleCubit = context.watch<ZoomCubit>();
 
-    final Vector2 mousePosition = mouseCubit.state;
+    // final Vector2 mousePosition = mouseCubit.state;
     final String zoomPercentage = scaleCubit.percentage();
 
     return Center(
       child: Row(
         children: [
-          Text("$mousePosition"),
+          // Text("$mousePosition"),
           TextButton(
             onPressed: () {
               scaleCubit.reset();

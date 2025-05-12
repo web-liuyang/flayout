@@ -1,61 +1,58 @@
-import 'package:flame/events.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
-import '../../layouts/cubits/cubits.dart';
 import 'state_machine_game.dart';
 
 abstract class BaseStateMachine {
-  BaseStateMachine(this.game);
-
-  final StateMachineGame game;
+  BaseStateMachine();
 
   void onTap() {}
 
-  void onTapDown(TapDownInfo info) {}
+  void onTapDown(TapDownDetails info) {}
 
-  void onTapUp(TapUpInfo info) {}
+  void onTapUp(TapUpDetails info) {}
 
   void onTapCancel() {}
 
-  void onSecondaryTapDown(TapDownInfo info) {
+  void onSecondaryTapDown(TapDownDetails info) {
     done();
   }
 
-  void onSecondaryTapUp(TapUpInfo info) {}
+  void onSecondaryTapUp(TapUpDetails info) {}
 
   void onSecondaryTapCancel() {}
 
-  void onPanStart(DragStartInfo info) {}
+  void onPanStart(DragStartDetails info) {}
 
-  void onPanDown(DragDownInfo info) {}
+  void onPanDown(DragDownDetails info) {}
 
-  void onPanUpdate(DragUpdateInfo info) {}
+  void onPanUpdate(DragUpdateDetails info) {}
 
-  void onPanEnd(DragEndInfo info) {}
+  void onPanEnd(DragEndDetails info) {}
 
   void onPanCancel() {}
 
-  void onScaleStart(ScaleStartInfo info) {}
+  void onScaleStart(ScaleStartDetails info) {}
 
-  void onScaleUpdate(ScaleUpdateInfo info) {}
+  void onScaleUpdate(ScaleUpdateDetails info) {}
 
-  void onScaleEnd(ScaleEndInfo info) {}
+  void onScaleEnd(ScaleEndDetails info) {}
 
-  void onMouseMove(PointerHoverInfo info) {
-    final position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
-    mouseCubit.update(position);
+  void onMouseMove(PointerHoverEvent info) {
+    // final position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
+    // mouseCubit.update(position);
   }
 
-  void onScroll(PointerScrollInfo info) {}
+  // void onScroll(PointerScrollDetails info) {}
 
-  void onDragStart(DragStartEvent event) {}
+  // void onDragStart(DragStartEvent event) {}
 
-  void onDragUpdate(DragUpdateEvent event) {}
+  // void onDragUpdate(DragUpdateEvent event) {}
 
-  void onDragEnd(DragEndEvent event) {}
+  // void onDragEnd(DragEndEvent event) {}
 
-  void onDragCancel(DragCancelEvent event) {}
+  // void onDragCancel(DragCancelEvent event) {}
 
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (event.logicalKey == LogicalKeyboardKey.escape) {

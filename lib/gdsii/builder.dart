@@ -203,7 +203,7 @@ class TextStruct extends Struct {
     required this.width,
     required this.vMirror,
     required this.string,
-    required this.points,
+    required this.offset,
   });
 
   final int layer;
@@ -218,9 +218,9 @@ class TextStruct extends Struct {
 
   final bool vMirror;
 
-  final List<Point> points;
-
   final String string;
+
+  final Point offset;
 }
 
 class TextStructBuilder extends StructBuilder<TextStruct> {
@@ -307,6 +307,7 @@ class TextStructBuilder extends StructBuilder<TextStruct> {
       case GdsRecordType.xy:
         {
           points = handleXY(data);
+          assert(points.length == 1, "The points length must be 1");
           break;
         }
       case GdsRecordType.string:
@@ -322,7 +323,7 @@ class TextStructBuilder extends StructBuilder<TextStruct> {
 
   @override
   TextStruct build() {
-    return TextStruct(layer: layer, texttype: texttype, size: size, alignment: alignment, width: width, vMirror: vMirror, string: string, points: points);
+    return TextStruct(layer: layer, texttype: texttype, size: size, alignment: alignment, width: width, vMirror: vMirror, string: string, offset: points.first);
   }
 }
 
@@ -417,7 +418,7 @@ class PathStructBuilder extends StructBuilder<PathStruct> {
 }
 
 class SRefStruct extends Struct {
-  SRefStruct({required this.name, required this.vMirror, required this.magnification, required this.angle, required this.points});
+  SRefStruct({required this.name, required this.vMirror, required this.magnification, required this.angle, required this.offset});
 
   final String name;
 
@@ -427,7 +428,7 @@ class SRefStruct extends Struct {
 
   final num angle;
 
-  final List<Point> points;
+  final Point offset;
 }
 
 class SRefStructBuilder extends StructBuilder<SRefStruct> {
@@ -473,6 +474,7 @@ class SRefStructBuilder extends StructBuilder<SRefStruct> {
       case GdsRecordType.xy:
         {
           points = handleXY(data);
+          assert(points.length == 1, "points length must be 1");
           break;
         }
 
@@ -483,7 +485,7 @@ class SRefStructBuilder extends StructBuilder<SRefStruct> {
 
   @override
   SRefStruct build() {
-    return SRefStruct(name: name, vMirror: vMirror, magnification: magnification, angle: angle, points: points);
+    return SRefStruct(name: name, vMirror: vMirror, magnification: magnification, angle: angle, offset: points.first);
   }
 }
 
