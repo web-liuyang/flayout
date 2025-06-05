@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:thread/thread.dart';
 
@@ -12,7 +13,8 @@ import 'package:blueprint_master/editors/business_graphics/business_graphics.dar
 import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:blueprint_master/layouts/cubits/cubits.dart';
-import 'package:flutter/rendering.dart';
+import 'package:blueprint_master/layers/layers.dart';
+import 'package:flutter/rendering.dart' hide Layer;
 import 'package:flutter/widgets.dart';
 // import 'package:flame/components.dart';
 // import 'package:flame/extensions.dart';
@@ -71,12 +73,12 @@ class Viewport {
   }
 
   void zoomIn(Offset origin) {
-    final zoom = getZoom() + 0.1;
+    final zoom = getZoom() + 0.01;
     setZoom(zoom, origin: origin);
   }
 
   void zoomOut(Offset origin) {
-    final zoom = getZoom() - 0.1;
+    final zoom = getZoom() - 0.01;
     setZoom(zoom, origin: origin);
   }
 
@@ -143,9 +145,7 @@ class World {
 
   late Element context;
 
-  void render() {
-    context.markNeedsBuild();
-  }
+  void render() async {}
 
   bool canSee(Rect aabb) {
     return viewport.visibleWorldRect.overlaps(aabb);
@@ -154,7 +154,14 @@ class World {
   bool canSeePoint(Offset offset) {
     return viewport.visibleWorldRect.contains(offset);
   }
+
+  final List<Path> paths = [];
+  final int count = 1000_0000_000;
+  final List<Float32List> vertices = [];
+  final List<ui.Vertices> vertices2 = [];
 }
+
+CellBusinessGraphic? cell;
 
 class Editor extends StatelessWidget {
   Editor({super.key});
@@ -175,8 +182,9 @@ class Editor extends StatelessWidget {
         world.init(c.biggest);
 
         // final cells = parseGdsii("/Users/liuyang/Desktop/xiaoyao/ansys/mmi.gds");
-        final cells = parseGdsii("/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_8X8.py.gds");
-        final cell = cells[0];
+        final result = parseGdsii("/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_8X8.py.gds");
+        print(result.layers.map((e) => e.identity()).toList());
+        cell = result.cells[0];
         // for (final element in cells.indexed) {
         //   print("${element.$1}: ${element.$2.name}");
         // }
@@ -184,20 +192,20 @@ class Editor extends StatelessWidget {
         // viewport.matrix4.setTranslation(Vector3(viewport.size.width / 2, viewport.size.height / 2, 1));
         // world.viewport.matrix4.setTranslation(Vector3(100, 0, 1));
 
-        final List<BaseGraphic> children = [];
-        void add(GroupGraphic gg, Offset offset) {
-          for (final element in gg.children) {
-            if (element is GroupGraphic) {
-              add(element, element.position * kEditorUnits);
-            } else {
-              element.position += offset;
-              children.add(element);
-            }
-          }
-        }
+        // final List<BaseGraphic> children = [];
+        // void add(GroupGraphic gg, Offset offset) {
+        //   for (final element in gg.children) {
+        //     if (element is GroupGraphic) {
+        //       add(element, element.position * kEditorUnits);
+        //     } else {
+        //       element.position += offset;
+        //       children.add(element);
+        //     }
+        //   }
+        // }
 
-        add(cell.toGraphic(world), Offset.zero);
-
+        // add(cell.toGraphic(), Offset.zero);
+        // print("count: ${children.length}");
         return Builder(
           builder: (context) {
             world.context = context as Element;
@@ -206,7 +214,7 @@ class Editor extends StatelessWidget {
               height: world.viewport.size.height,
               child: StateMachine(
                 state: stateMachine,
-                child: CustomPaint(painter: Scene(world: world, cell: cell)),
+                child: CustomPaint(painter: Scene(world: world, cell: cell!, graphics: [])),
                 // child: ListView.builder(
                 //   itemCount: children.length,
                 //   itemBuilder: (context, index) {
@@ -224,9 +232,11 @@ class Editor extends StatelessWidget {
   }
 }
 
+final globalPath = Path();
+
 class Scene extends BaseCustomPainter {
-  Scene({required this.world, required this.cell}) {
-    final List<BaseGraphic> children = [];
+  Scene({required this.world, required this.cell, required this.graphics}) {
+    // final List<BaseGraphic> children = [];
     // void add(GroupGraphic gg, Offset offset) {
     //   for (final element in gg.children) {
     //     if (element is GroupGraphic) {
@@ -240,10 +250,10 @@ class Scene extends BaseCustomPainter {
 
     // add(cell.toGraphic(world), Offset.zero);
 
-    _graphics = children;
+    // _graphics = children;
   }
 
-  List<BaseGraphic> _graphics = [];
+  final List<BaseGraphic> graphics;
 
   final CellBusinessGraphic cell;
 
@@ -253,6 +263,8 @@ class Scene extends BaseCustomPainter {
 
   final World world;
 
+  // 多次调用 drawPath 可以充分利用 GPU
+
   @override
   void paint(ui.Canvas canvas, ui.Size size) {
     print("Scene paint");
@@ -261,17 +273,111 @@ class Scene extends BaseCustomPainter {
 
     final pr = RendererBinding.instance.createPictureRecorder();
     final innerCanvas = RendererBinding.instance.createCanvas(pr);
+
     innerCanvas.transform(world.viewport.matrix4.storage);
     // canvas.transform(world.viewport.matrix4.storage);
+    // final c = Collection();
 
-    // final g = Benchmark.run(() {
-    //   return cell.toGraphic(world).paint(innerCanvas, size);
+    // Benchmark.run(() {
+    //   cell.collect(c);
     // }, cell.name);
 
+    // print(c.layerDependency.length);
+    // print(c.cellNameDependency.length);
+
     Benchmark.run(() {
-      for (final item in _graphics) {
-        item.paint(innerCanvas, size);
+      // 700ms 330ms 20ms
+      // for (int i = 0; i < count; i++) {
+      //   final rect = Rect.fromLTWH(-100, -100, 200, 200);
+      //   final path = Path();
+      //   path.addRect(rect);
+      //   paths.add(path);
+      // }
+
+      // 800ms 350ms 20ms
+      // for (int i = 0; i < count; i++) {
+      //   final rect = Rect.fromLTWH(-100, -100, 200, 200);
+      //   final path = Path();
+      //   path.moveTo(rect.left, rect.top);
+      //   path.lineTo(rect.right, rect.top);
+      //   path.lineTo(rect.right, rect.bottom);
+      //   path.lineTo(rect.left, rect.bottom);
+      //   path.close();
+      //   paths.add(path);
+      // }
+
+      // 366ms 0ms 20ms 实际渲染其实于 path 差不多
+      // for (int i = 0; i < count; i++) {
+      //   final rect = Rect.fromLTWH(-100, -100, 200, 200);
+      //   innerCanvas.drawPoints(ui.PointMode.polygon, [rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft, rect.topLeft], kEditorPaint);
+      // // }
+
+      // for (int i = 0; i < count; i++) {
+      //   final rect = Rect.fromLTWH(-100, -100, 200, 200);
+      //   final list = Float32List.fromList([
+      //     rect.topLeft.dx,
+      //     rect.topLeft.dx,
+      //     rect.topRight.dx,
+      //     rect.topRight.dy,
+      //     rect.bottomRight.dx,
+      //     rect.bottomRight.dy,
+      //     rect.bottomLeft.dx,
+      //     rect.bottomLeft.dy,
+      //     rect.topLeft.dx,
+      //     rect.topLeft.dx,
+      //   ]);
+      //   vertices.add(list);
+      // }
+
+      // for (int i = 0; i < count; i++) {
+      //   final rect = Rect.fromLTWH(-100, -100, 200, 200);
+      //   final list = Float32List.fromList([
+      //     rect.topLeft.dx,
+      //     rect.topLeft.dx,
+      //     rect.topRight.dx,
+      //     rect.topRight.dy,
+      //     rect.bottomRight.dx,
+      //     rect.bottomRight.dy,
+      //     rect.bottomLeft.dx,
+      //     rect.bottomLeft.dy,
+      //     rect.topLeft.dx,
+      //     rect.topLeft.dx,
+      //   ]);
+
+      //   vertices2.add(ui.Vertices.raw(VertexMode.triangles, list));
+      // }
+
+      // 118ms 卡死
+      // final path = Path();
+      // for (int i = 0; i < count; i++) {
+      //   final rect = Rect.fromLTWH(-100, -100, 200, 200);
+      //   path.addRect(rect);
+      // }
+      // paths.add(path);
+
+      // innerCanvas.drawPath(globalPath, kEditorPaint);
+    }, "Compute");
+
+    Benchmark.run(() {
+      for (final path in world.paths) {
+        innerCanvas.drawPath(path, kEditorPaint);
       }
+
+      for (final list in world.vertices) {
+        innerCanvas.drawRawPoints(ui.PointMode.polygon, list, kEditorPaint);
+      }
+
+      for (final list in world.vertices2) {
+        innerCanvas.drawVertices(list, BlendMode.clear, kEditorPaint);
+      }
+
+      // for (final item in world.cellNameDependency.values) {
+      //   innerCanvas.drawPath(item.path, kEditorPaint);
+
+      //   // for (final text in item.textParagraphs) {
+      //   //   innerCanvas.drawParagraph(text.paragraph, text.offset);
+      //   // }
+      // }
     }, "Paint");
 
     grid.paint(innerCanvas, size);
@@ -279,13 +385,6 @@ class Scene extends BaseCustomPainter {
 
     final p = pr.endRecording();
 
-    // final image = p.toImageSync(size.width.toInt(), size.height.toInt());
-    // image.toByteData().then((data) {
-    //   final cache = data!.buffer.asFloat32List();
-
-    //   // print(a);
-    //   // canvas.drawRawPoints(ui.PointMode.points, a, Paint());
-    // });
     // Benchmark.run(() {
     //   canvas.drawImage(image, Offset.zero, Paint());
 
@@ -598,18 +697,3 @@ class Axis extends BaseCustomPainter {
 //     super.render(canvas);
 //   }
 // }
-
-// 1. 属性栏重排
-//  1.1 单位
-
-// 2. 资源栏
-//   2.1 搜索框 后面加个有无符号的筛选
-//   2.2 PDK Design 增加搜索框
-//   2.3 Symbol Parameters 无法点击添加参数
-
-// 3. 扫描
-//   3.1 添加参数后可以进行删除
-
-// 4. 两个Editor时, 分割线不明显且不能拖拽改变宽度
-
-// 5. Toolbar icon

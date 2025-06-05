@@ -1,26 +1,13 @@
-import 'dart:math';
 import 'dart:ui';
 
+import 'package:blueprint_master/editors/business_graphics/business_graphics.dart';
 import 'package:blueprint_master/editors/editor_config.dart';
-import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:blueprint_master/layers/layers.dart';
 
 import 'base_business_graphic.dart';
 
 class PathBusinessGraphic extends BaseBusinessGraphic {
-  PathBusinessGraphic({required this.vertices, required this.layer, required this.halfWidth}) {
-    Offset leftTop = vertices.first * kEditorUnits;
-    Offset rightBottom = vertices.first * kEditorUnits;
-
-    for (final vertex in vertices.sublist(1)) {
-      final renderVertex = vertex * kEditorUnits;
-      leftTop = Offset(min(leftTop.dx, renderVertex.dx), min(leftTop.dy, renderVertex.dy));
-      rightBottom = Offset(max(rightBottom.dx, renderVertex.dx), max(rightBottom.dy, renderVertex.dy));
-      _renderVertices.add(renderVertex);
-    }
-
-    _renderAabb = Rect.fromPoints(leftTop, rightBottom);
-  }
+  PathBusinessGraphic({required this.vertices, required this.layer, required this.halfWidth});
 
   final List<Offset> vertices;
 
@@ -28,14 +15,63 @@ class PathBusinessGraphic extends BaseBusinessGraphic {
 
   final double halfWidth;
 
-  final List<Offset> _renderVertices = [];
+  // PolylineGraphic? cache;
 
-  late Rect _renderAabb;
+  // @override
+  // PolylineGraphic? toGraphic() {
+  //   cache ??= PolylineGraphic(graphic: this, halfWidth: halfWidth, vertices: vertices);
+  //   return cache!;
+  // }
+
+  Path? path;
+
+  Path getPath() {
+    final path = Path();
+    final [first, ...remining] = vertices;
+    Offset renderVertex = first * kEditorUnits;
+    path.moveTo(renderVertex.dx, renderVertex.dy);
+    for (final vertex in remining) {
+      Offset renderVertex = vertex * kEditorUnits;
+      path.lineTo(renderVertex.dx, renderVertex.dy);
+    }
+
+    return path;
+  }
+
+  final List<Offset> _vertices = [];
+
+  void updateVertices() {
+    // final path = Path();
+
+    _vertices.clear();
+    for (final vertex in vertices) {
+      final renderVertex = vertex * kEditorUnits;
+      _vertices.add(renderVertex);
+    }
+  }
 
   @override
-  PolylineGraphic? toGraphic(world) {
-    if (!world.canSee(_renderAabb)) return null;
+  // Path collect(Map<Layer, Collection> layerToCollection, Map<String, Path> cellNameToPath) {
+  Path collect(Collection collection) {
+    final Dependency dependency = collection.layerDependency[layer] ??= Dependency.empty();
 
-    return PolylineGraphic(vertices: vertices);
+    // if (_vertices.isEmpty) updateVertices();
+    // final [first, ...remining] = _vertices;
+    // collection.path.moveTo(first.dx, first.dy);
+    // for (final vertex in remining) {
+    //   collection.path.lineTo(vertex.dx, vertex.dy);
+    // }
+
+    // return Path();
+    // if (path == null) {
+    //   print("Path Create");
+    //   path = getPath();
+    // } else {
+    //   print("Path Cache");
+    // }
+
+    path ??= getPath();
+    dependency.path.addPath(path!, Offset.zero);
+    return path!;
   }
 }

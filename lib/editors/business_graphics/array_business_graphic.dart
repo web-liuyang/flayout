@@ -1,10 +1,7 @@
 import 'dart:ui';
 
-import 'package:blueprint_master/editors/graphics/base_graphic.dart';
-import 'package:blueprint_master/editors/graphics/group_graphic.dart';
-
-import 'base_business_graphic.dart';
-import 'cell_business_graphic.dart';
+import 'package:blueprint_master/editors/business_graphics/business_graphics.dart';
+import 'package:blueprint_master/editors/editor_config.dart';
 
 class ArrayBusinessGraphic extends BaseBusinessGraphic {
   ArrayBusinessGraphic({
@@ -37,22 +34,50 @@ class ArrayBusinessGraphic extends BaseBusinessGraphic {
 
   final double rowSpacing;
 
-  @override
-  BaseGraphic toGraphic(world) {
-    final BaseGraphic child = cell.toGraphic(world);
-    final List<BaseGraphic> children = [];
+  // GroupGraphic? cache;
+
+  // @override
+  // GroupGraphic toGraphic() {
+  //   if (cache == null) {
+  //     final BaseGraphic child = cell.toGraphic();
+  //     final List<BaseGraphic> children = [];
+  //     for (int i = 0; i < col; i++) {
+  //       final double colOffset = (i) * colSpacing;
+  //       for (int j = 0; j < row; j++) {
+  //         final double rowOffset = (j) * rowSpacing;
+  //         final Offset pos = Offset(colOffset, rowOffset);
+  //         children.add(GroupGraphic(graphic: null, position: pos, children: [child]));
+  //       }
+  //     }
+
+  //     cache = GroupGraphic(graphic: this, position: position, children: children);
+  //   }
+
+  //   return cache!;
+  // }
+
+  Path? path;
+
+  Path getPath(Path cellPath) {
+    final path = Path();
     for (int i = 0; i < col; i++) {
       final double colOffset = (i) * colSpacing;
       for (int j = 0; j < row; j++) {
         final double rowOffset = (j) * rowSpacing;
         final Offset pos = Offset(colOffset, rowOffset);
-        children.add(GroupGraphic(position: pos, children: [child]));
+
+        path.addPath(cellPath, pos);
       }
     }
 
-    return GroupGraphic(position: position, children: children);
+    return Path()..addPath(path, position * kEditorUnits);
+  }
+
+  @override
+  // Path collect(Map<Layer, Collection> layerToCollection, Map<String, Path> cellNameToPath) {
+  Path collect(Collection collection) {
+    final cellPath = cell.collect(collection);
+    path ??= getPath(cellPath);
+    return path!;
   }
 }
-
-
-      // graphics.add(groupShape);

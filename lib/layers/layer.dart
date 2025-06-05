@@ -1,7 +1,18 @@
 import 'base_layer.dart';
 
 class Layer extends BaseLayer {
-  const Layer({required super.number, required this.datatype});
+  const Layer({required super.number, required super.datatype});
 
-  final int datatype;
+  String identity() {
+    return combineIdentity(number, datatype);
+  }
+
+  @override
+  String toString() {
+    return "Layer(number: $number, datatype: $datatype)";
+  }
+}
+
+String combineIdentity(int number, int datatype) {
+  return "$number/$datatype";
 }

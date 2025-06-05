@@ -1,9 +1,8 @@
 import 'dart:ui';
 
-import 'package:blueprint_master/editors/graphics/graphics.dart';
-
-import 'base_business_graphic.dart';
-import 'cell_business_graphic.dart';
+import 'package:blueprint_master/editors/business_graphics/business_graphics.dart';
+import 'package:blueprint_master/editors/editor_config.dart';
+import 'package:blueprint_master/layers/layers.dart';
 
 class InstanceBusinessGraphic extends BaseBusinessGraphic {
   InstanceBusinessGraphic({required this.position, required this.cell, required this.vMirror, required this.magnification, required this.angle});
@@ -18,8 +17,25 @@ class InstanceBusinessGraphic extends BaseBusinessGraphic {
 
   final num angle;
 
+  // GroupGraphic? cache;
+
+  // @override
+  // GroupGraphic toGraphic(world) {
+  //   cache ??= GroupGraphic(graphic: this, position: position, children: [cell.toGraphic(world)]);
+  //   return cache!;
+  // }
+
+  Path? path;
+
+  Path getPath(Path cellPath) {
+    return Path()..addPath(cellPath, position * kEditorUnits);
+  }
+
   @override
-  BaseGraphic toGraphic(world) {
-    return GroupGraphic(position: position, children: [cell.toGraphic(world)]);
+  // Path collect(Map<Layer, Collection> layerToCollection, Map<String, Path> cellNameToPath) {
+  Path collect(Collection collection) {
+    final cellPath = cell.collect(collection);
+    path ??= getPath(cellPath);
+    return path!;
   }
 }

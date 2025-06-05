@@ -1,6 +1,6 @@
-import 'package:blueprint_master/editors/business_graphics/base_business_graphic.dart';
-import 'package:blueprint_master/editors/editor.dart';
-import 'package:blueprint_master/editors/graphics/graphics.dart';
+import 'dart:ui';
+
+import 'package:blueprint_master/editors/business_graphics/business_graphics.dart';
 
 class CellBusinessGraphic extends BaseBusinessGraphic {
   CellBusinessGraphic({required this.name, this.children = const []});
@@ -9,8 +9,30 @@ class CellBusinessGraphic extends BaseBusinessGraphic {
 
   final List<BaseBusinessGraphic> children;
 
+  // GroupGraphic? cache;
+
+  // @override
+  // GroupGraphic toGraphic() {
+  //   cache ??= GroupGraphic(graphic: this, children: children.map((child) => child.toGraphic()).nonNulls.toList());
+  //   return cache!;
+  // }
+
   @override
-  GroupGraphic toGraphic(World world) {
-    return GroupGraphic(children: children.map((child) => child.toGraphic(world)).nonNulls.toList());
+  // Path collect(Map<Layer, Collection> layerToCollection, Map<String, Path> cellNameToPath) {
+  Path collect(Collection collection) {
+    if (collection.cellNameDependency.containsKey(name)) {
+      return collection.cellNameDependency[name]!.path;
+    }
+
+    collection.cellNameDependency[name] = Dependency.empty();
+
+    final Path cellPath = (collection.cellNameDependency[name]!.path);
+
+    for (final child in children) {
+      final childPath = child.collect(collection);
+      cellPath.addPath(childPath, Offset.zero);
+    }
+
+    return cellPath;
   }
 }

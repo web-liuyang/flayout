@@ -1,45 +1,81 @@
-import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:blueprint_master/editors/business_graphics/business_graphics.dart';
 import 'package:blueprint_master/editors/editor_config.dart';
-import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:blueprint_master/layers/layers.dart';
 
 import 'base_business_graphic.dart';
 
 class BoundaryBusinessGraphic extends BaseBusinessGraphic {
-  BoundaryBusinessGraphic({required this.vertices, required this.layer}) {
-    Offset leftTop = vertices.first * kEditorUnits;
-    Offset rightBottom = vertices.first * kEditorUnits;
-    // final List<Offset> renderVertices = [];
-    final List<double> renderVertices = [];
-    for (final vertex in vertices.sublist(1)) {
-      final renderVertex = vertex * kEditorUnits;
-      leftTop = Offset(min(leftTop.dx, renderVertex.dx), min(leftTop.dy, renderVertex.dy));
-      rightBottom = Offset(max(rightBottom.dx, renderVertex.dx), max(rightBottom.dy, renderVertex.dy));
-      renderVertices.addAll([renderVertex.dx, renderVertex.dy]);
-      // renderVertices.add(renderVertex);
-    }
-
-    _renderVertices = Float32List.fromList(renderVertices);
-    // _renderVertices = renderVertices;
-    _renderAabb = Rect.fromPoints(leftTop, rightBottom);
-  }
+  BoundaryBusinessGraphic({required this.vertices, required this.layer});
 
   final List<Offset> vertices;
 
   final Layer layer;
 
-  // late List<Offset> _renderVertices = [];
-  late Float32List _renderVertices;
+  // PolygonGraphic? cache;
 
-  late Rect _renderAabb;
+  // @override
+  // PolygonGraphic toGraphic() {
+  //   cache ??= PolygonGraphic(graphic: this, vertices: vertices);
+  //   return cache!;
+  // }
+
+  Path? path;
+
+  Rect? aabb;
+
+  Path getPath() {
+    final path = Path();
+    final [first, ...remining] = vertices;
+    Offset renderVertex = first * kEditorUnits;
+    path.moveTo(renderVertex.dx, renderVertex.dy);
+    for (final vertex in remining) {
+      Offset renderVertex = vertex * kEditorUnits;
+      path.lineTo(renderVertex.dx, renderVertex.dy);
+    }
+    path.close();
+
+    return path;
+  }
+
+  final List<Offset> _vertices = [];
+
+  void updateVertices() {
+    _vertices.clear();
+    for (final vertex in vertices) {
+      final renderVertex = vertex * kEditorUnits;
+      _vertices.add(renderVertex);
+    }
+  }
 
   @override
-  PolygonGraphic? toGraphic(world) {
-    if (!world.canSee(_renderAabb)) return null;
+  // Path collect(Map<Layer, Collection> layerToCollection, Map<String, Path> cellNameToPath) {
+  Path collect(Collection collection) {
+    final Dependency dependency = collection.layerDependency[layer] ??= Dependency.empty();
+    // if (_vertices.isEmpty) updateVertices();
+    // final [first, ...remining] = _vertices;
+    // dependency.path.moveTo(first.dx, first.dy);
+    // for (final vertex in remining) {
+    //   dependency.path.lineTo(vertex.dx, vertex.dy);
+    // }
 
-    return PolygonGraphic(vertices: _renderVertices);
+    // return Path();
+
+    path ??= getPath();
+    
+    if (visibleRect.overlaps(path!.getBounds())) {
+      path!.getBounds();
+      dependency.path.addPath(path!, Offset.zero);
+      return path!;
+    } else {
+      // print("not visible");
+      // return path!;
+      return Path();
+    }
+
+    return path!;
   }
 }
+
+final visibleRect = Rect.fromLTWH(-300, -300, 600, 600);

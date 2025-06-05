@@ -5,7 +5,7 @@ import 'package:blueprint_master/editors/editor_config.dart';
 import 'base_graphic.dart';
 
 class TextGraphic extends BaseGraphic {
-  TextGraphic({super.position, required this.text, required this.paragraph});
+  TextGraphic({required super.graphic, super.position, required this.text, required this.paragraph});
 
   final String text;
 
@@ -21,6 +21,6 @@ class TextGraphic extends BaseGraphic {
     //       ..layout(ParagraphConstraints(width: double.infinity));
 
     // final offset = position * kEditorUnits;
-    // canvas.drawParagraph(paragraph, position);
+    canvas.drawParagraph(paragraph, position);
   }
 }

@@ -1,23 +1,12 @@
 import 'dart:ui';
 
 import 'package:blueprint_master/editors/editor_config.dart';
-import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:blueprint_master/layers/layers.dart';
 
 import 'base_business_graphic.dart';
 
 class TextBusinessGraphic extends BaseBusinessGraphic {
-  TextBusinessGraphic({required this.position, required this.text, required this.layer}) {
-    _renderParagraph =
-        (ParagraphBuilder(ParagraphStyle())
-              ..pushStyle(kEditorTextStyle)
-              ..addText(text))
-            .build()
-          ..layout(ParagraphConstraints(width: double.infinity));
-
-    _renderPosition = position * kEditorUnits;
-    _renderAabb = Rect.fromPoints(_renderPosition, Offset(_renderParagraph.width, _renderParagraph.height));
-  }
+  TextBusinessGraphic({required this.position, required this.text, required this.layer});
 
   final Offset position;
 
@@ -25,16 +14,33 @@ class TextBusinessGraphic extends BaseBusinessGraphic {
 
   final Layer layer;
 
-  late Paragraph _renderParagraph;
+  // TextGraphic? cache;
 
-  late Offset _renderPosition;
+  // @override
+  // TextGraphic? toGraphic(world) {
+  //   cache ??= TextGraphic(graphic: this, position: _renderPosition, text: text, paragraph: _renderParagraph);
+  //   return cache;
+  // }
 
-  late Rect _renderAabb;
+  TextParagraph? textParagraph;
+
+  TextParagraph getTextParagraph() {
+    final paragraph =
+        (ParagraphBuilder(ParagraphStyle())
+              ..pushStyle(kEditorTextStyle)
+              ..addText(text))
+            .build()
+          ..layout(ParagraphConstraints(width: double.infinity));
+    return TextParagraph(paragraph: paragraph, offset: position * kEditorUnits);
+  }
 
   @override
-  TextGraphic? toGraphic(world) {
-    if (!world.canSee(_renderAabb)) return null;
+  // Path collect(Map<Layer, Collection> layerToCollection, Map<String, Path> cellNameToPath) {
+  Path collect(Collection collection) {
+    final Dependency dependency = collection.layerDependency[layer] ??= Dependency.empty();
+    textParagraph ??= getTextParagraph();
+    dependency.textParagraphs.add(textParagraph!);
 
-    return TextGraphic(position: _renderPosition, text: text, paragraph: _renderParagraph);
+    return Path();
   }
 }
