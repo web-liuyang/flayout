@@ -5,7 +5,7 @@ import 'package:blueprint_master/editors/editor_config.dart';
 import 'base_graphic.dart';
 
 class TextGraphic extends BaseGraphic {
-  TextGraphic({required super.graphic, super.position, required this.text, required this.paragraph});
+  TextGraphic({super.position, required this.text, required this.paragraph});
 
   final String text;
 

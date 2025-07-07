@@ -110,29 +110,29 @@ Future<ui.Image> drawTest() async {
 void main() async {
   // 创建一个示例的 Uint8List（这里填充为红色像素）
 
-  const int width = 200;
-  const int height = 200;
+  // const int width = 200;
+  // const int height = 200;
 
-  // 创建 ui.Image
+  // // 创建 ui.Image
 
-  final Uint8List bitmap = createBitmap(width, height);
-  bitmap.fillRange(0, bitmap.length, 255); // 填充为白色背景
+  // final Uint8List bitmap = createBitmap(width, height);
+  // bitmap.fillRange(0, bitmap.length, 255); // 填充为白色背景
 
-  // 绘制光滑的斜线
-  drawLine(bitmap, width, height, 0, 0, width, height, [0, 0, 255, 255]); // 蓝色线条
-  // 这里可以将bitmap用于其他目的，比如显示在Canvas上
-  // final buffer = await ui.ImmutableBuffer.fromUint8List(bitmap);
-  // final codec = await ui.instantiateImageCodecFromBuffer(buffer);
-  ui.Image image = await createImageFromUint8List(bitmap, width, height);
-  image = await resizeImage(image, (width / 2).round(), (height / 2).round());
-  // final codec = await ui.instantiateImageCodec(bitmap, allowUpscaling: false);
-  // final info = await codec.getNextFrame();
-  final data = await image.toByteData(format: ui.ImageByteFormat.png);
+  // // 绘制光滑的斜线
+  // drawLine(bitmap, width, height, 0, 0, width, height, [0, 0, 255, 255]); // 蓝色线条
+  // // 这里可以将bitmap用于其他目的，比如显示在Canvas上
+  // // final buffer = await ui.ImmutableBuffer.fromUint8List(bitmap);
+  // // final codec = await ui.instantiateImageCodecFromBuffer(buffer);
+  // ui.Image image = await createImageFromUint8List(bitmap, width, height);
+  // image = await resizeImage(image, (width / 2).round(), (height / 2).round());
+  // // final codec = await ui.instantiateImageCodec(bitmap, allowUpscaling: false);
+  // // final info = await codec.getNextFrame();
+  // final data = await image.toByteData(format: ui.ImageByteFormat.png);
 
-  // 保存为PNG文件
-  await File('line2.png').writeAsBytes(data!.buffer.asUint8List());
+  // // 保存为PNG文件
+  // await File('line2.png').writeAsBytes(data!.buffer.asUint8List());
 
-  print('图片已保存为 line.png');
+  // print('图片已保存为 line.png');
 
   runApp(const BlueprintMaster());
 }

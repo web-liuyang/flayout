@@ -1,10 +1,8 @@
 import 'package:blueprint_master/editors/business_graphics/business_graphics.dart';
 import 'package:flutter/rendering.dart';
 
-abstract class BaseGraphic<T extends BaseBusinessGraphic?> extends CustomPainter {
-  BaseGraphic({required this.graphic, this.position = Offset.zero});
-
-  T graphic;
+abstract class BaseGraphic extends CustomPainter {
+  BaseGraphic({this.position = Offset.zero});
 
   Offset position;
 

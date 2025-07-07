@@ -5,7 +5,7 @@ import 'package:blueprint_master/editors/editor_config.dart';
 import 'base_graphic.dart';
 
 class PolylineGraphic extends BaseGraphic {
-  PolylineGraphic({required super.graphic, super.position, required this.vertices, required this.halfWidth});
+  PolylineGraphic({super.position, required this.vertices, required this.halfWidth});
 
   final List<Offset> vertices;
 

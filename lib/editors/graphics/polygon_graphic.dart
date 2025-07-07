@@ -7,8 +7,8 @@ import 'package:blueprint_master/editors/editor_config.dart';
 
 import 'base_graphic.dart';
 
-class PolygonGraphic extends BaseGraphic<BoundaryBusinessGraphic> {
-  PolygonGraphic({required super.graphic, required this.vertices});
+class PolygonGraphic extends BaseGraphic {
+  PolygonGraphic({required this.vertices});
 
   final List<Offset> vertices;
 
