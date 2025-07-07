@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:blueprint_master/main.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:thread/thread.dart';
@@ -145,7 +146,9 @@ class World {
 
   late Element context;
 
-  void render() async {}
+  void render() async {
+    context.markNeedsBuild();
+  }
 
   bool canSee(Rect aabb) {
     return viewport.visibleWorldRect.overlaps(aabb);
@@ -162,6 +165,39 @@ class World {
 }
 
 CellBusinessGraphic? cell;
+
+List<BaseBusinessGraphic> flattenCell(CellBusinessGraphic graphic) {
+  final List<BaseBusinessGraphic> children = [];
+
+  void resursive(List<BaseBusinessGraphic> graphics) {
+    for (final BaseBusinessGraphic graphic in graphics) {
+      if (graphic is CellBusinessGraphic) {
+        children.add(graphic);
+        children.addAll(flattenCell(graphic));
+      } else if (graphic is InstanceBusinessGraphic) {
+        children.add(graphic);
+        children.addAll(flattenCell(graphic.cell));
+      } else if (graphic is ArrayBusinessGraphic) {
+        children.add(graphic);
+        children.addAll(flattenCell(graphic.cell));
+      } else {
+        children.add(graphic);
+      }
+    }
+  }
+
+  resursive(graphic.children);
+
+  return children;
+}
+
+void buildBitmap(BaseBusinessGraphic graphic) {
+  compute((_) {
+    buildBitmap(cell!);
+
+    print(ui.Color(0xFF000000));
+  }, null);
+}
 
 class Editor extends StatelessWidget {
   Editor({super.key});
@@ -185,6 +221,15 @@ class Editor extends StatelessWidget {
         final result = parseGdsii("/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_8X8.py.gds");
         print(result.layers.map((e) => e.identity()).toList());
         cell = result.cells[0];
+        final graphics = Benchmark.run(() {
+          final graphics = flattenCell(cell!);
+
+          print(graphics.length);
+
+          return graphics;
+        }, "flattenCell");
+
+        // cell.collect(collection);
         // for (final element in cells.indexed) {
         //   print("${element.$1}: ${element.$2.name}");
         // }
@@ -234,6 +279,10 @@ class Editor extends StatelessWidget {
 
 final globalPath = Path();
 
+ui.Image? imageCache;
+
+Float32List? f32;
+
 class Scene extends BaseCustomPainter {
   Scene({required this.world, required this.cell, required this.graphics}) {
     // final List<BaseGraphic> children = [];
@@ -275,6 +324,50 @@ class Scene extends BaseCustomPainter {
     final innerCanvas = RendererBinding.instance.createCanvas(pr);
 
     innerCanvas.transform(world.viewport.matrix4.storage);
+    print(world.viewport.matrix4.storage);
+    // const int width = 100;
+    // const int height = 100;
+    // final bitmap = createBitmap(width, height);
+
+    // // 绘制光滑的斜线
+    // drawLine(bitmap, width, height, 0, 0, 100, 100, [0, 0, 255, 255]); // 蓝色线条
+
+    if (imageCache == null) {
+      print("1");
+      drawTest().then((image) {
+        imageCache = image;
+        world.render();
+      });
+      // createLineImage(100, 100, Offset(0, 0), Offset(100, 100)).then((image) async {
+      //   // final byteData = await image.toByteData();
+      //   // f32 = Float32List.fromList([0, 0, 100, 100]);
+      //   print("A");
+      //   imageCache = image;
+      //   world.render();
+      // });
+    } else {
+      print("2");
+
+      // innerCanvas.drawRawPoints(
+      //   ui.PointMode.points,
+      //   f32!,
+      //   Paint()
+      //     ..color = Color(0xFFFF4500)
+      //     ..strokeWidth = 1
+      //     ..isAntiAlias = false,
+      // );
+
+      innerCanvas.drawLine(
+        Offset(0, 0),
+        Offset(100, 100),
+        Paint()
+          ..color = Color(0xFFFF4500)
+          ..strokeWidth = 1,
+      );
+
+      innerCanvas.drawImage(imageCache!, Offset(100, 0), Paint());
+    }
+
     // canvas.transform(world.viewport.matrix4.storage);
     // final c = Collection();
 

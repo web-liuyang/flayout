@@ -1,3 +1,5 @@
+import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:blueprint_master/editors/business_graphics/business_graphics.dart';
@@ -63,7 +65,7 @@ class BoundaryBusinessGraphic extends BaseBusinessGraphic {
     // return Path();
 
     path ??= getPath();
-    
+
     if (visibleRect.overlaps(path!.getBounds())) {
       path!.getBounds();
       dependency.path.addPath(path!, Offset.zero);
@@ -75,6 +77,35 @@ class BoundaryBusinessGraphic extends BaseBusinessGraphic {
     }
 
     return path!;
+  }
+
+  buildBitmap() {
+    double minX = double.maxFinite;
+    double minY = double.maxFinite;
+    double maxX = -double.maxFinite;
+    double maxY = -double.maxFinite;
+
+    for (final vertex in vertices) {
+      minX = min(minX, vertex.dx);
+      minY = min(minY, vertex.dy);
+      maxX = max(maxX, vertex.dx);
+      maxY = max(maxY, vertex.dy);
+    }
+
+    final int width = (maxX - minX).round();
+    final int height = (maxY - minY).round();
+    final rect = Rect.fromLTWH(minX, minY, width.toDouble(), height.toDouble());
+
+    final workspace = Uint8ClampedList(width * height * 4);
+
+    for (final vertex in vertices) {
+      final x = (vertex.dx - minX).round();
+      final y = (vertex.dy - minY).round();
+      workspace[y * width * 4 + x * 4] = 255;
+      workspace[y * width * 4 + x * 4 + 1] = 255;
+      workspace[y * width * 4 + x * 4 + 2] = 255;
+      workspace[y * width * 4 + x * 4 + 3] = 255;
+    }
   }
 }
 
