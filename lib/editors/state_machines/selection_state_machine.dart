@@ -61,7 +61,6 @@ class SelectionStateMachine extends BaseStateMachine {
     // world.viewport.setTranslation(focalPointDelta.dx, focalPointDelta.dy);
 
     world.viewport.translate(info.focalPointDelta);
-
     world.render();
     // final scaleFactor = info.scale.global;
     // if (scaleFactor == defaultFactor) return;

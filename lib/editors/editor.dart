@@ -32,6 +32,8 @@ import 'package:vector_math/vector_math_64.dart';
 import '../gdsii/builder.dart';
 import '../gdsii/gdsii.dart';
 import 'editor_config.dart';
+import 'figures/polygon_figure.dart';
+import 'figures/polyline_figure.dart';
 import 'state_machines/state_machines.dart';
 
 class Viewport {
@@ -135,8 +137,12 @@ class World {
 
   late Element context;
 
+  late SceneRenderObject renderObject;
+
   void render() async {
-    context.markNeedsBuild();
+    print("render");
+    renderObject.markNeedsPaint();
+    // context.markNeedsBuild();
   }
 
   bool canSee(Rect aabb) {
@@ -161,65 +167,113 @@ class Editor extends StatelessWidget {
 
     // final drawCubit = context.watch<DrawCubit>();
 
-    // return GameWidget(game: drawCubit.game);
     return LayoutBuilder(
       builder: (context, c) {
         world.init(c.biggest);
-
-        return Builder(
-          builder: (context) {
-            world.context = context as Element;
-            return Container(
-              width: world.viewport.size.width,
-              height: world.viewport.size.height,
-              child: StateMachine(
-                state: stateMachine,
-                // CustomPaint(painter: Scene(world: world, cell: cells[0]));
-                child: Stack(children: [CustomPaint(painter: Scene(world: world))]),
-              ),
-            );
-          },
+        return Container(
+          width: world.viewport.size.width,
+          height: world.viewport.size.height,
+          child: StateMachine(
+            state: stateMachine,
+            child: Builder(
+              builder: (context) {
+                // world.context = context as Element;
+                // return Stack(children: [CustomPaint(painter: Scene(world: world))]);
+                return Scene(world: world);
+              },
+            ),
+          ),
         );
       },
     );
   }
 }
 
-class Scene extends CustomPainter {
-  Scene({required this.world});
-
-  late Grid grid = Grid(dotGap: kEditorDotGap, dotSize: kEditorDotSize, world: world);
-
-  late Axis axis = Axis(axisLength: kEditorAxisLength, axisWidth: kEditorAxisWidth, world: world);
+class SceneRenderObject extends RenderBox {
+  SceneRenderObject({required this.world}) {
+    world.renderObject = this;
+  }
 
   final World world;
 
-  // 多次调用 drawPath 可以充分利用 GPU
+  late final Grid grid = Grid(dotGap: kEditorDotGap, dotSize: kEditorDotSize, world: world);
+
+  late final Axis axis = Axis(axisLength: kEditorAxisLength, axisWidth: kEditorAxisWidth, world: world);
 
   @override
-  void paint(ui.Canvas canvas, ui.Size size) {
-    print("Scene paint");
-
-    canvas.clipRect(Offset.zero & size);
-
-    final pr = RendererBinding.instance.createPictureRecorder();
-    final innerCanvas = RendererBinding.instance.createCanvas(pr);
-
-    innerCanvas.transform(world.viewport.matrix4.storage);
-
-    grid.paint(innerCanvas, size);
-    axis.paint(innerCanvas, size);
-
-    final p = pr.endRecording();
-
-    canvas.drawPicture(p);
+  void performLayout() {
+    size = constraints.biggest;
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+  void paint(PaintingContext context, ui.Offset offset) {
+    context.canvas.save();
+    context.canvas.translate(offset.dx, offset.dy);
+
+    context.pushTransform(needsCompositing, offset, world.viewport.matrix4.matrix4, (PaintingContext context, ui.Offset offset) {
+      grid.paint(context.canvas, size);
+      axis.paint(context.canvas, size);
+    });
+    context.canvas.restore();
+  }
+
+  @override
+  bool hitTestSelf(ui.Offset position) {
     return true;
   }
 }
+
+class Scene extends LeafRenderObjectWidget {
+  const Scene({super.key, required this.world});
+
+  final World world;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return SceneRenderObject(world: world);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
+    super.updateRenderObject(context, renderObject);
+  }
+}
+
+// class Scene extends CustomPainter {
+//   Scene({required this.world});
+
+//   late final Grid grid = Grid(dotGap: kEditorDotGap, dotSize: kEditorDotSize, world: world);
+
+//   late final Axis axis = Axis(axisLength: kEditorAxisLength, axisWidth: kEditorAxisWidth, world: world);
+
+//   final World world;
+
+//   // 多次调用 drawPath 可以充分利用 GPU
+
+//   @override
+//   void paint(ui.Canvas canvas, ui.Size size) {
+//     print("Scene paint");
+
+//     canvas.clipRect(Offset.zero & size);
+
+//     final pr = RendererBinding.instance.createPictureRecorder();
+//     final innerCanvas = RendererBinding.instance.createCanvas(pr);
+
+//     innerCanvas.transform(world.viewport.matrix4.storage);
+
+//     grid.paint(innerCanvas, size);
+//     axis.paint(innerCanvas, size);
+
+//     final p = pr.endRecording();
+
+//     canvas.drawPicture(p);
+//   }
+
+//   @override
+//   bool shouldRepaint(covariant CustomPainter oldDelegate) {
+//     return true;
+//   }
+// }
 
 class Grid {
   Grid({required this.dotGap, required this.dotSize, required this.world});

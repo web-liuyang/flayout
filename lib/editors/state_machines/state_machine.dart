@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -142,7 +143,6 @@ class StateMachine extends StatelessWidget {
           // onPanUpdate: onPanUpdate,
           // onPanEnd: onPanEnd,
           // onPanCancel: onPanCancel,
-
           onSecondaryTapDown: onSecondaryTapDown,
           onSecondaryTapUp: onSecondaryTapUp,
           onSecondaryTapCancel: onSecondaryTapCancel,
