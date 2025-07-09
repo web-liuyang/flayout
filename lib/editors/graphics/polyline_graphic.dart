@@ -5,7 +5,7 @@ import 'package:blueprint_master/editors/editor_config.dart';
 import 'base_graphic.dart';
 
 class PolylineGraphic extends BaseGraphic {
-  PolylineGraphic({super.position, required this.vertices, required this.halfWidth});
+  PolylineGraphic({required this.vertices, required this.halfWidth});
 
   final List<Offset> vertices;
 
@@ -13,8 +13,6 @@ class PolylineGraphic extends BaseGraphic {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = kEditorPaint;
-
-    canvas.drawPoints(PointMode.polygon, vertices, paint);
+    canvas.drawPoints(PointMode.lines, vertices, kEditorPaint);
   }
 }

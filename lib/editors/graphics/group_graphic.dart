@@ -1,12 +1,13 @@
 import 'dart:ui';
 
-import 'package:blueprint_master/editors/editor_config.dart';
 import 'package:flutter/rendering.dart';
 
 import 'base_graphic.dart';
 
 class GroupGraphic extends BaseGraphic {
-  GroupGraphic({super.position, this.children = const []});
+  GroupGraphic({required this.position, this.children = const []});
+
+  final Offset position;
 
   final List<BaseGraphic> children;
 

@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -83,6 +85,7 @@ class StateMachine extends StatelessWidget {
   }
 
   void onScaleUpdate(ScaleUpdateDetails info) {
+    print("onScaleUpdate");
     state.onScaleUpdate(info);
   }
 
@@ -98,9 +101,9 @@ class StateMachine extends StatelessWidget {
     state.onMouseMove(info);
   }
 
-  // void onScroll(PointerScrollDetails info) {
-  //   state.onScroll(info);
-  // }
+  void onScroll(PointerScrollEvent info) {
+    state.onScroll(info);
+  }
 
   // DragCallbacks
   // void onDragStart(DragStartEvent event) {
@@ -151,9 +154,21 @@ class StateMachine extends StatelessWidget {
           onScaleUpdate: onScaleUpdate,
           onScaleEnd: onScaleEnd,
 
-          child: child,
+          child: Listener(
+            onPointerSignal: (event) {
+              if (event is! PointerScrollEvent) return;
+              onScroll(event);
+            },
+            child: child,
+          ),
         ),
       ),
     );
   }
+}
+
+enum ScrollDirection { up, down }
+
+extension PointerScrollEventExtension on PointerScrollEvent {
+  ScrollDirection get direction => scrollDelta.dy > 0 ? ScrollDirection.down : ScrollDirection.up;
 }

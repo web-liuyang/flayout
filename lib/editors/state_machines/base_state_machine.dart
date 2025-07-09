@@ -43,8 +43,7 @@ abstract class BaseStateMachine {
     // final position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
     // mouseCubit.update(position);
   }
-
-  // void onScroll(PointerScrollDetails info) {}
+  void onScroll(PointerScrollEvent info) {}
 
   // void onDragStart(DragStartEvent event) {}
 

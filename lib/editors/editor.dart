@@ -159,7 +159,7 @@ class Editor extends StatelessWidget {
 
   final World world = World();
 
-  late BaseStateMachine stateMachine = SelectionStateMachine(world: world);
+  late final BaseStateMachine stateMachine = SelectionStateMachine(world: world);
 
   @override
   Widget build(BuildContext context) {
@@ -196,9 +196,9 @@ class SceneRenderObject extends RenderBox {
 
   final World world;
 
-  late final Grid grid = Grid(dotGap: kEditorDotGap, dotSize: kEditorDotSize, world: world);
+  final Grid grid = Grid(dotGap: kEditorDotGap, dotSize: kEditorDotSize);
 
-  late final Axis axis = Axis(axisLength: kEditorAxisLength, axisWidth: kEditorAxisWidth, world: world);
+  final Axis axis = Axis(axisLength: kEditorAxisLength, axisWidth: kEditorAxisWidth);
 
   @override
   void performLayout() {
@@ -209,10 +209,14 @@ class SceneRenderObject extends RenderBox {
   void paint(PaintingContext context, ui.Offset offset) {
     context.canvas.save();
     context.canvas.translate(offset.dx, offset.dy);
-
-    context.pushTransform(needsCompositing, offset, world.viewport.matrix4.matrix4, (PaintingContext context, ui.Offset offset) {
-      grid.paint(context.canvas, size);
-      axis.paint(context.canvas, size);
+    final rect = Offset.zero & world.viewport.size;
+    context.pushClipRect(needsCompositing, Offset.zero, rect, (PaintingContext context, ui.Offset offset) {
+      context.pushTransform(needsCompositing, offset, world.viewport.matrix4.matrix4, (PaintingContext context, ui.Offset offset) {
+        final ctx = Context(world: world, paintingContext: context);
+        print(world.viewport.matrix4.matrix4);
+        grid.paint(ctx, Offset.zero);
+        axis.paint(ctx, Offset.zero);
+      });
     });
     context.canvas.restore();
   }
@@ -221,6 +225,18 @@ class SceneRenderObject extends RenderBox {
   bool hitTestSelf(ui.Offset position) {
     return true;
   }
+}
+
+class Context {
+  final World world;
+
+  final PaintingContext paintingContext;
+
+  get canvas => paintingContext.canvas;
+
+  get viewport => world.viewport;
+
+  const Context({required this.world, required this.paintingContext});
 }
 
 class Scene extends LeafRenderObjectWidget {
@@ -275,26 +291,28 @@ class Scene extends LeafRenderObjectWidget {
 //   }
 // }
 
-class Grid {
-  Grid({required this.dotGap, required this.dotSize, required this.world});
+abstract class BasePainter {
+  void paint(Context ctx, Offset offset);
+}
+
+class Grid extends BasePainter {
+  Grid({required this.dotGap, required this.dotSize});
 
   final double dotGap;
 
   final double dotSize;
 
-  final World world;
-
   final Paint _paint = Paint();
 
-  void renderGrid(Canvas canvas) {
-    final gap = world.viewport.getLogicSize(dotGap);
+  void renderGrid(Context ctx) {
+    final gap = ctx.viewport.getLogicSize(dotGap);
 
-    final visibleWorldRect = world.viewport.visibleWorldRect;
+    final visibleWorldRect = ctx.viewport.visibleWorldRect;
     final dots = createGridDots(visibleWorldRect, gap);
-    final strokeWidth = world.viewport.getLogicSize(dotSize);
+    final strokeWidth = ctx.viewport.getLogicSize(dotSize);
 
     _paint.strokeWidth = strokeWidth;
-    canvas.drawPoints(ui.PointMode.points, dots, _paint);
+    ctx.canvas.drawPoints(ui.PointMode.points, dots, _paint);
   }
 
   List<Offset> createGridDots(Rect rect, double gap) {
@@ -314,35 +332,32 @@ class Grid {
   }
 
   @override
-  void paint(ui.Canvas canvas, ui.Size size) {
-    renderGrid(canvas);
+  void paint(Context ctx, Offset offset) {
+    renderGrid(ctx);
   }
 }
 
-class Axis {
-  Axis({required this.axisLength, required this.axisWidth, required this.world});
+class Axis extends BasePainter {
+  Axis({required this.axisLength, required this.axisWidth});
 
   final double axisLength;
 
   final double axisWidth;
 
-  final World world;
-
   final Paint _paint = Paint()..color = kEditorAxisColor;
 
-  void renderAxis(Canvas canvas) {
-    final double strokeWidth = world.viewport.getLogicSize(axisWidth);
-    final double length = world.viewport.getLogicSize(axisLength);
+  void renderAxis(Context ctx) {
+    final double strokeWidth = ctx.viewport.getLogicSize(axisWidth);
+    final double length = ctx.viewport.getLogicSize(axisLength);
 
     _paint.strokeWidth = strokeWidth;
-
-    canvas.drawLine(Offset(-length, 0), Offset(length, 0), _paint);
-    canvas.drawLine(Offset(0, -length), Offset(0, length), _paint);
+    ctx.canvas.drawLine(Offset(-length, 0), Offset(length, 0), _paint);
+    ctx.canvas.drawLine(Offset(0, -length), Offset(0, length), _paint);
   }
 
   @override
-  void paint(ui.Canvas canvas, ui.Size size) {
-    renderAxis(canvas);
+  void paint(Context ctx, Offset offset) {
+    renderAxis(ctx);
   }
 }
 

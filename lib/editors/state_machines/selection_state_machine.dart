@@ -1,5 +1,6 @@
 import 'package:blueprint_master/editors/editor.dart';
 import 'package:blueprint_master/editors/editor_config.dart';
+import 'package:blueprint_master/editors/state_machines/state_machine.dart';
 import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -71,16 +72,15 @@ class SelectionStateMachine extends BaseStateMachine {
     // zoomCubit.zoomAt(newZoom, startPivot, worldOffset);
   }
 
-  // @override
-  // void onScroll(info) {
-  //   // - Zoom In
-  //   // + Zoom Out
-  //   final sign = info.scrollDelta.global.y.sign;
-  //   final delta = (-sign) * step;
-  //   final pivot = game.camera.globalToLocal(info.eventPosition.widget);
-  //   final worldOffset = info.eventPosition.widget;
-  //   final newZoom = (zoomCubit.state + delta).clamp(kMinZoom, kMaxZoom);
-  //   // print(newZoom);
-  //   zoomCubit.zoomAt(newZoom, pivot, worldOffset);
-  // }
+  @override
+  void onScroll(info) {
+    final point = world.viewport.windowToWorld(info.localPosition.toVector3()).toOffset();
+
+    final zoomFn = switch (info.direction) {
+      ScrollDirection.up => world.viewport.zoomIn,
+      ScrollDirection.down => world.viewport.zoomOut,
+    };
+    zoomFn(point);
+    world.render();
+  }
 }
