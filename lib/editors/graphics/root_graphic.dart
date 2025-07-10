@@ -4,10 +4,8 @@ import 'package:flutter/rendering.dart';
 
 import 'base_graphic.dart';
 
-class GroupGraphic extends BaseGraphic {
-  GroupGraphic({required this.position, this.children = const []});
-
-  final Offset position;
+class RootGraphic extends BaseGraphic {
+  RootGraphic({this.children = const []});
 
   final List<BaseGraphic> children;
 
@@ -21,12 +19,8 @@ class GroupGraphic extends BaseGraphic {
 
   @override
   void paint(Context ctx, Offset offset) {
-    ctx.canvas.save();
-    ctx.canvas.translate(position.dx, position.dy);
     for (final child in children) {
-      child.paint(ctx, offset + position);
+      child.paint(ctx, offset);
     }
-
-    ctx.canvas.restore();
   }
 }

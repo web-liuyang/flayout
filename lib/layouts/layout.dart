@@ -1,9 +1,9 @@
-// import 'package:flame/game.dart';
+import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../editors/editors.dart';
-import '../editors/state_machines/state_machines.dart';
 import 'cubits/cubits.dart';
 
 class Layout extends StatefulWidget {
@@ -14,6 +14,31 @@ class Layout extends StatefulWidget {
 }
 
 class _LayoutState extends State<Layout> {
+  @override
+  void initState() {
+    editorManager.createEditor(
+      EditorConfig(
+        title: "Test1",
+        graphic: RootGraphic(
+          children: [
+            PolygonGraphic(vertices: [Offset(0, 0), Offset(100, 0), Offset(100, 100), Offset(0, 100), Offset(0, 0)]),
+          ],
+        ),
+      ),
+    );
+    editorManager.createEditor(
+      EditorConfig(
+        title: "Test2",
+        graphic: RootGraphic(
+          children: [
+            PolygonGraphic(vertices: [Offset(0, 0), Offset(200, 0), Offset(200, 200), Offset(0, 200), Offset(0, 0)]),
+          ],
+        ),
+      ),
+    );
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -29,7 +54,7 @@ class _LayoutState extends State<Layout> {
             children: [
               Container(decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))), child: ResourcePanel()),
               // Expanded(child: MultiBlocProvider(providers: [], child: Editor())),
-              Expanded(child: Editor()),
+              Expanded(child: DrawingArea()),
               Container(decoration: BoxDecoration(border: Border(left: BorderSide(width: 1))), child: PropertyPanel()),
             ],
           ),
@@ -39,6 +64,35 @@ class _LayoutState extends State<Layout> {
           child: MultiBlocProvider(providers: [BlocProvider.value(value: mouseCubit), BlocProvider.value(value: zoomCubit)], child: StatusBar()),
         ),
       ],
+    );
+  }
+}
+
+class DrawingArea extends StatefulWidget {
+  const DrawingArea({super.key});
+
+  @override
+  DrawingAreaState createState() => DrawingAreaState();
+}
+
+class DrawingAreaState extends State<DrawingArea> {
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: editorManager.tabsNotifier,
+      builder: (context, child) {
+        final List<EditorTab> tabs = editorManager.tabs;
+
+        return DefaultTabController(
+          length: tabs.length,
+          child: Column(
+            children: [
+              TabBar(tabs: tabs.map((tab) => Text(tab.title)).toList(growable: false)),
+              Expanded(child: TabBarView(children: tabs.map((tab) => tab.editor).toList(growable: false))),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -53,31 +107,31 @@ class Toolbar extends StatefulWidget {
 class _ToolbarState extends State<Toolbar> {
   @override
   Widget build(BuildContext context) {
-    final DrawCubit drawCubit = context.watch<DrawCubit>();
+    // final DrawCubit drawCubit = context.watch<DrawCubit>();
     print("_ToolBarState");
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        IconButton(
-          onPressed: drawCubit.enterSelection,
-          isSelected: drawCubit.state is SelectionStateMachine,
-          icon: const Icon(Icons.north_west),
-          tooltip: "Selection",
-        ),
-        IconButton(
-          onPressed: drawCubit.enterRectangle,
-          isSelected: drawCubit.state is RectangleStateMachine,
-          icon: const Icon(Icons.rectangle_outlined),
-          tooltip: "Rectange",
-        ),
-        IconButton(onPressed: drawCubit.enterPolygon, isSelected: drawCubit.state is PolygonStateMachine, icon: const Icon(Icons.tab), tooltip: "Polygon"),
-        IconButton(
-          onPressed: drawCubit.enterCircle,
-          isSelected: drawCubit.state is CircleStateMachine,
-          icon: const Icon(Icons.circle_outlined),
-          tooltip: "Circle",
-        ),
+        // IconButton(
+        //   onPressed: drawCubit.enterSelection,
+        //   isSelected: drawCubit.state is SelectionStateMachine,
+        //   icon: const Icon(Icons.north_west),
+        //   tooltip: "Selection",
+        // ),
+        // IconButton(
+        //   onPressed: drawCubit.enterRectangle,
+        //   isSelected: drawCubit.state is RectangleStateMachine,
+        //   icon: const Icon(Icons.rectangle_outlined),
+        //   tooltip: "Rectange",
+        // ),
+        // IconButton(onPressed: drawCubit.enterPolygon, isSelected: drawCubit.state is PolygonStateMachine, icon: const Icon(Icons.tab), tooltip: "Polygon"),
+        // IconButton(
+        //   onPressed: drawCubit.enterCircle,
+        //   isSelected: drawCubit.state is CircleStateMachine,
+        //   icon: const Icon(Icons.circle_outlined),
+        //   tooltip: "Circle",
+        // ),
       ],
     );
   }

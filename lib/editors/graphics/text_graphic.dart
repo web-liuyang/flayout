@@ -14,7 +14,7 @@ class TextGraphic extends BaseGraphic {
   final Paragraph paragraph;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Context ctx, Offset offset) {
     // final paragraph =
     //     (ParagraphBuilder(ParagraphStyle())
     //           ..pushStyle(kEditorTextStyle)
@@ -23,6 +23,7 @@ class TextGraphic extends BaseGraphic {
     //       ..layout(ParagraphConstraints(width: double.infinity));
 
     // final offset = position * kEditorUnits;
-    canvas.drawParagraph(paragraph, position);
+
+    ctx.canvas.drawParagraph(paragraph, position);
   }
 }

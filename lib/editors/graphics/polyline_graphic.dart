@@ -12,7 +12,7 @@ class PolylineGraphic extends BaseGraphic {
   final double halfWidth;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawPoints(PointMode.lines, vertices, kEditorPaint);
+  void paint(Context ctx, Offset offset) {
+    ctx.canvas.drawPoints(PointMode.lines, vertices, kEditorPaint);
   }
 }

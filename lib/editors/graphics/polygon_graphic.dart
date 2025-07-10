@@ -23,10 +23,7 @@ class PolygonGraphic extends BaseGraphic {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
-    // path ??= createPath();
-
-    // canvas.drawPath(path!, kEditorPaint);
-    canvas.drawPoints(PointMode.polygon, vertices, kEditorPaint);
+  void paint(Context ctx, Offset offset) {
+    ctx.canvas.drawPoints(PointMode.polygon, vertices, kEditorPaint);
   }
 }

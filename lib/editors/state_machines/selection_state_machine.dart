@@ -1,9 +1,7 @@
-import 'package:blueprint_master/editors/editor.dart';
-import 'package:blueprint_master/editors/editor_config.dart';
+import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:blueprint_master/editors/state_machines/state_machine.dart';
 import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:flutter/gestures.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'base_state_machine.dart';
 
