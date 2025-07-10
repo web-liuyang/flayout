@@ -128,7 +128,19 @@ class Viewport {
   // }
 }
 
+class GraphicCollection {
+  List<BaseGraphic> _graphics = [];
+
+  List<BaseGraphic> get graphics => _graphics;
+}
+
 class World {
+  final List<BaseGraphic> _graphics = [];
+
+  void add(BaseGraphic graphic) {
+    _graphics.add(graphic);
+  }
+
   void init(Size size) {
     viewport = Viewport(size: size);
   }
@@ -213,7 +225,6 @@ class SceneRenderObject extends RenderBox {
     context.pushClipRect(needsCompositing, Offset.zero, rect, (PaintingContext context, ui.Offset offset) {
       context.pushTransform(needsCompositing, offset, world.viewport.matrix4.matrix4, (PaintingContext context, ui.Offset offset) {
         final ctx = Context(world: world, paintingContext: context);
-        print(world.viewport.matrix4.matrix4);
         grid.paint(ctx, Offset.zero);
         axis.paint(ctx, Offset.zero);
       });

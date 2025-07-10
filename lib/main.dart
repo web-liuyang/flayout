@@ -143,6 +143,14 @@ class BlueprintMaster extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = ThemeData(brightness: Brightness.light, useMaterial3: true, colorScheme: ColorScheme.light());
-    return MaterialApp(title: "Blueprint Master", themeMode: ThemeMode.system, theme: theme, home: Scaffold(body: const Layout()));
+    return MaterialApp(
+      title: "Blueprint Master",
+      themeMode: ThemeMode.system,
+      theme: theme,
+      home: Scaffold(body: const Layout()),
+      shortcuts: {
+        //
+      },
+    );
   }
 }

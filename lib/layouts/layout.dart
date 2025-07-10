@@ -22,7 +22,7 @@ class _LayoutState extends State<Layout> {
         Container(
           decoration: BoxDecoration(border: Border(bottom: BorderSide(width: 1))),
           // child: MultiBlocProvider(providers: [BlocProvider.value(value: drawCubit)], child: ToolBar()),
-          child: ToolBar(),
+          child: Toolbar(),
         ),
         Expanded(
           child: Row(
@@ -43,42 +43,41 @@ class _LayoutState extends State<Layout> {
   }
 }
 
-class ToolBar extends StatefulWidget {
-  const ToolBar({super.key});
+class Toolbar extends StatefulWidget {
+  const Toolbar({super.key});
 
   @override
-  State<ToolBar> createState() => _ToolBarState();
+  State<Toolbar> createState() => _ToolbarState();
 }
 
-class _ToolBarState extends State<ToolBar> {
+class _ToolbarState extends State<Toolbar> {
   @override
   Widget build(BuildContext context) {
-    // final DrawCubit drawCubit = context.watch<DrawCubit>();
-    // print("_ToolBarState");
+    final DrawCubit drawCubit = context.watch<DrawCubit>();
+    print("_ToolBarState");
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        //
-        // IconButton(
-        //   onPressed: drawCubit.enterSelection,
-        //   isSelected: drawCubit.state is SelectionStateMachine,
-        //   icon: const Icon(Icons.north_west),
-        //   tooltip: "Selection",
-        // ),
-        // IconButton(
-        //   onPressed: drawCubit.enterRectangle,
-        //   isSelected: drawCubit.state is RectangleStateMachine,
-        //   icon: const Icon(Icons.rectangle_outlined),
-        //   tooltip: "Rectange",
-        // ),
-        // IconButton(onPressed: drawCubit.enterPolygon, isSelected: drawCubit.state is PolygonStateMachine, icon: const Icon(Icons.tab), tooltip: "Polygon"),
-        // IconButton(
-        //   onPressed: drawCubit.enterCircle,
-        //   isSelected: drawCubit.state is CircleStateMachine,
-        //   icon: const Icon(Icons.circle_outlined),
-        //   tooltip: "Circle",
-        // ),
+        IconButton(
+          onPressed: drawCubit.enterSelection,
+          isSelected: drawCubit.state is SelectionStateMachine,
+          icon: const Icon(Icons.north_west),
+          tooltip: "Selection",
+        ),
+        IconButton(
+          onPressed: drawCubit.enterRectangle,
+          isSelected: drawCubit.state is RectangleStateMachine,
+          icon: const Icon(Icons.rectangle_outlined),
+          tooltip: "Rectange",
+        ),
+        IconButton(onPressed: drawCubit.enterPolygon, isSelected: drawCubit.state is PolygonStateMachine, icon: const Icon(Icons.tab), tooltip: "Polygon"),
+        IconButton(
+          onPressed: drawCubit.enterCircle,
+          isSelected: drawCubit.state is CircleStateMachine,
+          icon: const Icon(Icons.circle_outlined),
+          tooltip: "Circle",
+        ),
       ],
     );
   }

@@ -85,7 +85,6 @@ class StateMachine extends StatelessWidget {
   }
 
   void onScaleUpdate(ScaleUpdateDetails info) {
-    print("onScaleUpdate");
     state.onScaleUpdate(info);
   }
 
