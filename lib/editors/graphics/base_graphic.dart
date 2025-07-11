@@ -119,7 +119,6 @@ class World {
   void render() async {
     print("render");
     renderObject.markNeedsPaint();
-    // context.markNeedsBuild();
   }
 
   bool canSee(Rect aabb) {
@@ -136,9 +135,9 @@ class Context {
 
   final PaintingContext paintingContext;
 
-  get canvas => paintingContext.canvas;
+  Canvas get canvas => paintingContext.canvas;
 
-  get viewport => world.viewport;
+  Viewport get viewport => world.viewport;
 
   const Context({required this.world, required this.paintingContext});
 }

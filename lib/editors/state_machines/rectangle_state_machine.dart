@@ -1,25 +1,26 @@
 // import 'package:blueprint_master/extensions/extensions.dart';
 // import 'package:blueprint_master/layouts/cubits/cubits.dart';
-// import 'package:flame/components.dart';
-// import 'package:flame/events.dart';
 // import 'package:flutter/material.dart';
 
 // import '../editors.dart';
-// import '../shapes/shapes.dart';
+// import '../graphics/base_graphic.dart';
 // import 'state_machines.dart';
 
 // class RectangleStateMachine extends BaseStateMachine {
-//   RectangleStateMachine(super.game);
+//   RectangleStateMachine({required this.world});
+
+//   final World world;
 
 //   late _DrawState _state = _DrawInitState(this);
 
 //   late final _RectangleDraftComponent _component = _RectangleDraftComponent();
 
 //   @override
-//   void onTapDown(TapDownInfo info) {
-//     if (!game.world.contains(_component)) game.world.add(_component);
-//     super.onTapDown(info);
-//     _state.onTapDown(info);
+//   void onTapDown(TapDownDetails info) {
+//     world;
+//     // if (!game.world.contains(_component)) game.world.add(_component);
+//     // super.onTapDown(info);
+//     // _state.onTapDown(info);
 //   }
 
 //   @override

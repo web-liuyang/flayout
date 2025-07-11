@@ -1,30 +1,35 @@
 import 'dart:ui' as ui;
 
 import 'package:blueprint_master/editors/graphics/graphics.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide Viewport;
 import 'editor_config.dart';
 import 'state_machines/state_machines.dart';
 
-class GraphicCollection {
-  List<BaseGraphic> _graphics = [];
+class EditorContext {
+  late RootGraphic graphic;
 
-  List<BaseGraphic> get graphics => _graphics;
+  late Viewport viewport;
+
+  late SceneRenderObject renderObject;
 }
 
-class Editor extends StatelessWidget {
-  Editor({super.key, required this.graphic});
+class Editor extends StatefulWidget {
+  const Editor({super.key, required this.context});
 
-  final RootGraphic graphic;
+  final EditorContext context;
 
+  @override
+  State<Editor> createState() => _EditorState();
+}
+
+class _EditorState extends State<Editor> {
   final World world = World();
 
-  late final BaseStateMachine stateMachine = SelectionStateMachine(world: world);
+  late BaseStateMachine stateMachine = SelectionStateMachine(world: world);
 
   @override
   Widget build(BuildContext context) {
     print("Editor Builder");
-
-    // final drawCubit = context.watch<DrawCubit>();
 
     return LayoutBuilder(
       builder: (context, c) {
@@ -36,9 +41,7 @@ class Editor extends StatelessWidget {
             state: stateMachine,
             child: Builder(
               builder: (context) {
-                // world.context = context as Element;
-                // return Stack(children: [CustomPaint(painter: Scene(world: world))]);
-                return Scene(graphic: graphic, world: world);
+                return Scene(graphic: widget.context.graphic, world: world);
               },
             ),
           ),
@@ -106,47 +109,7 @@ class Scene extends LeafRenderObjectWidget {
   }
 }
 
-// class Scene extends CustomPainter {
-//   Scene({required this.world});
-
-//   late final Grid grid = Grid(dotGap: kEditorDotGap, dotSize: kEditorDotSize, world: world);
-
-//   late final Axis axis = Axis(axisLength: kEditorAxisLength, axisWidth: kEditorAxisWidth, world: world);
-
-//   final World world;
-
-//   // 多次调用 drawPath 可以充分利用 GPU
-
-//   @override
-//   void paint(ui.Canvas canvas, ui.Size size) {
-//     print("Scene paint");
-
-//     canvas.clipRect(Offset.zero & size);
-
-//     final pr = RendererBinding.instance.createPictureRecorder();
-//     final innerCanvas = RendererBinding.instance.createCanvas(pr);
-
-//     innerCanvas.transform(world.viewport.matrix4.storage);
-
-//     grid.paint(innerCanvas, size);
-//     axis.paint(innerCanvas, size);
-
-//     final p = pr.endRecording();
-
-//     canvas.drawPicture(p);
-//   }
-
-//   @override
-//   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-//     return true;
-//   }
-// }
-
-abstract class BasePainter {
-  void paint(Context ctx, Offset offset);
-}
-
-class Grid extends BasePainter {
+class Grid extends BaseGraphic {
   Grid({required this.dotGap, required this.dotSize});
 
   final double dotGap;
@@ -188,7 +151,7 @@ class Grid extends BasePainter {
   }
 }
 
-class Axis extends BasePainter {
+class Axis extends BaseGraphic {
   Axis({required this.axisLength, required this.axisWidth});
 
   final double axisLength;

@@ -1,4 +1,6 @@
 import 'package:blueprint_master/editors/graphics/graphics.dart';
+import 'package:blueprint_master/layouts/resource_panel.dart';
+import 'package:blueprint_master/layouts/toolbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,31 +17,6 @@ class Layout extends StatefulWidget {
 
 class _LayoutState extends State<Layout> {
   @override
-  void initState() {
-    editorManager.createEditor(
-      EditorConfig(
-        title: "Test1",
-        graphic: RootGraphic(
-          children: [
-            PolygonGraphic(vertices: [Offset(0, 0), Offset(100, 0), Offset(100, 100), Offset(0, 100), Offset(0, 0)]),
-          ],
-        ),
-      ),
-    );
-    editorManager.createEditor(
-      EditorConfig(
-        title: "Test2",
-        graphic: RootGraphic(
-          children: [
-            PolygonGraphic(vertices: [Offset(0, 0), Offset(200, 0), Offset(200, 200), Offset(0, 200), Offset(0, 0)]),
-          ],
-        ),
-      ),
-    );
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
@@ -52,7 +29,7 @@ class _LayoutState extends State<Layout> {
         Expanded(
           child: Row(
             children: [
-              Container(decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))), child: ResourcePanel()),
+              Container(width: 200, decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))), child: ResourcePanel()),
               // Expanded(child: MultiBlocProvider(providers: [], child: Editor())),
               Expanded(child: DrawingArea()),
               Container(decoration: BoxDecoration(border: Border(left: BorderSide(width: 1))), child: PropertyPanel()),
@@ -75,7 +52,9 @@ class DrawingArea extends StatefulWidget {
   DrawingAreaState createState() => DrawingAreaState();
 }
 
-class DrawingAreaState extends State<DrawingArea> {
+class DrawingAreaState extends State<DrawingArea> with SingleTickerProviderStateMixin {
+  // controller: TabController(length: tabs.length, vsync: this);
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -94,60 +73,6 @@ class DrawingAreaState extends State<DrawingArea> {
         );
       },
     );
-  }
-}
-
-class Toolbar extends StatefulWidget {
-  const Toolbar({super.key});
-
-  @override
-  State<Toolbar> createState() => _ToolbarState();
-}
-
-class _ToolbarState extends State<Toolbar> {
-  @override
-  Widget build(BuildContext context) {
-    // final DrawCubit drawCubit = context.watch<DrawCubit>();
-    print("_ToolBarState");
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // IconButton(
-        //   onPressed: drawCubit.enterSelection,
-        //   isSelected: drawCubit.state is SelectionStateMachine,
-        //   icon: const Icon(Icons.north_west),
-        //   tooltip: "Selection",
-        // ),
-        // IconButton(
-        //   onPressed: drawCubit.enterRectangle,
-        //   isSelected: drawCubit.state is RectangleStateMachine,
-        //   icon: const Icon(Icons.rectangle_outlined),
-        //   tooltip: "Rectange",
-        // ),
-        // IconButton(onPressed: drawCubit.enterPolygon, isSelected: drawCubit.state is PolygonStateMachine, icon: const Icon(Icons.tab), tooltip: "Polygon"),
-        // IconButton(
-        //   onPressed: drawCubit.enterCircle,
-        //   isSelected: drawCubit.state is CircleStateMachine,
-        //   icon: const Icon(Icons.circle_outlined),
-        //   tooltip: "Circle",
-        // ),
-      ],
-    );
-  }
-}
-
-class ResourcePanel extends StatefulWidget {
-  const ResourcePanel({super.key});
-
-  @override
-  State<ResourcePanel> createState() => _ResourcePanelState();
-}
-
-class _ResourcePanelState extends State<ResourcePanel> {
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text("Resource Panel"));
   }
 }
 
