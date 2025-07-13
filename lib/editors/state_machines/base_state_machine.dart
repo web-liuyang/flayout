@@ -1,15 +1,28 @@
+import 'package:blueprint_master/editors/editor.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'state_machine_game.dart';
+class TapDownCanvasEvent {
+  const TapDownCanvasEvent({required this.position});
+
+  final Offset position;
+}
+
+class MouseMoveCanvasEvent {
+  const MouseMoveCanvasEvent({required this.position});
+
+  final Offset position;
+}
 
 abstract class BaseStateMachine {
-  BaseStateMachine();
+  BaseStateMachine({required this.context});
+
+  final EditorContext context;
 
   void onTap() {}
 
-  void onTapDown(TapDownDetails info) {}
+  void onTapDown(TapDownCanvasEvent event) {}
 
   void onTapUp(TapUpDetails info) {}
 
@@ -39,7 +52,7 @@ abstract class BaseStateMachine {
 
   void onScaleEnd(ScaleEndDetails info) {}
 
-  void onMouseMove(PointerHoverEvent info) {
+  void onMouseMove(MouseMoveCanvasEvent event) {
     // final position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
     // mouseCubit.update(position);
   }

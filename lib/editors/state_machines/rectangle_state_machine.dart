@@ -1,131 +1,105 @@
-// import 'package:blueprint_master/extensions/extensions.dart';
-// import 'package:blueprint_master/layouts/cubits/cubits.dart';
-// import 'package:flutter/material.dart';
+import 'package:blueprint_master/editors/graphics/graphics.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 
-// import '../editors.dart';
-// import '../graphics/base_graphic.dart';
-// import 'state_machines.dart';
+import '../graphics/base_graphic.dart';
+import 'state_machines.dart';
 
-// class RectangleStateMachine extends BaseStateMachine {
-//   RectangleStateMachine({required this.world});
+class RectangleStateMachine extends BaseStateMachine {
+  RectangleStateMachine({required super.context});
 
-//   final World world;
+  late BaseStateMachine _state = _DrawInitState(context: context, state: this);
 
-//   late _DrawState _state = _DrawInitState(this);
+  late final _RectangleGraphicDraft _draft = _RectangleGraphicDraft();
 
-//   late final _RectangleDraftComponent _component = _RectangleDraftComponent();
+  @override
+  void onTapDown(event) {
+    _state.onTapDown(event);
+  }
 
-//   @override
-//   void onTapDown(TapDownDetails info) {
-//     world;
-//     // if (!game.world.contains(_component)) game.world.add(_component);
-//     // super.onTapDown(info);
-//     // _state.onTapDown(info);
-//   }
+  @override
+  void onMouseMove(event) {
+    super.onMouseMove(event);
+    _state.onMouseMove(event);
+  }
 
-//   @override
-//   void onMouseMove(PointerHoverInfo info) {
-//     super.onMouseMove(info);
-//     _state.onMouseMove(info);
-//   }
+  @override
+  void done() {
+    super.done();
 
-//   @override
-//   void done() {
-//     super.done();
+    context.graphic.children.remove(_draft);
+    context.graphic.children.add(_draft.toGraphic());
+    _state = _DrawInitState(context: context, state: this);
+  }
 
-//     final rectangle = RectangleShape.fromRect(_component.rect!);
-//     game.world.add(rectangle);
+  @override
+  void exit() {
+    super.exit();
+    context.graphic.children.remove(_draft);
+    _state = _DrawInitState(context: context, state: this);
+  }
+}
 
-//     _component.reset();
-//     game.world.remove(_component);
+class _DrawInitState extends BaseStateMachine {
+  _DrawInitState({required super.context, required this.state});
 
-//     _state = _DrawInitState(this);
-//   }
+  final RectangleStateMachine state;
 
-//   @override
-//   void exit() {
-//     super.exit();
+  @override
+  void onTapDown(info) {
+    state._draft.start = info.position;
+    context.graphic.children.add(state._draft);
+    state._state = _DrawStartedState(context: context, state: state);
+  }
+}
 
-//     if (game.world.contains(_component)) {
-//       _component.reset();
-//       game.world.remove(_component);
-//     }
+class _DrawStartedState extends BaseStateMachine {
+  _DrawStartedState({required super.context, required this.state});
 
-//     drawCubit.enterSelection();
-//   }
-// }
+  final RectangleStateMachine state;
 
-// class _DrawState {
-//   _DrawState(this.stateMachine);
+  @override
+  void onTapDown(info) {
+    state.done();
+  }
 
-//   final RectangleStateMachine stateMachine;
+  @override
+  void onMouseMove(event) {
+    super.onMouseMove(event);
+    state._draft.end = event.position;
+    state.context.render();
+  }
+}
 
-//   StateMachineGame get game => stateMachine.game;
+class _RectangleGraphicDraft extends BaseGraphic {
+  _RectangleGraphicDraft();
 
-//   _RectangleDraftComponent get component => stateMachine._component;
+  Offset? start;
 
-//   void onTapDown(TapDownInfo info) {}
+  Offset? end;
 
-//   void onMouseMove(PointerHoverInfo info) {}
-// }
+  Rect? get rect => start != null && end != null ? Rect.fromPoints(start!, end!) : null;
 
-// class _DrawInitState extends _DrawState {
-//   _DrawInitState(super.stateMachine);
+  final Paint _paint =
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..color = Colors.black;
 
-//   @override
-//   void onTapDown(TapDownInfo info) {
-//     super.onTapDown(info);
+  void reset() {
+    start = null;
+    end = null;
+  }
 
-//     final Vector2 position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
-//     component.start = position;
-//     component.end = position;
+  @override
+  void paint(Context context, Offset offset) {
+    if (start == null || end == null) return;
+    _paint.strokeWidth = context.viewport.getLogicSize(1);
+    final Rect rect = Rect.fromPoints(start!, end!);
+    context.canvas.drawRect(rect, _paint);
+  }
 
-//     stateMachine._state = _DrawStartedState(stateMachine);
-//   }
-// }
-
-// class _DrawStartedState extends _DrawInitState {
-//   _DrawStartedState(super.stateMachine);
-
-//   @override
-//   void onTapDown(TapDownInfo info) {
-//     stateMachine.done();
-//   }
-
-//   @override
-//   void onMouseMove(PointerHoverInfo info) {
-//     super.onMouseMove(info);
-//     final position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
-//     component.end = position;
-//   }
-// }
-
-// class _RectangleDraftComponent extends Component with HasGameRef<EditorGame> {
-//   _RectangleDraftComponent();
-
-//   Vector2? start;
-
-//   Vector2? end;
-
-//   Rect? get rect => start != null && end != null ? Rect.fromPoints(start!.toOffset(), end!.toOffset()) : null;
-
-//   final Paint _paint =
-//       Paint()
-//         ..style = PaintingStyle.stroke
-//         ..color = Colors.black;
-
-//   @override
-//   void render(Canvas canvas) {
-//     super.render(canvas);
-//     if (start == null || end == null) return;
-
-//     _paint.strokeWidth = game.camera.viewfinder.getLogicSize(1);
-//     final Rect rect = Rect.fromPoints(start!.toOffset(), end!.toOffset());
-//     canvas.drawRect(rect, _paint);
-//   }
-
-//   void reset() {
-//     start = null;
-//     end = null;
-//   }
-// }
+  PolygonGraphic toGraphic() {
+    final rect = this.rect!;
+    return PolygonGraphic(vertices: [rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft, rect.topLeft]);
+  }
+}

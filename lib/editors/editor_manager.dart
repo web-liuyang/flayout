@@ -27,10 +27,11 @@ class EditorManager {
 
   List<EditorTab> get tabs => tabsNotifier.value;
 
+  Editor? get currentEditor => tabsNotifier.value.lastOrNull?.editor;
+
   void createEditor(EditorConfig config) {
     final RootGraphicInfo root = infos.firstWhere((item) => item.title == config.title);
-    final EditorContext context = EditorContext();
-
+    final EditorContext context = EditorContext()..graphic = root.graphic;
     final EditorTab tab = EditorTab(title: config.title, editor: Editor(context: context));
     tabsNotifier.value = [...tabsNotifier.value, tab];
   }

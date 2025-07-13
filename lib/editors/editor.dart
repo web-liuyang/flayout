@@ -11,6 +11,18 @@ class EditorContext {
   late Viewport viewport;
 
   late SceneRenderObject renderObject;
+
+  late BaseStateMachine stateMachine = RectangleStateMachine(context: this);
+
+  void render() => renderObject.markNeedsPaint();
+
+  bool canSee(Rect aabb) {
+    return viewport.visibleWorldRect.overlaps(aabb);
+  }
+
+  bool canSeePoint(Offset offset) {
+    return viewport.visibleWorldRect.contains(offset);
+  }
 }
 
 class Editor extends StatefulWidget {
@@ -23,27 +35,20 @@ class Editor extends StatefulWidget {
 }
 
 class _EditorState extends State<Editor> {
-  final World world = World();
-
-  late BaseStateMachine stateMachine = SelectionStateMachine(world: world);
-
   @override
   Widget build(BuildContext context) {
     print("Editor Builder");
 
     return LayoutBuilder(
       builder: (context, c) {
-        world.init(c.biggest);
-        return Container(
-          width: world.viewport.size.width,
-          height: world.viewport.size.height,
-          child: StateMachine(
-            state: stateMachine,
-            child: Builder(
-              builder: (context) {
-                return Scene(graphic: widget.context.graphic, world: world);
-              },
-            ),
+        widget.context.viewport = Viewport(size: c.biggest);
+
+        return StateMachine(
+          context: widget.context,
+          child: Builder(
+            builder: (context) {
+              return Scene(context: widget.context);
+            },
           ),
         );
       },
@@ -52,13 +57,11 @@ class _EditorState extends State<Editor> {
 }
 
 class SceneRenderObject extends RenderBox {
-  SceneRenderObject({required this.world, required this.graphic}) {
-    world.renderObject = this;
+  SceneRenderObject({required this.context}) {
+    context.renderObject = this;
   }
 
-  final World world;
-
-  final RootGraphic graphic;
+  final EditorContext context;
 
   final Grid grid = Grid(dotGap: kEditorDotGap, dotSize: kEditorDotSize);
 
@@ -73,13 +76,13 @@ class SceneRenderObject extends RenderBox {
   void paint(PaintingContext context, ui.Offset offset) {
     context.canvas.save();
     context.canvas.translate(offset.dx, offset.dy);
-    final rect = Offset.zero & world.viewport.size;
+    final rect = Offset.zero & this.context.viewport.size;
     context.pushClipRect(needsCompositing, Offset.zero, rect, (PaintingContext context, ui.Offset offset) {
-      context.pushTransform(needsCompositing, offset, world.viewport.matrix4.matrix4, (PaintingContext context, ui.Offset offset) {
-        final ctx = Context(world: world, paintingContext: context);
+      context.pushTransform(needsCompositing, offset, this.context.viewport.matrix4.matrix4, (PaintingContext context, ui.Offset offset) {
+        final ctx = Context(context: this.context, paintingContext: context);
         grid.paint(ctx, Offset.zero);
         axis.paint(ctx, Offset.zero);
-        graphic.paint(ctx, Offset.zero);
+        this.context.graphic.paint(ctx, Offset.zero);
       });
     });
     context.canvas.restore();
@@ -92,15 +95,13 @@ class SceneRenderObject extends RenderBox {
 }
 
 class Scene extends LeafRenderObjectWidget {
-  const Scene({super.key, required this.world, required this.graphic});
+  const Scene({super.key, required this.context});
 
-  final World world;
-
-  final RootGraphic graphic;
+  final EditorContext context;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return SceneRenderObject(world: world, graphic: graphic);
+    return SceneRenderObject(context: this.context);
   }
 
   @override

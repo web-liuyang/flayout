@@ -1,3 +1,4 @@
+import 'package:blueprint_master/editors/editor.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -7,9 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'state_machines.dart';
 
 class StateMachine extends StatelessWidget {
-  StateMachine({required this.state, required this.child});
+  const StateMachine({super.key, required this.context, required this.child});
 
-  final BaseStateMachine state;
+  final EditorContext context;
 
   final Widget child;
 
@@ -30,95 +31,95 @@ class StateMachine extends StatelessWidget {
 
   // TapDetector
   void onTap() {
-    state.onTap();
+    context.stateMachine.onTap();
   }
 
   void onTapDown(TapDownDetails info) {
-    state.onTapDown(info);
+    print(context.stateMachine);
+    final position = context.viewport.windowToCanvas(info.localPosition);
+    context.stateMachine.onTapDown(TapDownCanvasEvent(position: position));
   }
 
   void onTapUp(TapUpDetails info) {
-    state.onTapUp(info);
+    context.stateMachine.onTapUp(info);
   }
 
   void onTapCancel() {
-    state.onTapCancel();
+    context.stateMachine.onTapCancel();
   }
 
   // SecondaryTapDetector
   void onSecondaryTapDown(TapDownDetails info) {
-    state.onSecondaryTapDown(info);
+    context.stateMachine.onSecondaryTapDown(info);
   }
 
   void onSecondaryTapUp(TapUpDetails info) {
-    state.onSecondaryTapUp(info);
+    context.stateMachine.onSecondaryTapUp(info);
   }
 
   void onSecondaryTapCancel() {
-    state.onSecondaryTapCancel();
+    context.stateMachine.onSecondaryTapCancel();
   }
 
   // PanDetector
   void onPanStart(DragStartDetails info) {
-    state.onPanStart(info);
+    context.stateMachine.onPanStart(info);
   }
 
   void onPanDown(DragDownDetails info) {
-    state.onPanDown(info);
+    context.stateMachine.onPanDown(info);
   }
 
   void onPanUpdate(DragUpdateDetails info) {
-    state.onPanUpdate(info);
+    context.stateMachine.onPanUpdate(info);
   }
 
   void onPanEnd(DragEndDetails info) {
-    state.onPanEnd(info);
+    context.stateMachine.onPanEnd(info);
   }
 
   void onPanCancel() {
-    state.onPanCancel();
+    context.stateMachine.onPanCancel();
   }
 
   // ScaleDetector
   void onScaleStart(ScaleStartDetails info) {
-    state.onScaleStart(info);
+    context.stateMachine.onScaleStart(info);
   }
 
   void onScaleUpdate(ScaleUpdateDetails info) {
-    state.onScaleUpdate(info);
+    context.stateMachine.onScaleUpdate(info);
   }
 
   void onScaleEnd(ScaleEndDetails info) {
-    state.onScaleEnd(info);
+    context.stateMachine.onScaleEnd(info);
   }
 
   // MouseMovementDetector
   void onMouseMove(PointerHoverEvent info) {
-    // final position = camera.viewfinder.globalToLocal(info.eventPosition.widget);
-    // mouseCubit.update(position);
-
-    state.onMouseMove(info);
+    final position = context.viewport.windowToCanvas(info.localPosition);
+    context.stateMachine.onMouseMove(MouseMoveCanvasEvent(position: position));
   }
 
   void onScroll(PointerScrollEvent info) {
-    state.onScroll(info);
+    context.stateMachine.onScroll(info);
   }
 
   // DragCallbacks
   // void onDragStart(DragStartEvent event) {
-  //   state.onDragStart(event);
+  //   context.stateMachine.onDragStart(event);
   // }
 
   // void onDragUpdate(DragUpdateEvent event) {
-  //   state.onDragUpdate(event);
+  //   context.stateMachine.onDragUpdate(event);
   // }
 
   // void onDragEnd(DragEndEvent event) {
-  //   state.onDragEnd(event);
+  //   context.stateMachine.onDragEnd(event);
   // }
 
   // void onDragCancel(DragCancelEvent event) {
-  //   state.onDragCancel(event);
+  //   context.stateMachine.onDragCancel(event);
   // }
 
   // KeyboardEvents
@@ -126,7 +127,7 @@ class StateMachine extends StatelessWidget {
   KeyEventResult onKeyEvent(FocusNode node, KeyEvent event) {
     // Set<LogicalKeyboardKey> keysPressed;
     final keysPressed = HardwareKeyboard.instance.logicalKeysPressed;
-    return state.onKeyEvent(event, keysPressed);
+    return context.stateMachine.onKeyEvent(event, keysPressed);
   }
 
   @override

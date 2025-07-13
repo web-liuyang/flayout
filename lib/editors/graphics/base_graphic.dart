@@ -58,20 +58,20 @@ class Viewport {
     };
   }
 
-  Vector3 localToGlobal(Vector3 position) {
-    return matrix4.localToGlobal(position);
-  }
+  // Vector3 localToGlobal(Vector3 position) {
+  //   return matrix4.localToGlobal(position);
+  // }
 
-  Vector3 windowToWorld(Vector3 position) {
+  Offset windowToCanvas(Offset position) {
     final m = matrix4.m;
     final tx = m[12];
     final ty = m[13];
-    final tz = m[14];
-    final x = (position.x - tx) / m[0];
-    final y = (position.y - ty) / m[5];
-    final z = (position.z - tz) / m[10];
+    // final tz = m[14];
+    final x = (position.dx - tx) / m[0];
+    final y = (position.dy - ty) / m[5];
+    // final z = (position.z - tz) / m[10];
 
-    return Vector3(x, y, z);
+    return Offset(x, y);
   }
 
   double getZoom() {
@@ -117,29 +117,20 @@ class World {
   late SceneRenderObject renderObject;
 
   void render() async {
-    print("render");
     renderObject.markNeedsPaint();
-  }
-
-  bool canSee(Rect aabb) {
-    return viewport.visibleWorldRect.overlaps(aabb);
-  }
-
-  bool canSeePoint(Offset offset) {
-    return viewport.visibleWorldRect.contains(offset);
   }
 }
 
 class Context {
-  final World world;
+  final EditorContext context;
 
   final PaintingContext paintingContext;
 
   Canvas get canvas => paintingContext.canvas;
 
-  Viewport get viewport => world.viewport;
+  Viewport get viewport => context.viewport;
 
-  const Context({required this.world, required this.paintingContext});
+  const Context({required this.paintingContext, required this.context});
 }
 
 abstract class BaseGraphic {
