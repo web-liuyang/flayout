@@ -52,26 +52,39 @@ class DrawingArea extends StatefulWidget {
   DrawingAreaState createState() => DrawingAreaState();
 }
 
+class CustomDirectionalFocusAction extends DirectionalFocusAction {
+  @override
+  void invoke(DirectionalFocusIntent intent) {
+    print(intent);
+    // super.invoke(intent);
+  }
+}
+
+final Map<Type, Action<Intent>> actions = {DirectionalFocusIntent: CustomDirectionalFocusAction()};
+
 class DrawingAreaState extends State<DrawingArea> with SingleTickerProviderStateMixin {
   // controller: TabController(length: tabs.length, vsync: this);
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: editorManager.tabsNotifier,
-      builder: (context, child) {
-        final List<EditorTab> tabs = editorManager.tabs;
+    return Actions(
+      actions: actions,
+      child: ListenableBuilder(
+        listenable: editorManager.tabsNotifier,
+        builder: (context, child) {
+          final List<EditorTab> tabs = editorManager.tabs;
 
-        return DefaultTabController(
-          length: tabs.length,
-          child: Column(
-            children: [
-              TabBar(tabs: tabs.map((tab) => Text(tab.title)).toList(growable: false)),
-              Expanded(child: TabBarView(children: tabs.map((tab) => tab.editor).toList(growable: false))),
-            ],
-          ),
-        );
-      },
+          return DefaultTabController(
+            length: tabs.length,
+            child: Column(
+              children: [
+                TabBar(tabs: tabs.map((tab) => Text(tab.title)).toList(growable: false)),
+                Expanded(child: TabBarView(children: tabs.map((tab) => tab.editor).toList(growable: false))),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
