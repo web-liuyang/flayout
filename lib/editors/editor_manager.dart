@@ -1,5 +1,6 @@
 import 'package:blueprint_master/editors/editor.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -27,13 +28,35 @@ class EditorManager {
 
   List<EditorTab> get tabs => tabsNotifier.value;
 
-  Editor? get currentEditor => tabsNotifier.value.lastOrNull?.editor;
+  final ValueNotifier<Editor?> currentEditorNotifier = ValueNotifier<Editor?>(null);
+
+  Editor? get currentEditor => currentEditorNotifier.value;
 
   void createEditor(EditorConfig config) {
+    final int index = tabs.indexWhere((tab) => tab.title == config.title);
+    if (index >= 0) {
+      currentEditorNotifier.value = tabs[index].editor;
+      return;
+    }
+
     final RootGraphicInfo root = infos.firstWhere((item) => item.title == config.title);
     final EditorContext context = EditorContext()..graphic = root.graphic;
-    final EditorTab tab = EditorTab(title: config.title, editor: Editor(context: context));
+    final EditorTab tab = EditorTab(title: config.title, editor: Editor(key: ValueKey(config.title), context: context));
     tabsNotifier.value = [...tabsNotifier.value, tab];
+    currentEditorNotifier.value = tab.editor;
+  }
+
+  void removeEditor(String title) {
+    final int index = tabs.indexWhere((item) => item.title == title);
+    if (currentEditor == tabs.elementAtOrNull(index)?.editor) {
+      currentEditorNotifier.value = null;
+    }
+    tabs.removeAt(index);
+    if (tabs.isNotEmpty) {
+      currentEditorNotifier.value = (tabs.elementAtOrNull(index) ?? tabs.elementAtOrNull(index - 1))?.editor;
+    }
+
+    tabsNotifier.value = [...tabs];
   }
 }
 

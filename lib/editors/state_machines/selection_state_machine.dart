@@ -1,5 +1,4 @@
 import 'package:blueprint_master/editors/state_machines/state_machine.dart';
-import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:flutter/gestures.dart';
 
 import 'base_state_machine.dart';
@@ -32,28 +31,28 @@ class SelectionStateMachine extends BaseStateMachine {
     prevZoom = 1;
   }
 
-  // @override
-  // void onScaleUpdate(info) {
-  //   // scale
-  //   if (prevZoom != info.scale) {
-  //     final zoomFn = prevZoom < info.scale ? context.viewport.zoomIn : context.viewport.zoomOut;
-  //     final point = context.viewport.windowToWorld(info.localFocalPoint.toVector3()).toOffset();
-  //     zoomFn(point);
-  //     prevZoom = info.scale;
-  //   }
+  @override
+  void onScaleUpdate(info) {
+    // scale
+    if (prevZoom != info.scale) {
+      final zoomFn = prevZoom < info.scale ? context.viewport.zoomIn : context.viewport.zoomOut;
+      final point = context.viewport.windowToCanvas(info.localFocalPoint);
+      zoomFn(point);
+      prevZoom = info.scale;
+    }
 
-  //   context.viewport.translate(info.focalPointDelta);
-  //   context.render();
-  // }
+    context.viewport.translate(info.focalPointDelta);
+    context.render();
+  }
 
-  // @override
-  // void onScroll(info) {
-  //   final point = context.viewport.windowToWorld(info.localPosition.toVector3()).toOffset();
-  //   final zoomFn = switch (info.direction) {
-  //     ScrollDirection.up => context.viewport.zoomIn,
-  //     ScrollDirection.down => context.viewport.zoomOut,
-  //   };
-  //   zoomFn(point);
-  //   context.render();
-  // }
+  @override
+  void onScroll(info) {
+    final point = context.viewport.windowToCanvas(info.localPosition);
+    final zoomFn = switch (info.direction) {
+      ScrollDirection.up => context.viewport.zoomIn,
+      ScrollDirection.down => context.viewport.zoomOut,
+    };
+    zoomFn(point);
+    context.render();
+  }
 }

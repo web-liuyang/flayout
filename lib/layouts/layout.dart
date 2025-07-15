@@ -1,6 +1,7 @@
 import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:blueprint_master/layouts/resource_panel.dart';
 import 'package:blueprint_master/layouts/toolbar.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,6 +56,12 @@ class DrawingArea extends StatefulWidget {
 class CustomDirectionalFocusAction extends DirectionalFocusAction {
   @override
   void invoke(DirectionalFocusIntent intent) {
+    final a = switch (intent.direction) {
+      TraversalDirection.left => 1,
+      TraversalDirection.right => 2,
+      TraversalDirection.up => 3,
+      TraversalDirection.down => 4,
+    };
     print(intent);
     // super.invoke(intent);
   }
@@ -62,30 +69,54 @@ class CustomDirectionalFocusAction extends DirectionalFocusAction {
 
 final Map<Type, Action<Intent>> actions = {DirectionalFocusIntent: CustomDirectionalFocusAction()};
 
-class DrawingAreaState extends State<DrawingArea> with SingleTickerProviderStateMixin {
-  // controller: TabController(length: tabs.length, vsync: this);
-
+class DrawingAreaState extends State<DrawingArea> {
   @override
   Widget build(BuildContext context) {
     return Actions(
       actions: actions,
       child: ListenableBuilder(
-        listenable: editorManager.tabsNotifier,
+        listenable: Listenable.merge([editorManager.tabsNotifier, editorManager.currentEditorNotifier]),
         builder: (context, child) {
           final List<EditorTab> tabs = editorManager.tabs;
-
-          return DefaultTabController(
-            length: tabs.length,
-            child: Column(
-              children: [
-                TabBar(tabs: tabs.map((tab) => Text(tab.title)).toList(growable: false)),
-                Expanded(child: TabBarView(children: tabs.map((tab) => tab.editor).toList(growable: false))),
-              ],
-            ),
+          return Column(
+            children: [
+              Row(
+                children: tabs
+                    .mapIndexed<Widget>(
+                      (index, tab) => IntrinsicWidth(
+                        child: ListTile(
+                          selected: editorManager.currentEditor == tab.editor,
+                          leading: Text(tab.title),
+                          trailing: IconButton(iconSize: 12, onPressed: () => editorManager.removeEditor(tab.title), icon: Icon(Icons.close)),
+                          onTap: () {
+                            editorManager.currentEditorNotifier.value = tab.editor;
+                          },
+                        ),
+                      ),
+                    )
+                    .intersected(VerticalDivider(width: 20, thickness: 20, color: Colors.black))
+                    .toList(growable: false),
+              ),
+              if (tabs.isNotEmpty) Divider(height: 1, thickness: 2),
+              Expanded(child: Container(child: editorManager.currentEditor)),
+            ],
           );
         },
       ),
     );
+  }
+}
+
+extension IterableExtension<T> on Iterable<T> {
+  List<T> intersected(T item) {
+    if (length < 2) return toList();
+
+    final List<T> newList = [];
+    for (final T element in this) {
+      newList.addAll([element, item]);
+    }
+    newList.removeLast();
+    return newList;
   }
 }
 

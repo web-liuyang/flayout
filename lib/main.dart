@@ -137,31 +137,13 @@ void main() async {
   runApp(const BlueprintMaster());
 }
 
-
-
 class BlueprintMaster extends StatelessWidget {
   const BlueprintMaster({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeData(brightness: Brightness.light, useMaterial3: true, colorScheme: ColorScheme.light());
+    final theme = ThemeData(brightness: Brightness.light, useMaterial3: true, colorSchemeSeed: Colors.blue);
 
-    return MaterialApp(
-      title: "Blueprint Master",
-      themeMode: ThemeMode.system,
-      theme: theme,
-      home: Scaffold(body: const Layout()),
-      // actions: {
-      //   ...WidgetsApp.defaultActions,
-      //   DirectionalFocusIntent: Action.overridable(
-      //     //
-      //     defaultAction: CustomDirectionalFocusAction(),
-      //     context: context,
-      //   ),
-      // },
-      // shortcuts: {
-      //   //
-      // },
-    );
+    return MaterialApp(title: "Blueprint Master", themeMode: ThemeMode.system, theme: theme, home: Scaffold(body: const Layout()));
   }
 }

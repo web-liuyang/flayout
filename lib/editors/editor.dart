@@ -12,7 +12,9 @@ class EditorContext {
 
   late SceneRenderObject renderObject;
 
-  late BaseStateMachine stateMachine = RectangleStateMachine(context: this);
+  late final ValueNotifier<BaseStateMachine> stateMachineNotifier = ValueNotifier<BaseStateMachine>(SelectionStateMachine(context: this));
+
+  BaseStateMachine get stateMachine => stateMachineNotifier.value;
 
   void render() => renderObject.markNeedsPaint();
 
