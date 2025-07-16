@@ -1,5 +1,4 @@
 import 'package:blueprint_master/editors/editor.dart';
-import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -9,9 +8,6 @@ import '../layouts/resource_panel.dart';
 class EditorConfig {
   final String title;
 
-  // final RootGraphic graphic;
-
-  // EditorConfig({required this.title, required this.graphic});
   EditorConfig({required this.title});
 }
 

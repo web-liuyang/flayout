@@ -1,3 +1,4 @@
+import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,11 @@ class RectangleStateMachine extends BaseStateMachine {
     super.done();
 
     context.graphic.children.remove(_draft);
-    context.graphic.children.add(_draft.toGraphic());
+    final graphic = _draft.toGraphic();
+    // context.graphic.children.add(_draft.toGraphic());
+    // print(context.buildContext);
+    // print(Actions.maybeFind(context.buildContext, intent: AddGraphicIntent(context, graphic)));
+    Actions.invoke(context.buildContext, AddGraphicIntent(context, graphic));
     _state = _DrawInitState(context: context, state: this);
   }
 

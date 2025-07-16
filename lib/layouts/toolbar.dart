@@ -1,3 +1,4 @@
+import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/editors.dart';
 import 'package:flutter/material.dart';
 
@@ -15,61 +16,66 @@ class _ToolbarState extends State<Toolbar> {
   Widget build(BuildContext context) {
     // final DrawCubit drawCubit = context.watch<DrawCubit>();
 
-    return ListenableBuilder(
-      listenable: editorManager.currentEditorNotifier,
-      builder: (context, _) {
-        final ValueNotifier<BaseStateMachine>? stateMachineNotifier = editorManager.currentEditorNotifier.value?.context.stateMachineNotifier;
+    return Actions(
+      actions: actions,
+      child: ListenableBuilder(
+        listenable: editorManager.currentEditorNotifier,
+        builder: (context, _) {
+          final ValueNotifier<BaseStateMachine>? stateMachineNotifier = editorManager.currentEditorNotifier.value?.context.stateMachineNotifier;
 
-        return ListenableBuilder(
-          listenable: Listenable.merge([stateMachineNotifier]),
-          builder: (context, _) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    final context = editorManager.currentEditor?.context;
-                    if (context == null) return;
-                    context.undo();
-                  },
-                  icon: const Icon(Icons.undo),
-                  tooltip: "Undo",
-                ),
-                IconButton(
-                  onPressed: () {
-                    final context = editorManager.currentEditor?.context;
-                    if (context == null) return;
-                    context.redo();
-                  },
-                  icon: const Icon(Icons.redo),
-                  tooltip: "Redo",
-                ),
+          return ListenableBuilder(
+            listenable: Listenable.merge([stateMachineNotifier]),
+            builder: (context, _) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      final editorContext = editorManager.currentEditor?.context;
+                      if (editorContext == null) return;
 
-                IconButton(
-                  onPressed: () {
-                    final context = editorManager.currentEditor?.context;
-                    if (context == null) return;
-                    context.stateMachineNotifier.value = SelectionStateMachine(context: context);
-                  },
-                  isSelected: editorManager.currentEditor?.context.stateMachine is SelectionStateMachine,
-                  icon: const Icon(Icons.north_west),
-                  tooltip: "Selection",
-                ),
-                IconButton(
-                  onPressed: () {
-                    final context = editorManager.currentEditor?.context;
-                    if (context == null) return;
-                    context.stateMachineNotifier.value = RectangleStateMachine(context: context);
-                  },
-                  isSelected: editorManager.currentEditor?.context.stateMachine is RectangleStateMachine,
-                  icon: const Icon(Icons.rectangle_outlined),
-                  tooltip: "Rectange",
-                ),
-              ],
-            );
-          },
-        );
-      },
+                      Actions.invoke(context, UndoIntent(editorContext));
+                    },
+                    icon: const Icon(Icons.undo),
+                    tooltip: "Undo",
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      final editorContext = editorManager.currentEditor?.context;
+                      if (editorContext == null) return;
+
+                      Actions.invoke(context, RedoIntent(editorContext));
+                    },
+                    icon: const Icon(Icons.redo),
+                    tooltip: "Redo",
+                  ),
+
+                  IconButton(
+                    onPressed: () {
+                      final context = editorManager.currentEditor?.context;
+                      if (context == null) return;
+                      context.stateMachineNotifier.value = SelectionStateMachine(context: context);
+                    },
+                    isSelected: editorManager.currentEditor?.context.stateMachine is SelectionStateMachine,
+                    icon: const Icon(Icons.north_west),
+                    tooltip: "Selection",
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      final context = editorManager.currentEditor?.context;
+                      if (context == null) return;
+                      context.stateMachineNotifier.value = RectangleStateMachine(context: context);
+                    },
+                    isSelected: editorManager.currentEditor?.context.stateMachine is RectangleStateMachine,
+                    icon: const Icon(Icons.rectangle_outlined),
+                    tooltip: "Rectange",
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

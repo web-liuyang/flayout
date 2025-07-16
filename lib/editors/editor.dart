@@ -14,6 +14,8 @@ class EditorContext {
 
   late final ValueNotifier<BaseStateMachine> stateMachineNotifier = ValueNotifier<BaseStateMachine>(SelectionStateMachine(context: this));
 
+  late BuildContext buildContext;
+
   BaseStateMachine get stateMachine => stateMachineNotifier.value;
 
   void render() => renderObject.markNeedsPaint();
@@ -42,21 +44,15 @@ class Editor extends StatefulWidget {
 
 class _EditorState extends State<Editor> with AutomaticKeepAliveClientMixin {
   @override
-  Widget build(BuildContext context) {
-    print("Editor Builder");
-
-    return StateMachine(
-      context: widget.context,
-      child: Builder(
-        builder: (context) {
-          return Scene(context: widget.context);
-        },
-      ),
-    );
-  }
+  bool get wantKeepAlive => true;
 
   @override
-  bool get wantKeepAlive => true;
+  Widget build(BuildContext context) {
+    super.build(context);
+    print("Editor Builder");
+    widget.context.buildContext = context;
+    return StateMachine(context: widget.context, child: Scene(context: widget.context));
+  }
 }
 
 class SceneRenderObject extends RenderBox {

@@ -1,9 +1,11 @@
+import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:blueprint_master/layouts/menubar.dart';
 import 'package:blueprint_master/layouts/resource_panel.dart';
 import 'package:blueprint_master/layouts/toolbar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -53,70 +55,56 @@ class DrawingArea extends StatefulWidget {
   DrawingAreaState createState() => DrawingAreaState();
 }
 
-class CustomDirectionalFocusAction extends DirectionalFocusAction {
-  @override
-  void invoke(DirectionalFocusIntent intent) {
-    final a = switch (intent.direction) {
-      TraversalDirection.left => 1,
-      TraversalDirection.right => 2,
-      TraversalDirection.up => 3,
-      TraversalDirection.down => 4,
-    };
-    print(intent);
-    // super.invoke(intent);
-  }
-}
-
-final Map<Type, Action<Intent>> actions = {DirectionalFocusIntent: CustomDirectionalFocusAction()};
-
 class DrawingAreaState extends State<DrawingArea> {
   @override
   Widget build(BuildContext context) {
     return Actions(
       actions: actions,
-      child: ListenableBuilder(
-        listenable: Listenable.merge([editorManager.tabsNotifier, editorManager.currentEditorNotifier]),
-        builder: (context, child) {
-          final List<EditorTab> tabs = editorManager.tabs;
-          return Column(
-            children: [
-              Row(
-                children: tabs
-                    .mapIndexed<Widget>(
-                      (index, tab) => Container(
-                        decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))),
-                        child: IntrinsicWidth(
-                          child: ListTile(
-                            minTileHeight: 32,
-                            contentPadding: EdgeInsets.only(left: 8),
-                            selected: editorManager.currentEditor == tab.editor,
-                            leading: Text(tab.title),
-                            trailing: IconButton(iconSize: 12, onPressed: () => editorManager.removeEditor(tab.title), icon: Icon(Icons.close)),
-                            onTap: () {
-                              editorManager.currentEditorNotifier.value = tab.editor;
-                            },
+      child: Shortcuts(
+        shortcuts: shortcuts,
+        child: ListenableBuilder(
+          listenable: Listenable.merge([editorManager.tabsNotifier, editorManager.currentEditorNotifier]),
+          builder: (context, child) {
+            final List<EditorTab> tabs = editorManager.tabs;
+            return Column(
+              children: [
+                Row(
+                  children: tabs
+                      .mapIndexed<Widget>(
+                        (index, tab) => Container(
+                          decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))),
+                          child: IntrinsicWidth(
+                            child: ListTile(
+                              minTileHeight: 32,
+                              contentPadding: EdgeInsets.only(left: 8),
+                              selected: editorManager.currentEditor == tab.editor,
+                              leading: Text(tab.title),
+                              trailing: IconButton(iconSize: 12, onPressed: () => editorManager.removeEditor(tab.title), icon: Icon(Icons.close)),
+                              onTap: () {
+                                editorManager.currentEditorNotifier.value = tab.editor;
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                    )
-                    // .intersected(VerticalDivider(width: 20, thickness: 20, color: Colors.black))
-                    .toList(growable: false),
-              ),
-              if (tabs.isNotEmpty) Divider(height: 1, thickness: 2),
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, c) {
-                    for (final tab in editorManager.tabs) {
-                      tab.editor.context.viewport.setSize(c.biggest);
-                    }
-
-                    return Container(child: editorManager.currentEditor);
-                  },
+                      )
+                      // .intersected(VerticalDivider(width: 20, thickness: 20, color: Colors.black))
+                      .toList(growable: false),
                 ),
-              ),
-            ],
-          );
-        },
+                if (tabs.isNotEmpty) Divider(height: 1, thickness: 2),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, c) {
+                      for (final tab in editorManager.tabs) {
+                        tab.editor.context.viewport.setSize(c.biggest);
+                      }
+                      return Container(child: editorManager.currentEditor);
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
