@@ -1,4 +1,5 @@
 import 'package:blueprint_master/editors/graphics/graphics.dart';
+import 'package:blueprint_master/layouts/menubar.dart';
 import 'package:blueprint_master/layouts/resource_panel.dart';
 import 'package:blueprint_master/layouts/toolbar.dart';
 import 'package:collection/collection.dart';
@@ -22,11 +23,10 @@ class _LayoutState extends State<Layout> {
     return Column(
       children: <Widget>[
         // //
-        Container(
-          decoration: BoxDecoration(border: Border(bottom: BorderSide(width: 1))),
-          // child: MultiBlocProvider(providers: [BlocProvider.value(value: drawCubit)], child: ToolBar()),
-          child: Toolbar(),
-        ),
+        Container(child: Menubar(), alignment: Alignment.centerLeft),
+        Divider(height: 1),
+        Container(child: Toolbar()),
+        Divider(height: 1),
         Expanded(
           child: Row(
             children: [
@@ -83,22 +83,37 @@ class DrawingAreaState extends State<DrawingArea> {
               Row(
                 children: tabs
                     .mapIndexed<Widget>(
-                      (index, tab) => IntrinsicWidth(
-                        child: ListTile(
-                          selected: editorManager.currentEditor == tab.editor,
-                          leading: Text(tab.title),
-                          trailing: IconButton(iconSize: 12, onPressed: () => editorManager.removeEditor(tab.title), icon: Icon(Icons.close)),
-                          onTap: () {
-                            editorManager.currentEditorNotifier.value = tab.editor;
-                          },
+                      (index, tab) => Container(
+                        decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))),
+                        child: IntrinsicWidth(
+                          child: ListTile(
+                            minTileHeight: 32,
+                            contentPadding: EdgeInsets.only(left: 8),
+                            selected: editorManager.currentEditor == tab.editor,
+                            leading: Text(tab.title),
+                            trailing: IconButton(iconSize: 12, onPressed: () => editorManager.removeEditor(tab.title), icon: Icon(Icons.close)),
+                            onTap: () {
+                              editorManager.currentEditorNotifier.value = tab.editor;
+                            },
+                          ),
                         ),
                       ),
                     )
-                    .intersected(VerticalDivider(width: 20, thickness: 20, color: Colors.black))
+                    // .intersected(VerticalDivider(width: 20, thickness: 20, color: Colors.black))
                     .toList(growable: false),
               ),
               if (tabs.isNotEmpty) Divider(height: 1, thickness: 2),
-              Expanded(child: Container(child: editorManager.currentEditor)),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, c) {
+                    for (final tab in editorManager.tabs) {
+                      tab.editor.context.viewport.setSize(c.biggest);
+                    }
+
+                    return Container(child: editorManager.currentEditor);
+                  },
+                ),
+              ),
             ],
           );
         },

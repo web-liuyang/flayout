@@ -8,7 +8,7 @@ import 'state_machines/state_machines.dart';
 class EditorContext {
   late RootGraphic graphic;
 
-  late Viewport viewport;
+  final Viewport viewport = Viewport();
 
   late SceneRenderObject renderObject;
 
@@ -25,6 +25,10 @@ class EditorContext {
   bool canSeePoint(Offset offset) {
     return viewport.visibleWorldRect.contains(offset);
   }
+
+  void undo() {}
+
+  void redo() {}
 }
 
 class Editor extends StatefulWidget {
@@ -36,26 +40,23 @@ class Editor extends StatefulWidget {
   State<Editor> createState() => _EditorState();
 }
 
-class _EditorState extends State<Editor> {
+class _EditorState extends State<Editor> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     print("Editor Builder");
 
-    return LayoutBuilder(
-      builder: (context, c) {
-        widget.context.viewport = Viewport(size: c.biggest);
-
-        return StateMachine(
-          context: widget.context,
-          child: Builder(
-            builder: (context) {
-              return Scene(context: widget.context);
-            },
-          ),
-        );
-      },
+    return StateMachine(
+      context: widget.context,
+      child: Builder(
+        builder: (context) {
+          return Scene(context: widget.context);
+        },
+      ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class SceneRenderObject extends RenderBox {

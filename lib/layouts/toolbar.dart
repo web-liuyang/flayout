@@ -30,6 +30,25 @@ class _ToolbarState extends State<Toolbar> {
                   onPressed: () {
                     final context = editorManager.currentEditor?.context;
                     if (context == null) return;
+                    context.undo();
+                  },
+                  icon: const Icon(Icons.undo),
+                  tooltip: "Undo",
+                ),
+                IconButton(
+                  onPressed: () {
+                    final context = editorManager.currentEditor?.context;
+                    if (context == null) return;
+                    context.redo();
+                  },
+                  icon: const Icon(Icons.redo),
+                  tooltip: "Redo",
+                ),
+
+                IconButton(
+                  onPressed: () {
+                    final context = editorManager.currentEditor?.context;
+                    if (context == null) return;
                     context.stateMachineNotifier.value = SelectionStateMachine(context: context);
                   },
                   isSelected: editorManager.currentEditor?.context.stateMachine is SelectionStateMachine,

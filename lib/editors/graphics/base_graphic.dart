@@ -5,10 +5,13 @@ import 'package:blueprint_master/editors/editor_config.dart';
 import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix4_transform/matrix4_transform.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 class Viewport {
-  Viewport({this.size = Size.zero}) {
+  Viewport();
+
+  void setSize(Size size) {
+    if (size == this.size) return;
+    this.size = size;
     final halfSize = size / 2;
     matrix4 = Matrix4Transform().translate(x: halfSize.width, y: halfSize.height);
   }
@@ -26,9 +29,9 @@ class Viewport {
     return Rect.fromLTWH(tx, ty, width, height);
   }
 
-  Size size;
+  Size size = Size.zero;
 
-  late Matrix4Transform matrix4;
+  Matrix4Transform matrix4 = Matrix4Transform();
 
   void setZoom(double zoom, {Offset? origin}) {
     final newZoom = zoom.clamp(kMinZoom, kMaxZoom);
@@ -99,27 +102,23 @@ class Viewport {
   // }
 }
 
-class World {
-  final List<BaseGraphic> _graphics = [];
+// class World {
+//   final List<BaseGraphic> _graphics = [];
 
-  void add(BaseGraphic graphic) {
-    _graphics.add(graphic);
-  }
+//   void add(BaseGraphic graphic) {
+//     _graphics.add(graphic);
+//   }
 
-  void init(Size size) {
-    viewport = Viewport(size: size);
-  }
+//   late Viewport viewport;
 
-  late Viewport viewport;
+//   late Element context;
 
-  late Element context;
+//   late SceneRenderObject renderObject;
 
-  late SceneRenderObject renderObject;
-
-  void render() async {
-    renderObject.markNeedsPaint();
-  }
-}
+//   void render() async {
+//     renderObject.markNeedsPaint();
+//   }
+// }
 
 class Context {
   final EditorContext context;

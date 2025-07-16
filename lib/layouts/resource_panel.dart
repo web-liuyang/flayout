@@ -40,17 +40,25 @@ class ResourcePanel extends StatefulWidget {
 class _ResourcePanelState extends State<ResourcePanel> {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        final title = infos[index].title;
-        return ListTile(
-          title: Text(title),
-          onTap: () {
-            editorManager.createEditor(EditorConfig(title: title));
-          },
-        );
-      },
-      itemCount: infos.length,
+    return Column(
+      children: [
+        Container(height: 32, padding: EdgeInsets.only(left: 8), child: Row(children: [Text("Resources")])),
+        Divider(height: 1),
+        Expanded(
+          child: ListView.builder(
+            itemBuilder: (context, index) {
+              final title = infos[index].title;
+              return ListTile(
+                title: Text(title),
+                onTap: () {
+                  editorManager.createEditor(EditorConfig(title: title));
+                },
+              );
+            },
+            itemCount: infos.length,
+          ),
+        ),
+      ],
     );
   }
 }

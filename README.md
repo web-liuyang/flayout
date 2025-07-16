@@ -16,8 +16,9 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 
 TODO
-[] EditorTab 的分割线
-[] 新增 Menubar
+[√] EditorTab 的分割线
+[√] 新增 Menubar
+[√] 保持当前 Editor 状态
 [] 状态栏当前画布的比例与当前鼠标位置
 [] Redo/Undo
 [] Copy/Paste
