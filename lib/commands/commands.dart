@@ -43,6 +43,9 @@ abstract class BaseAction<T extends BaseIntent> extends Action<T> {
 class AddGraphicAction extends BaseAction<AddGraphicIntent> {
   late AddGraphicIntent intent;
 
+  // AddGraphicAction 有永远是单例
+  // 所以回退的时候需要单独再来个 Index来控制加入的图形
+
   @override
   void invoke(AddGraphicIntent intent) {
     this.intent = intent;
@@ -62,8 +65,6 @@ class AddGraphicAction extends BaseAction<AddGraphicIntent> {
   void undo() {
     intent.context.graphic.children.remove(intent.graphic);
     intent.context.render();
-
-    print(intent.context.graphic.children);
   }
 }
 
