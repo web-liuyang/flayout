@@ -17,56 +17,56 @@ class _ToolbarState extends State<Toolbar> {
     // final DrawCubit drawCubit = context.watch<DrawCubit>();
 
     return Actions(
-      actions: actions,
+      actions: createEditorActions(),
       child: ListenableBuilder(
         listenable: editorManager.currentEditorNotifier,
         builder: (context, _) {
-          final ValueNotifier<BaseStateMachine>? stateMachineNotifier = editorManager.currentEditorNotifier.value?.context.stateMachineNotifier;
+          final EditorContext? editorContext = editorManager.currentEditor?.context;
+          final ValueNotifier<BaseStateMachine>? stateMachineNotifier = editorManager.currentEditor?.context.stateMachineNotifier;
+          final CommandManager? commands = editorManager.currentEditor?.context.commands;
 
           return ListenableBuilder(
-            listenable: Listenable.merge([stateMachineNotifier]),
+            listenable: Listenable.merge([stateMachineNotifier, commands]),
             builder: (context, _) {
+              final bool canUndo = (commands?.canUndo ?? false);
+              final bool canRedo = (commands?.canRedo ?? false);
+
+              VoidCallback? invoke(ValueSetter<EditorContext> callback) {
+                if (editorContext == null) return null;
+
+                return () => callback(editorContext);
+              }
+
+              void onUndo(EditorContext editorContext) {
+                Actions.invoke(context, UndoIntent(editorContext));
+              }
+
+              void onRedo(EditorContext editorContext) {
+                Actions.invoke(context, RedoIntent(editorContext));
+              }
+
+              void onSelection(EditorContext editorContext) {
+                editorContext.stateMachineNotifier.value = SelectionStateMachine(context: editorContext);
+              }
+
+              void onRectangle(EditorContext editorContext) {
+                editorContext.stateMachineNotifier.value = RectangleStateMachine(context: editorContext);
+              }
+
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  IconButton(onPressed: canUndo ? invoke(onUndo) : null, icon: const Icon(Icons.undo), tooltip: "Undo"),
+                  IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.redo), tooltip: "Redo"),
                   IconButton(
-                    onPressed: () {
-                      final editorContext = editorManager.currentEditor?.context;
-                      if (editorContext == null) return;
-
-                      Actions.invoke(context, UndoIntent(editorContext));
-                    },
-                    icon: const Icon(Icons.undo),
-                    tooltip: "Undo",
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      final editorContext = editorManager.currentEditor?.context;
-                      if (editorContext == null) return;
-
-                      Actions.invoke(context, RedoIntent(editorContext));
-                    },
-                    icon: const Icon(Icons.redo),
-                    tooltip: "Redo",
-                  ),
-
-                  IconButton(
-                    onPressed: () {
-                      final context = editorManager.currentEditor?.context;
-                      if (context == null) return;
-                      context.stateMachineNotifier.value = SelectionStateMachine(context: context);
-                    },
-                    isSelected: editorManager.currentEditor?.context.stateMachine is SelectionStateMachine,
+                    onPressed: invoke(onSelection),
+                    isSelected: editorContext?.stateMachine is SelectionStateMachine,
                     icon: const Icon(Icons.north_west),
                     tooltip: "Selection",
                   ),
                   IconButton(
-                    onPressed: () {
-                      final context = editorManager.currentEditor?.context;
-                      if (context == null) return;
-                      context.stateMachineNotifier.value = RectangleStateMachine(context: context);
-                    },
-                    isSelected: editorManager.currentEditor?.context.stateMachine is RectangleStateMachine,
+                    onPressed: invoke(onRectangle),
+                    isSelected: editorContext?.stateMachine is RectangleStateMachine,
                     icon: const Icon(Icons.rectangle_outlined),
                     tooltip: "Rectange",
                   ),

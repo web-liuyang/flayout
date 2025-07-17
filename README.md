@@ -19,7 +19,7 @@ TODO
 [√] EditorTab 的分割线
 [√] 新增 Menubar
 [√] 保持当前 Editor 状态
-[] Redo/Undo
+[√] Redo/Undo
 [] Copy/Paste
 [] 状态栏当前画布的比例与当前鼠标位置
 [] 中间区域 左中右 的拖拽

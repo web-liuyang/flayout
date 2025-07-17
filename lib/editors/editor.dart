@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:flutter/widgets.dart' hide Viewport;
 import 'editor_config.dart';
@@ -8,15 +9,16 @@ import 'state_machines/state_machines.dart';
 class EditorContext {
   late RootGraphic graphic;
 
-  final Viewport viewport = Viewport();
-
   late SceneRenderObject renderObject;
 
   late final ValueNotifier<BaseStateMachine> stateMachineNotifier = ValueNotifier<BaseStateMachine>(SelectionStateMachine(context: this));
+  BaseStateMachine get stateMachine => stateMachineNotifier.value;
 
   late BuildContext buildContext;
 
-  BaseStateMachine get stateMachine => stateMachineNotifier.value;
+  final Viewport viewport = Viewport();
+
+  final CommandManager commands = CommandManager();
 
   void render() => renderObject.markNeedsPaint();
 
@@ -27,10 +29,6 @@ class EditorContext {
   bool canSeePoint(Offset offset) {
     return viewport.visibleWorldRect.contains(offset);
   }
-
-  void undo() {}
-
-  void redo() {}
 }
 
 class Editor extends StatefulWidget {

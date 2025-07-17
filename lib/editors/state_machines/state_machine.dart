@@ -35,7 +35,6 @@ class StateMachine extends StatelessWidget {
   }
 
   void onTapDown(TapDownDetails info) {
-    print(context.stateMachine);
     final position = context.viewport.windowToCanvas(info.localPosition);
     context.stateMachine.onTapDown(TapDownCanvasEvent(position: position));
   }

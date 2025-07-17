@@ -59,14 +59,16 @@ class DrawingAreaState extends State<DrawingArea> {
   @override
   Widget build(BuildContext context) {
     return Actions(
-      actions: actions,
-      child: Shortcuts(
-        shortcuts: shortcuts,
-        child: ListenableBuilder(
-          listenable: Listenable.merge([editorManager.tabsNotifier, editorManager.currentEditorNotifier]),
-          builder: (context, child) {
-            final List<EditorTab> tabs = editorManager.tabs;
-            return Column(
+      actions: createEditorActions(),
+      child: ListenableBuilder(
+        listenable: Listenable.merge([editorManager.tabsNotifier, editorManager.currentEditorNotifier]),
+        builder: (context, child) {
+          final List<EditorTab> tabs = editorManager.tabs;
+          final Editor? currentEditor = editorManager.currentEditor;
+
+          return Shortcuts(
+            shortcuts: createEditorShortcuts(currentEditor?.context),
+            child: Column(
               children: [
                 Row(
                   children: tabs
@@ -102,9 +104,9 @@ class DrawingAreaState extends State<DrawingArea> {
                   ),
                 ),
               ],
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
