@@ -13,8 +13,17 @@ class SelectionStateMachine extends BaseStateMachine {
   late double prevZoom;
 
   @override
-  void onTap() {
-    // super.onTap();
+  void onTapDown(TapDownCanvasEvent event) {
+    for (int i = context.graphic.children.length - 1; i >= 0; i--) {
+      final g = context.graphic.children[i];
+      if (g.contains(event.position)) {
+        final selected = context.selectedGraphics.contains(g);
+        if (!selected) context.selectedGraphicsNotifier.value = [g];
+        return;
+      }
+    }
+
+    context.selectedGraphicsNotifier.value = [];
   }
 
   @override

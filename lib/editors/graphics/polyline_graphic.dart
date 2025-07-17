@@ -15,4 +15,14 @@ class PolylineGraphic extends BaseGraphic {
   void paint(Context ctx, Offset offset) {
     ctx.canvas.drawPoints(PointMode.lines, vertices, kEditorPaint);
   }
+
+  @override
+  bool contains(Offset position) {
+    return false;
+  }
+
+  @override
+  PolylineGraphic clone() {
+    return PolylineGraphic(vertices: vertices, halfWidth: halfWidth);
+  }
 }

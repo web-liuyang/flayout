@@ -29,4 +29,19 @@ class GroupGraphic extends BaseGraphic {
 
     ctx.canvas.restore();
   }
+
+  @override
+  bool contains(Offset position) {
+    for (final child in children) {
+      if (child.contains(position)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  GroupGraphic clone() {
+    return GroupGraphic(position: position, children: children.map((e) => e.clone()).toList());
+  }
 }

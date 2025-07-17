@@ -1,7 +1,5 @@
 import 'dart:ui';
 
-import 'package:blueprint_master/editors/editor_config.dart';
-
 import 'base_graphic.dart';
 
 class TextGraphic extends BaseGraphic {
@@ -25,5 +23,15 @@ class TextGraphic extends BaseGraphic {
     // final offset = position * kEditorUnits;
 
     ctx.canvas.drawParagraph(paragraph, position);
+  }
+
+  @override
+  bool contains(Offset position) {
+    return false;
+  }
+
+  @override
+  TextGraphic clone() {
+    return TextGraphic(position: position, text: text, paragraph: paragraph);
   }
 }

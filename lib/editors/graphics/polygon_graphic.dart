@@ -5,25 +5,27 @@ import 'package:blueprint_master/editors/editor_config.dart';
 import 'base_graphic.dart';
 
 class PolygonGraphic extends BaseGraphic {
-  PolygonGraphic({required this.vertices});
+  PolygonGraphic({required this.vertices, this.close = false});
 
   final List<Offset> vertices;
 
-  Path? path;
+  final bool close;
 
-  Path createPath() {
-    final path = Path();
-    for (final vertex in vertices) {
-      // final renderVertex = vertex * kEditorUnits;
-      final renderVertex = vertex;
-      path.lineTo(renderVertex.dx, renderVertex.dy);
-    }
-
-    return path;
-  }
+  Path path = Path();
 
   @override
   void paint(Context ctx, Offset offset) {
-    ctx.canvas.drawPoints(PointMode.polygon, vertices, kEditorPaint);
+    path = Path()..addPolygon(vertices, close);
+    ctx.canvas.drawPath(path, kEditorPaint);
+  }
+
+  @override
+  bool contains(Offset position) {
+    return path.contains(position);
+  }
+
+  @override
+  PolygonGraphic clone() {
+    return PolygonGraphic(vertices: vertices, close: close);
   }
 }

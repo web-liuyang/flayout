@@ -82,6 +82,7 @@ class CommandManager extends ChangeNotifier {
   bool get canRedo => _redoStack.isNotEmpty;
 
   void execute(BaseCommand command) {
+    print(command);
     _undoStack.add(command); // Push to undo stack
     _redoStack.clear(); // Clear redo stack
     command.execute(); // Execute the command
@@ -89,6 +90,7 @@ class CommandManager extends ChangeNotifier {
   }
 
   void undo() {
+    print("undo");
     if (_undoStack.isNotEmpty) {
       final command = _undoStack.removeLast(); // Pop from undo stack
       _redoStack.add(command); // Push to redo stack
@@ -100,6 +102,7 @@ class CommandManager extends ChangeNotifier {
   }
 
   void redo() {
+    print("redo");
     if (_redoStack.isNotEmpty) {
       final command = _redoStack.removeLast(); // Pop from redo stack
       _undoStack.add(command); // Push to undo stack
@@ -129,8 +132,8 @@ Map<ShortcutActivator, BaseIntent> createEditorShortcuts(EditorContext? context)
   if (context == null) return {};
 
   final Map<ShortcutActivator, BaseIntent> shortcuts = {
-    SingleActivator(LogicalKeyboardKey.keyZ, meta: true, control: true): UndoIntent(context),
-    SingleActivator(LogicalKeyboardKey.keyZ, meta: true, control: true, shift: true): RedoIntent(context),
+    SingleActivator(LogicalKeyboardKey.keyZ, control: true): UndoIntent(context),
+    SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true): RedoIntent(context),
     // SingleActivator(LogicalKeyboardKey.keyC, meta: true, control: true): CopyIntent(),
     // SingleActivator(LogicalKeyboardKey.keyV, meta: true, control: true): PasteIntent(),
   };

@@ -15,4 +15,16 @@ class CircleGraphic extends BaseGraphic {
   void paint(Context ctx, Offset offset) {
     ctx.canvas.drawCircle(position, radius, kEditorPaint);
   }
+
+  @override
+  bool contains(Offset position) {
+    final dx = position.dx - this.position.dx;
+    final dy = position.dy - this.position.dy;
+    return dx * dx + dy * dy <= radius * radius;
+  }
+
+  @override
+  CircleGraphic clone() {
+    return CircleGraphic(position: position, radius: radius);
+  }
 }

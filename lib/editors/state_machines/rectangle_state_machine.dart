@@ -1,9 +1,7 @@
 import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../graphics/base_graphic.dart';
 import 'state_machines.dart';
 
 class RectangleStateMachine extends BaseStateMachine {
@@ -40,8 +38,10 @@ class RectangleStateMachine extends BaseStateMachine {
   @override
   void exit() {
     super.exit();
-    context.graphic.children.remove(_draft);
     _state = _DrawInitState(context: context, state: this);
+    final result = context.graphic.children.remove(_draft);
+    context.render();
+    if (!result) context.stateMachineNotifier.value = SelectionStateMachine(context: context);
   }
 }
 
@@ -106,5 +106,15 @@ class _RectangleGraphicDraft extends BaseGraphic {
   PolygonGraphic toGraphic() {
     final rect = this.rect!;
     return PolygonGraphic(vertices: [rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft, rect.topLeft]);
+  }
+
+  @override
+  bool contains(Offset position) => false;
+
+  @override
+  BaseGraphic clone() {
+    return _RectangleGraphicDraft()
+      ..start = start
+      ..end = end;
   }
 }

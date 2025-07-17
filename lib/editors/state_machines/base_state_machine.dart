@@ -67,9 +67,12 @@ abstract class BaseStateMachine {
   // void onDragCancel(DragCancelEvent event) {}
 
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    if (event.logicalKey == LogicalKeyboardKey.escape) {
-      exit();
-      return KeyEventResult.handled;
+    if (event is KeyDownEvent) {
+      if (event.logicalKey == LogicalKeyboardKey.escape) {
+        print("escape");
+        exit();
+        return KeyEventResult.handled;
+      }
     }
 
     return KeyEventResult.handled;

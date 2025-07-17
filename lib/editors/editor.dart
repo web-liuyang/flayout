@@ -14,6 +14,11 @@ class EditorContext {
   late final ValueNotifier<BaseStateMachine> stateMachineNotifier = ValueNotifier<BaseStateMachine>(SelectionStateMachine(context: this));
   BaseStateMachine get stateMachine => stateMachineNotifier.value;
 
+  final ValueNotifier<List<BaseGraphic>> selectedGraphicsNotifier = ValueNotifier<List<BaseGraphic>>([
+    PolygonGraphic(vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50), Offset(-50, -50)]),
+  ]);
+  List<BaseGraphic> get selectedGraphics => selectedGraphicsNotifier.value;
+
   late BuildContext buildContext;
 
   final Viewport viewport = Viewport();
@@ -147,6 +152,14 @@ class Grid extends BaseGraphic {
   void paint(Context ctx, Offset offset) {
     renderGrid(ctx);
   }
+
+  @override
+  bool contains(ui.Offset position) => false;
+
+  @override
+  Grid clone() {
+    return Grid(dotGap: dotGap, dotSize: dotSize);
+  }
 }
 
 class Axis extends BaseGraphic {
@@ -170,6 +183,14 @@ class Axis extends BaseGraphic {
   @override
   void paint(Context ctx, Offset offset) {
     renderAxis(ctx);
+  }
+
+  @override
+  bool contains(ui.Offset position) => false;
+
+  @override
+  Axis clone() {
+    return Axis(axisLength: axisLength, axisWidth: axisWidth);
   }
 }
 

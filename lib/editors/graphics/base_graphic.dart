@@ -136,4 +136,8 @@ abstract class BaseGraphic {
   BaseGraphic();
 
   void paint(Context ctx, Offset offset);
+
+  bool contains(Offset position);
+
+  BaseGraphic clone();
 }

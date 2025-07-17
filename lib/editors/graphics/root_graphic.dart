@@ -23,4 +23,19 @@ class RootGraphic extends BaseGraphic {
       child.paint(ctx, offset);
     }
   }
+
+  @override
+  bool contains(Offset position) {
+    for (final child in children) {
+      if (child.contains(position)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  RootGraphic clone() {
+    return RootGraphic(children: children.map((e) => e.clone()).toList());
+  }
 }

@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../editors/editors.dart';
 import 'cubits/cubits.dart';
+import 'property_panel.dart';
 
 class Layout extends StatefulWidget {
   const Layout({super.key});
@@ -32,10 +33,9 @@ class _LayoutState extends State<Layout> {
         Expanded(
           child: Row(
             children: [
-              Container(width: 200, decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))), child: ResourcePanel()),
-              // Expanded(child: MultiBlocProvider(providers: [], child: Editor())),
+              Container(width: 300, decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))), child: ResourcePanel()),
               Expanded(child: DrawingArea()),
-              Container(decoration: BoxDecoration(border: Border(left: BorderSide(width: 1))), child: PropertyPanel()),
+              Container(width: 300, decoration: BoxDecoration(border: Border(left: BorderSide(width: 1))), child: PropertyPanel()),
             ],
           ),
         ),
@@ -68,42 +68,49 @@ class DrawingAreaState extends State<DrawingArea> {
 
           return Shortcuts(
             shortcuts: createEditorShortcuts(currentEditor?.context),
-            child: Column(
-              children: [
-                Row(
-                  children: tabs
-                      .mapIndexed<Widget>(
-                        (index, tab) => Container(
-                          decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))),
-                          child: IntrinsicWidth(
-                            child: ListTile(
-                              minTileHeight: 32,
-                              contentPadding: EdgeInsets.only(left: 8),
-                              selected: editorManager.currentEditor == tab.editor,
-                              leading: Text(tab.title),
-                              trailing: IconButton(iconSize: 12, onPressed: () => editorManager.removeEditor(tab.title), icon: Icon(Icons.close)),
-                              onTap: () {
-                                editorManager.currentEditorNotifier.value = tab.editor;
-                              },
+            child: Focus(
+              // autofocus: true,
+              // onKeyEvent: (node, event) {
+              //   print(event);
+              //   return KeyEventResult.ignored;
+              // },
+              child: Column(
+                children: [
+                  Row(
+                    children: tabs
+                        .mapIndexed<Widget>(
+                          (index, tab) => Container(
+                            decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))),
+                            child: IntrinsicWidth(
+                              child: ListTile(
+                                minTileHeight: 32,
+                                contentPadding: EdgeInsets.only(left: 8),
+                                selected: editorManager.currentEditor == tab.editor,
+                                leading: Text(tab.title),
+                                trailing: IconButton(iconSize: 12, onPressed: () => editorManager.removeEditor(tab.title), icon: Icon(Icons.close)),
+                                onTap: () {
+                                  editorManager.currentEditorNotifier.value = tab.editor;
+                                },
+                              ),
                             ),
                           ),
-                        ),
-                      )
-                      // .intersected(VerticalDivider(width: 20, thickness: 20, color: Colors.black))
-                      .toList(growable: false),
-                ),
-                if (tabs.isNotEmpty) Divider(height: 1, thickness: 2),
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, c) {
-                      for (final tab in editorManager.tabs) {
-                        tab.editor.context.viewport.setSize(c.biggest);
-                      }
-                      return Container(child: editorManager.currentEditor);
-                    },
+                        )
+                        // .intersected(VerticalDivider(width: 20, thickness: 20, color: Colors.black))
+                        .toList(growable: false),
                   ),
-                ),
-              ],
+                  if (tabs.isNotEmpty) Divider(height: 1, thickness: 2),
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, c) {
+                        for (final tab in editorManager.tabs) {
+                          tab.editor.context.viewport.setSize(c.biggest);
+                        }
+                        return Container(child: editorManager.currentEditor);
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -122,20 +129,6 @@ extension IterableExtension<T> on Iterable<T> {
     }
     newList.removeLast();
     return newList;
-  }
-}
-
-class PropertyPanel extends StatefulWidget {
-  const PropertyPanel({super.key});
-
-  @override
-  State<PropertyPanel> createState() => _PropertyPanelState();
-}
-
-class _PropertyPanelState extends State<PropertyPanel> {
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text("Property Panel"));
   }
 }
 
