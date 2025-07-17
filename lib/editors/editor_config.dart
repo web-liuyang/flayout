@@ -23,3 +23,9 @@ Paint kEditorPaint =
       ..color = Color(0xFF000000)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
+
+Paint kEditorHighlightPaint =
+    Paint()
+      ..color = Color(0xFFFF0000)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;

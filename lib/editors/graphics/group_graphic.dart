@@ -44,4 +44,13 @@ class GroupGraphic extends BaseGraphic {
   GroupGraphic clone() {
     return GroupGraphic(position: position, children: children.map((e) => e.clone()).toList());
   }
+
+  @override
+  Rect aabb() {
+    Rect aabb = Rect.zero;
+    for (final child in children) {
+      aabb = aabb.expandToInclude(child.aabb());
+    }
+    return aabb;
+  }
 }

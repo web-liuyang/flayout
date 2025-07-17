@@ -25,4 +25,7 @@ class PolylineGraphic extends BaseGraphic {
   PolylineGraphic clone() {
     return PolylineGraphic(vertices: vertices, halfWidth: halfWidth);
   }
+
+  @override
+  Rect aabb() => Rect.fromPoints(vertices.first, vertices.last);
 }

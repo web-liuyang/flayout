@@ -5,6 +5,7 @@ import 'package:blueprint_master/editors/editor_config.dart';
 import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix4_transform/matrix4_transform.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 class Viewport {
   Viewport();
@@ -140,4 +141,6 @@ abstract class BaseGraphic {
   bool contains(Offset position);
 
   BaseGraphic clone();
+
+  Rect aabb();
 }

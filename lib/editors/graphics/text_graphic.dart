@@ -34,4 +34,9 @@ class TextGraphic extends BaseGraphic {
   TextGraphic clone() {
     return TextGraphic(position: position, text: text, paragraph: paragraph);
   }
+
+  @override
+  Rect aabb() {
+    return Rect.fromLTWH(position.dx, position.dy, paragraph.width, paragraph.height);
+  }
 }

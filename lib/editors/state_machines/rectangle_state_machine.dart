@@ -117,4 +117,7 @@ class _RectangleGraphicDraft extends BaseGraphic {
       ..start = start
       ..end = end;
   }
+
+  @override
+  Rect aabb() => Rect.fromPoints(start!, end!);
 }

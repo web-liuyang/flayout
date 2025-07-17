@@ -20,7 +20,12 @@ TODO
 [√] 新增 Menubar
 [√] 保持当前 Editor 状态
 [√] Redo/Undo
+[√] 中间区域 左中右 的拖拽
+
+[] 创建 Cell
+[] 创建 Layer
 [] Copy/Paste
 [] 状态栏当前画布的比例与当前鼠标位置
-[] 中间区域 左中右 的拖拽
 [] 目前只支持单个选中, 后期会加上多选
+
+[] PolylineGraphic AABB 是错误的

@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:blueprint_master/editors/editor_config.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'base_graphic.dart';
 
@@ -27,4 +28,6 @@ class CircleGraphic extends BaseGraphic {
   CircleGraphic clone() {
     return CircleGraphic(position: position, radius: radius);
   }
+
+  Rect aabb() => Rect.fromCircle(center: position, radius: radius);
 }

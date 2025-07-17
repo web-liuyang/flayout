@@ -85,6 +85,8 @@ class SceneRenderObject extends RenderBox {
         grid.paint(ctx, Offset.zero);
         axis.paint(ctx, Offset.zero);
         this.context.graphic.paint(ctx, Offset.zero);
+
+        Selection(graphics: this.context.selectedGraphics).paint(ctx, Offset.zero);
       });
     });
     context.canvas.restore();
@@ -94,6 +96,31 @@ class SceneRenderObject extends RenderBox {
   bool hitTestSelf(ui.Offset position) {
     return true;
   }
+}
+
+class Selection extends BaseGraphic {
+  Selection({required this.graphics});
+
+  final List<BaseGraphic> graphics;
+
+  @override
+  Selection clone() {
+    return Selection(graphics: graphics);
+  }
+
+  @override
+  bool contains(ui.Offset position) => false;
+
+  @override
+  void paint(Context ctx, ui.Offset offset) {
+    for (final graphic in graphics) {
+      final rect = graphic.aabb();
+      ctx.canvas.drawPoints(ui.PointMode.polygon, [rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft, rect.topLeft], kEditorHighlightPaint);
+    }
+  }
+
+  @override
+  Rect aabb() => Rect.zero;
 }
 
 class Scene extends LeafRenderObjectWidget {
@@ -160,6 +187,9 @@ class Grid extends BaseGraphic {
   Grid clone() {
     return Grid(dotGap: dotGap, dotSize: dotSize);
   }
+
+  @override
+  Rect aabb() => Rect.zero;
 }
 
 class Axis extends BaseGraphic {
@@ -191,6 +221,11 @@ class Axis extends BaseGraphic {
   @override
   Axis clone() {
     return Axis(axisLength: axisLength, axisWidth: axisWidth);
+  }
+
+  @override
+  Rect aabb() {
+    throw UnimplementedError();
   }
 }
 

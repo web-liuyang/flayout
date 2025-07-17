@@ -28,4 +28,7 @@ class PolygonGraphic extends BaseGraphic {
   PolygonGraphic clone() {
     return PolygonGraphic(vertices: vertices, close: close);
   }
+
+  @override
+  Rect aabb() => path.getBounds();
 }

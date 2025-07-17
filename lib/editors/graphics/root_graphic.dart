@@ -38,4 +38,7 @@ class RootGraphic extends BaseGraphic {
   RootGraphic clone() {
     return RootGraphic(children: children.map((e) => e.clone()).toList());
   }
+
+  @override
+  Rect aabb() => Rect.zero;
 }

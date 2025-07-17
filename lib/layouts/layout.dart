@@ -1,15 +1,18 @@
 import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
+import 'package:blueprint_master/extensions/list_extension.dart';
 import 'package:blueprint_master/layouts/menubar.dart';
 import 'package:blueprint_master/layouts/resource_panel.dart';
+import 'package:blueprint_master/layouts/statusbar.dart';
 import 'package:blueprint_master/layouts/toolbar.dart';
+import 'package:blueprint_master/widgets/widgets.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../editors/editors.dart';
+import '../editors/editors.dart' hide Axis;
 import 'cubits/cubits.dart';
 import 'property_panel.dart';
 
@@ -31,18 +34,18 @@ class _LayoutState extends State<Layout> {
         Container(child: Toolbar()),
         Divider(height: 1),
         Expanded(
-          child: Row(
-            children: [
-              Container(width: 300, decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))), child: ResourcePanel()),
-              Expanded(child: DrawingArea()),
-              Container(width: 300, decoration: BoxDecoration(border: Border(left: BorderSide(width: 1))), child: PropertyPanel()),
+          child: Splitter(
+            axis: Axis.horizontal,
+            items: [
+              SplitterItem(child: ResourcePanel(), min: 100, size: 300),
+              SplitterItem(child: DrawingArea(), min: 100),
+              SplitterItem(child: PropertyPanel(), min: 100, size: 300),
             ],
           ),
         ),
-        Container(
-          decoration: BoxDecoration(border: Border(top: BorderSide(width: 1))),
-          child: MultiBlocProvider(providers: [BlocProvider.value(value: mouseCubit), BlocProvider.value(value: zoomCubit)], child: StatusBar()),
-        ),
+
+        Divider(height: 1),
+        Container(child: Statusbar()),
       ],
     );
   }
@@ -114,51 +117,6 @@ class DrawingAreaState extends State<DrawingArea> {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-extension IterableExtension<T> on Iterable<T> {
-  List<T> intersected(T item) {
-    if (length < 2) return toList();
-
-    final List<T> newList = [];
-    for (final T element in this) {
-      newList.addAll([element, item]);
-    }
-    newList.removeLast();
-    return newList;
-  }
-}
-
-class StatusBar extends StatefulWidget {
-  const StatusBar({super.key});
-
-  @override
-  State<StatusBar> createState() => _StatusBarState();
-}
-
-class _StatusBarState extends State<StatusBar> {
-  @override
-  Widget build(BuildContext context) {
-    final MouseCubit mouseCubit = context.watch<MouseCubit>();
-    final ZoomCubit scaleCubit = context.watch<ZoomCubit>();
-
-    // final Vector2 mousePosition = mouseCubit.state;
-    final String zoomPercentage = scaleCubit.percentage();
-
-    return Center(
-      child: Row(
-        children: [
-          // Text("$mousePosition"),
-          TextButton(
-            onPressed: () {
-              scaleCubit.reset();
-            },
-            child: Text(zoomPercentage),
-          ),
-        ],
       ),
     );
   }
