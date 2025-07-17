@@ -22,9 +22,9 @@ TODO
 [√] Redo/Undo
 [√] 中间区域 左中右 的拖拽
 
+[] Copy/Paste
 [] 创建 Cell
 [] 创建 Layer
-[] Copy/Paste
 [] 状态栏当前画布的比例与当前鼠标位置
 [] 目前只支持单个选中, 后期会加上多选
 
