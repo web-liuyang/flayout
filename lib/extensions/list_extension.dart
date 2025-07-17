@@ -13,3 +13,11 @@ extension IterableExtension<T> on Iterable<T> {
     return newList;
   }
 }
+
+extension ListExtension<T> on List<T> {
+  void removeAll(List<T> items) {
+    for (final T item in items) {
+      remove(item);
+    }
+  }
+}

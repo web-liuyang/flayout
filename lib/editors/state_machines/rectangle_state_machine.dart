@@ -31,7 +31,7 @@ class RectangleStateMachine extends BaseStateMachine {
     // context.graphic.children.add(_draft.toGraphic());
     // print(context.buildContext);
     // print(Actions.maybeFind(context.buildContext, intent: AddGraphicIntent(context, graphic)));
-    Actions.invoke(context.buildContext, AddGraphicIntent(context, graphic));
+    Actions.invoke(context.buildContext, AddGraphicIntent(context, [graphic]));
     _state = _DrawInitState(context: context, state: this);
   }
 
