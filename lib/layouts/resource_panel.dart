@@ -38,16 +38,51 @@ class ResourcePanel extends StatefulWidget {
 }
 
 class _ResourcePanelState extends State<ResourcePanel> {
+  final TextEditingController controller = TextEditingController();
+  String get searchValue => controller.text;
+
   @override
   Widget build(BuildContext context) {
+    final List<RootGraphicInfo> filteredInfos = infos.where((info) => info.title.contains(searchValue)).toList(growable: false);
+
+    // TextField;
+
     return Column(
       children: [
         Container(height: 32, padding: EdgeInsets.only(left: 8), child: Row(children: [Text("Resources")])),
         Divider(height: 1),
+        TextField(
+          // constraints: ,
+          decoration: const InputDecoration(hintText: "Search", prefixIcon: Icon(Icons.search), suffixIcon: Icon(Icons.clear, size: 12)),
+          controller: controller,
+          // placeholder: "Search",
+          // shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+          // padding: WidgetStateProperty.all(EdgeInsets.zero),
+          scrollPadding: EdgeInsets.zero,
+          // leading: Icon(Icons.search),
+          // trailing: [
+          //   IconButton(
+          //     onPressed: () {
+          //       setState(() {
+          //         controller.text = "";
+          //       });
+          //     },
+          //     icon: Icon(Icons.clear),
+          //   ),
+          // ],
+          onSubmitted: (value) {
+            setState(() {
+              controller.text = value;
+            });
+
+            print(value);
+          },
+        ),
+        Divider(height: 1),
         Expanded(
           child: ListView.builder(
             itemBuilder: (context, index) {
-              final title = infos[index].title;
+              final title = filteredInfos[index].title;
               return ListTile(
                 title: Text(title),
                 onTap: () {
@@ -55,7 +90,7 @@ class _ResourcePanelState extends State<ResourcePanel> {
                 },
               );
             },
-            itemCount: infos.length,
+            itemCount: filteredInfos.length,
           ),
         ),
       ],
