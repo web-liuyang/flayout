@@ -30,6 +30,7 @@ class _ToolbarState extends State<Toolbar> {
             builder: (context, _) {
               final bool canUndo = (commands?.canUndo ?? false);
               final bool canRedo = (commands?.canRedo ?? false);
+              // final bool canRedo = (commands?.canRedo ?? false);
 
               VoidCallback? invoke(ValueSetter<EditorContext> callback) {
                 if (editorContext == null) return null;
@@ -58,6 +59,8 @@ class _ToolbarState extends State<Toolbar> {
                 children: [
                   IconButton(onPressed: canUndo ? invoke(onUndo) : null, icon: const Icon(Icons.undo), tooltip: "Undo"),
                   IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.redo), tooltip: "Redo"),
+                  IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.copy), tooltip: "Copy"),
+                  IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.paste), tooltip: "Paste"),
                   IconButton(
                     onPressed: invoke(onSelection),
                     isSelected: editorContext?.stateMachine is SelectionStateMachine,

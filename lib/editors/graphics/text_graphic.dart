@@ -3,9 +3,7 @@ import 'dart:ui';
 import 'base_graphic.dart';
 
 class TextGraphic extends BaseGraphic {
-  TextGraphic({required this.position, required this.text, required this.paragraph});
-
-  final Offset position;
+  TextGraphic({required super.position, required this.text, required this.paragraph});
 
   final String text;
 
@@ -22,7 +20,7 @@ class TextGraphic extends BaseGraphic {
 
     // final offset = position * kEditorUnits;
 
-    ctx.canvas.drawParagraph(paragraph, position);
+    ctx.canvas.drawParagraph(paragraph, position + offset);
   }
 
   @override

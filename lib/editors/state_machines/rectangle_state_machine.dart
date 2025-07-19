@@ -25,14 +25,9 @@ class RectangleStateMachine extends BaseStateMachine {
   @override
   void done() {
     super.done();
-
-    context.graphic.children.remove(_draft);
-    final graphic = _draft.toGraphic();
-    // context.graphic.children.add(_draft.toGraphic());
-    // print(context.buildContext);
-    // print(Actions.maybeFind(context.buildContext, intent: AddGraphicIntent(context, graphic)));
-    Actions.invoke(context.buildContext, AddGraphicIntent(context, [graphic]));
     _state = _DrawInitState(context: context, state: this);
+    context.graphic.children.remove(_draft);
+    Actions.invoke(context.buildContext, AddGraphicIntent(context, [_draft.toGraphic()]));
   }
 
   @override

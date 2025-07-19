@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../editors/graphics/graphics.dart';
+import '../editors/state_machines/state_machines.dart';
 
 abstract class BaseIntent extends Intent {}
 
@@ -133,7 +134,8 @@ Map<Type, Action<BaseIntent>> createEditorActions() {
     PasteIntent: CallbackAction<PasteIntent>(
       onInvoke: (intent) {
         if (_clipboardGraphics.isEmpty) return;
-        intent.context.commands.execute(AddGraphicCommand(AddGraphicIntent(intent.context, _clipboardGraphics)));
+        print(123);
+        intent.context.stateMachineNotifier.value = PasteStateMachine(context: intent.context, graphics: _clipboardGraphics);
       },
     ),
   };
@@ -166,7 +168,6 @@ Map<ShortcutActivator, BaseIntent> _createEditorShortcuts(EditorContext context)
 }
 
 Map<ShortcutActivator, BaseIntent> _createEditorShortcutsAppleOs(EditorContext context) {
-  print(2);
   return {
     SingleActivator(LogicalKeyboardKey.keyZ, meta: true): UndoIntent(context),
     SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true): RedoIntent(context),

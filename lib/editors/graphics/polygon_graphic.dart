@@ -5,7 +5,7 @@ import 'package:blueprint_master/editors/editor_config.dart';
 import 'base_graphic.dart';
 
 class PolygonGraphic extends BaseGraphic {
-  PolygonGraphic({required this.vertices, this.close = false});
+  PolygonGraphic({super.position, required this.vertices, this.close = false});
 
   final List<Offset> vertices;
 
@@ -15,6 +15,7 @@ class PolygonGraphic extends BaseGraphic {
 
   @override
   void paint(Context ctx, Offset offset) {
+    final List<Offset> vertices = this.vertices.map((e) => e + position + offset).toList();
     path = Path()..addPolygon(vertices, close);
     ctx.canvas.drawPath(path, kEditorPaint);
   }
@@ -26,7 +27,7 @@ class PolygonGraphic extends BaseGraphic {
 
   @override
   PolygonGraphic clone() {
-    return PolygonGraphic(vertices: vertices, close: close);
+    return PolygonGraphic(position: position, vertices: vertices, close: close);
   }
 
   @override

@@ -1,33 +1,31 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:blueprint_master/editors/editor_config.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'base_graphic.dart';
 
 class CircleGraphic extends BaseGraphic {
-  CircleGraphic({required this.position, required this.radius});
+  CircleGraphic({super.position, required this.center, required this.radius});
 
-  final Offset position;
+  final Offset center;
 
   final double radius;
 
+  Path path = Path();
+
   @override
   void paint(Context ctx, Offset offset) {
-    ctx.canvas.drawCircle(position, radius, kEditorPaint);
+    path = Path()..addArc(Rect.fromCircle(center: center + position + offset, radius: radius), 0, 2 * pi);
+    ctx.canvas.drawPath(path, kEditorPaint);
   }
 
   @override
-  bool contains(Offset position) {
-    final dx = position.dx - this.position.dx;
-    final dy = position.dy - this.position.dy;
-    return dx * dx + dy * dy <= radius * radius;
-  }
+  bool contains(Offset position) => path.contains(position);
 
   @override
-  CircleGraphic clone() {
-    return CircleGraphic(position: position, radius: radius);
-  }
+  CircleGraphic clone() => CircleGraphic(position: position, radius: radius, center: center);
 
-  Rect aabb() => Rect.fromCircle(center: position, radius: radius);
+  @override
+  Rect aabb() => path.getBounds();
 }

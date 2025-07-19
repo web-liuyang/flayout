@@ -46,7 +46,6 @@ class CanvasAreaState extends State<CanvasArea> {
                         ),
                       ),
                     )
-                    // .intersected(VerticalDivider(width: 20, thickness: 20, color: Colors.black))
                     .toList(growable: false),
               ),
               if (tabs.isNotEmpty) Divider(height: 1, thickness: 2),

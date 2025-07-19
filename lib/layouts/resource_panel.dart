@@ -16,6 +16,7 @@ final List<RootGraphicInfo> infos = [
     graphic: RootGraphic(
       children: [
         PolygonGraphic(vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50), Offset(-50, -50)]),
+        PolygonGraphic(vertices: [Offset(-150, -150), Offset(-100, -150), Offset(-100, -100), Offset(-150, -100), Offset(-150, -150)]),
       ],
     ),
   ),
@@ -24,7 +25,7 @@ final List<RootGraphicInfo> infos = [
     graphic: RootGraphic(
       children: [
         PolygonGraphic(vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50), Offset(-50, -50)]),
-        CircleGraphic(position: Offset(0, 0), radius: 50),
+        CircleGraphic(center: Offset(0, 0), radius: 50),
       ],
     ),
   ),

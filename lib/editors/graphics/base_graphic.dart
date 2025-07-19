@@ -134,7 +134,9 @@ class Context {
 }
 
 abstract class BaseGraphic {
-  BaseGraphic();
+  BaseGraphic({this.position = Offset.zero});
+
+  Offset position;
 
   void paint(Context ctx, Offset offset);
 
