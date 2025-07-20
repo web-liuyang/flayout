@@ -5,7 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'base_graphic.dart';
 
 class RootGraphic extends BaseGraphic {
-  RootGraphic({this.children = const []});
+  RootGraphic({required this.children});
 
   final List<BaseGraphic> children;
 

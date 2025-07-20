@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:isolate';
 import 'dart:ui' as ui;
 
+import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/layouts/layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -142,8 +143,32 @@ class BlueprintMaster extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeData(brightness: Brightness.light, useMaterial3: true, colorSchemeSeed: Colors.blue);
+    final theme = ThemeData(
+      brightness: Brightness.light,
+      useMaterial3: true,
+      colorSchemeSeed: Colors.blue,
+      inputDecorationTheme: InputDecorationTheme(
+        constraints: const BoxConstraints(maxHeight: 32),
+        contentPadding: EdgeInsets.symmetric(horizontal: 4),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        ),
+      ),
+      dialogTheme: DialogThemeData(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
+      buttonTheme: ButtonThemeData(),
+    );
 
-    return MaterialApp(title: "Blueprint Master", themeMode: ThemeMode.system, theme: theme, home: Scaffold(body: const Layout()));
+    return MaterialApp(
+      actions: createEditorActions(),
+      shortcuts: createEditorShortcuts(),
+      title: "Blueprint Master",
+      themeMode: ThemeMode.system,
+      theme: theme,
+      home: Scaffold(body: const Layout()),
+    );
   }
 }

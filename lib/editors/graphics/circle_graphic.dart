@@ -8,9 +8,9 @@ import 'base_graphic.dart';
 class CircleGraphic extends BaseGraphic {
   CircleGraphic({super.position, required this.center, required this.radius});
 
-  final Offset center;
+  Offset center;
 
-  final double radius;
+  double radius;
 
   Path path = Path();
 

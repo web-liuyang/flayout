@@ -16,69 +16,76 @@ class _ToolbarState extends State<Toolbar> {
   Widget build(BuildContext context) {
     // final DrawCubit drawCubit = context.watch<DrawCubit>();
 
-    return Actions(
-      actions: createEditorActions(),
-      child: ListenableBuilder(
-        listenable: editorManager.currentEditorNotifier,
-        builder: (context, _) {
-          final EditorContext? editorContext = editorManager.currentEditor?.context;
-          final ValueNotifier<BaseStateMachine>? stateMachineNotifier = editorManager.currentEditor?.context.stateMachineNotifier;
-          final CommandManager? commands = editorManager.currentEditor?.context.commands;
+    return ListenableBuilder(
+      listenable: editorManager.currentEditorNotifier,
+      builder: (context, _) {
+        final EditorContext? editorContext = editorManager.currentEditor?.context;
+        final ValueNotifier<BaseStateMachine>? stateMachineNotifier = editorManager.currentEditor?.context.stateMachineNotifier;
+        final CommandManager? commands = editorManager.currentEditor?.context.commands;
 
-          return ListenableBuilder(
-            listenable: Listenable.merge([stateMachineNotifier, commands]),
-            builder: (context, _) {
-              final bool canUndo = (commands?.canUndo ?? false);
-              final bool canRedo = (commands?.canRedo ?? false);
-              // final bool canRedo = (commands?.canRedo ?? false);
+        return ListenableBuilder(
+          listenable: Listenable.merge([stateMachineNotifier, commands]),
+          builder: (context, _) {
+            final bool canUndo = (commands?.canUndo ?? false);
+            final bool canRedo = (commands?.canRedo ?? false);
+            // final bool canRedo = (commands?.canRedo ?? false);
 
-              VoidCallback? invoke(ValueSetter<EditorContext> callback) {
-                if (editorContext == null) return null;
+            VoidCallback? invoke(ValueSetter<EditorContext> callback) {
+              if (editorContext == null) return null;
 
-                return () => callback(editorContext);
-              }
+              return () => callback(editorContext);
+            }
 
-              void onUndo(EditorContext editorContext) {
-                Actions.invoke(context, UndoIntent(editorContext));
-              }
+            void onUndo(EditorContext editorContext) {
+              Actions.invoke(context, UndoIntent());
+            }
 
-              void onRedo(EditorContext editorContext) {
-                Actions.invoke(context, RedoIntent(editorContext));
-              }
+            void onRedo(EditorContext editorContext) {
+              Actions.invoke(context, RedoIntent());
+            }
 
-              void onSelection(EditorContext editorContext) {
-                editorContext.stateMachineNotifier.value = SelectionStateMachine(context: editorContext);
-              }
+            void onSelection(EditorContext editorContext) {
+              editorContext.stateMachineNotifier.value = SelectionStateMachine(context: editorContext);
+            }
 
-              void onRectangle(EditorContext editorContext) {
-                editorContext.stateMachineNotifier.value = RectangleStateMachine(context: editorContext);
-              }
+            void onRectangle(EditorContext editorContext) {
+              editorContext.stateMachineNotifier.value = RectangleStateMachine(context: editorContext);
+            }
 
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(onPressed: canUndo ? invoke(onUndo) : null, icon: const Icon(Icons.undo), tooltip: "Undo"),
-                  IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.redo), tooltip: "Redo"),
-                  IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.copy), tooltip: "Copy"),
-                  IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.paste), tooltip: "Paste"),
-                  IconButton(
-                    onPressed: invoke(onSelection),
-                    isSelected: editorContext?.stateMachine is SelectionStateMachine,
-                    icon: const Icon(Icons.north_west),
-                    tooltip: "Selection",
-                  ),
-                  IconButton(
-                    onPressed: invoke(onRectangle),
-                    isSelected: editorContext?.stateMachine is RectangleStateMachine,
-                    icon: const Icon(Icons.rectangle_outlined),
-                    tooltip: "Rectange",
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      ),
+            void onCircle(EditorContext editorContext) {
+              editorContext.stateMachineNotifier.value = CircleStateMachine(context: editorContext);
+            }
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(onPressed: canUndo ? invoke(onUndo) : null, icon: const Icon(Icons.undo), tooltip: "Undo"),
+                IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.redo), tooltip: "Redo"),
+                // IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.copy), tooltip: "Copy"),
+                // IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.paste), tooltip: "Paste"),
+                IconButton(
+                  onPressed: invoke(onSelection),
+                  isSelected: editorContext?.stateMachine is SelectionStateMachine,
+                  icon: const Icon(Icons.north_west),
+                  tooltip: "Selection",
+                ),
+                IconButton(
+                  onPressed: invoke(onRectangle),
+                  isSelected: editorContext?.stateMachine is RectangleStateMachine,
+                  icon: const Icon(Icons.rectangle_outlined),
+                  tooltip: "Rectange",
+                ),
+                IconButton(
+                  onPressed: invoke(onCircle),
+                  isSelected: editorContext?.stateMachine is CircleStateMachine,
+                  icon: const Icon(Icons.circle_outlined),
+                  tooltip: "Rectange",
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

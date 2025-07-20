@@ -20,27 +20,19 @@ class AddGraphicIntent extends BaseIntent {
 }
 
 class UndoIntent extends BaseIntent {
-  UndoIntent(this.context);
-
-  final EditorContext context;
+  UndoIntent();
 }
 
 class RedoIntent extends BaseIntent {
-  RedoIntent(this.context);
-
-  final EditorContext context;
+  RedoIntent();
 }
 
 class CopyIntent extends BaseIntent {
-  CopyIntent(this.context);
-
-  final EditorContext context;
+  CopyIntent();
 }
 
 class PasteIntent extends BaseIntent {
-  PasteIntent(this.context);
-
-  final EditorContext context;
+  PasteIntent();
 }
 
 class CustomDirectionalFocusAction extends DirectionalFocusAction {
@@ -126,16 +118,43 @@ List<BaseGraphic> _clipboardGraphics = [];
 Map<Type, Action<BaseIntent>> createEditorActions() {
   final Map<Type, Action<BaseIntent>> actions = {
     // DirectionalFocusIntent: CustomDirectionalFocusAction(),
-    UndoIntent: CallbackAction<UndoIntent>(onInvoke: (intent) => intent.context.commands.undo()),
-    RedoIntent: CallbackAction<RedoIntent>(onInvoke: (intent) => intent.context.commands.redo()),
-
-    AddGraphicIntent: CallbackAction<AddGraphicIntent>(onInvoke: (intent) => intent.context.commands.execute(AddGraphicCommand(intent))),
-    CopyIntent: CallbackAction<CopyIntent>(onInvoke: (intent) => _clipboardGraphics = intent.context.selectedGraphics),
+    UndoIntent: CallbackAction<UndoIntent>(
+      onInvoke: (intent) {
+        final EditorContext? context = editorManager.currentEditor?.context;
+        context?.commands.undo();
+        return;
+      },
+    ),
+    RedoIntent: CallbackAction<RedoIntent>(
+      onInvoke: (intent) {
+        final EditorContext? context = editorManager.currentEditor?.context;
+        context?.commands.redo();
+        return;
+      },
+    ),
+    AddGraphicIntent: CallbackAction<AddGraphicIntent>(
+      onInvoke: (intent) {
+        final EditorContext? context = editorManager.currentEditor?.context;
+        context?.commands.execute(AddGraphicCommand(intent));
+        return;
+      },
+    ),
+    CopyIntent: CallbackAction<CopyIntent>(
+      onInvoke: (intent) {
+        final EditorContext? context = editorManager.currentEditor?.context;
+        if (context == null) return;
+        _clipboardGraphics = context.selectedGraphics.toList();
+        return;
+      },
+    ),
     PasteIntent: CallbackAction<PasteIntent>(
       onInvoke: (intent) {
+        final EditorContext? context = editorManager.currentEditor?.context;
+        if (context == null) return;
         if (_clipboardGraphics.isEmpty) return;
-        print(123);
-        intent.context.stateMachineNotifier.value = PasteStateMachine(context: intent.context, graphics: _clipboardGraphics);
+        context.stateMachineNotifier.value = PasteStateMachine(context: context, graphics: _clipboardGraphics);
+
+        return;
       },
     ),
   };
@@ -143,35 +162,34 @@ Map<Type, Action<BaseIntent>> createEditorActions() {
   return actions;
 }
 
-Map<ShortcutActivator, BaseIntent> createEditorShortcuts(EditorContext? context) {
-  if (context == null) return {};
-
+Map<ShortcutActivator, Intent> createEditorShortcuts() {
   switch (defaultTargetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.fuchsia:
     case TargetPlatform.linux:
     case TargetPlatform.windows:
-      return _createEditorShortcuts(context);
+      return _createEditorShortcuts();
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
-      return _createEditorShortcutsAppleOs(context);
+      return _createEditorShortcutsAppleOs();
   }
 }
 
-Map<ShortcutActivator, BaseIntent> _createEditorShortcuts(EditorContext context) {
+// UndoIntent(context),
+Map<ShortcutActivator, Intent> _createEditorShortcuts() {
   return {
-    SingleActivator(LogicalKeyboardKey.keyZ, control: true): UndoIntent(context),
-    SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true): RedoIntent(context),
-    SingleActivator(LogicalKeyboardKey.keyC, control: true): CopyIntent(context),
-    SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteIntent(context),
+    SingleActivator(LogicalKeyboardKey.keyZ, control: true): UndoIntent(),
+    SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true): RedoIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, control: true): CopyIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteIntent(),
   };
 }
 
-Map<ShortcutActivator, BaseIntent> _createEditorShortcutsAppleOs(EditorContext context) {
+Map<ShortcutActivator, Intent> _createEditorShortcutsAppleOs() {
   return {
-    SingleActivator(LogicalKeyboardKey.keyZ, meta: true): UndoIntent(context),
-    SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true): RedoIntent(context),
-    SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopyIntent(context),
-    SingleActivator(LogicalKeyboardKey.keyV, meta: true): PasteIntent(context),
+    SingleActivator(LogicalKeyboardKey.keyZ, meta: true): UndoIntent(),
+    SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true): RedoIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopyIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, meta: true): PasteIntent(),
   };
 }

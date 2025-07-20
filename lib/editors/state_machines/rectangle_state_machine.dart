@@ -13,6 +13,7 @@ class RectangleStateMachine extends BaseStateMachine {
 
   @override
   void onTapDown(event) {
+    super.onTapDown(event);
     _state.onTapDown(event);
   }
 
@@ -27,6 +28,7 @@ class RectangleStateMachine extends BaseStateMachine {
     super.done();
     _state = _DrawInitState(context: context, state: this);
     context.graphic.children.remove(_draft);
+    context.render();
     Actions.invoke(context.buildContext, AddGraphicIntent(context, [_draft.toGraphic()]));
   }
 
@@ -49,6 +51,7 @@ class _DrawInitState extends BaseStateMachine {
   void onTapDown(info) {
     state._draft.start = info.position;
     context.graphic.children.add(state._draft);
+    context.render();
     state._state = _DrawStartedState(context: context, state: state);
   }
 }
@@ -67,7 +70,7 @@ class _DrawStartedState extends BaseStateMachine {
   void onMouseMove(event) {
     super.onMouseMove(event);
     state._draft.end = event.position;
-    state.context.render();
+    context.render();
   }
 }
 
@@ -98,9 +101,9 @@ class _RectangleGraphicDraft extends BaseGraphic {
     context.canvas.drawRect(rect, _paint);
   }
 
-  PolygonGraphic toGraphic() {
+  RectangleGraphic toGraphic() {
     final rect = this.rect!;
-    return PolygonGraphic(vertices: [rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft, rect.topLeft]);
+    return RectangleGraphic(position: rect.topLeft, width: rect.width, height: rect.height);
   }
 
   @override

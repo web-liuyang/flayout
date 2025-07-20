@@ -1,13 +1,13 @@
-import 'package:flame/game.dart';
+import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class MouseCubit extends Cubit<Vector2> {
-  MouseCubit() : super(Vector2.zero());
+class MouseCubit extends Cubit<Offset> {
+  MouseCubit(super.initialState);
 
-  void update(Vector2 position) {
-    emit(position);
-  }
+  // void update(Vector2 position) {
+  //   emit(position);
+  // }
 }
 
-final MouseCubit mouseCubit = MouseCubit();
+final MouseCubit mouseCubit = MouseCubit(Offset.zero);

@@ -1,164 +1,167 @@
 import 'package:blueprint_master/editors/editor.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'state_machines.dart';
 
-class StateMachine extends StatelessWidget {
+class StateMachine extends StatefulWidget {
   const StateMachine({super.key, required this.context, required this.child});
 
   final EditorContext context;
 
   final Widget child;
 
+  @override
+  State<StateMachine> createState() => _StateMachineState();
+}
+
+class _StateMachineState extends State<StateMachine> {
+  final FocusNode focusNode = FocusNode(debugLabel: "StateMachine");
+
+  @override
+  void initState() {
+    print("initState");
+    focusNode.requestFocus();
+    // HardwareKeyboard.instance.a(focusNode);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    print("dispose");
+    focusNode.dispose();
+    super.dispose();
+  }
+
   //   bloc: drawCubit,
-  //   listenWhen: (previousState, newState) {
-  //     if (previousState.runtimeType == newState.runtimeType) return false;
-
-  //     return true;
-  //   },
-  //   onNewState: (state) {
-  //     state = state;
-  //   },
-  // );
-
   void onLoad() {
     // add(drawCubitListener);
   }
 
   // TapDetector
   void onTap() {
-    context.stateMachine.onTap();
+    widget.context.stateMachine.onTap();
   }
 
   void onTapDown(TapDownDetails info) {
-    final position = context.viewport.windowToCanvas(info.localPosition);
-    context.stateMachine.onTapDown(TapDownCanvasEvent(position: position));
+    final position = widget.context.viewport.windowToCanvas(info.localPosition);
+    widget.context.stateMachine.onTapDown(TapDownCanvasEvent(position: position));
   }
 
   void onTapUp(TapUpDetails info) {
-    context.stateMachine.onTapUp(info);
+    widget.context.stateMachine.onTapUp(info);
   }
 
   void onTapCancel() {
-    context.stateMachine.onTapCancel();
+    widget.context.stateMachine.onTapCancel();
   }
 
   // SecondaryTapDetector
   void onSecondaryTapDown(TapDownDetails info) {
-    context.stateMachine.onSecondaryTapDown(info);
+    widget.context.stateMachine.onSecondaryTapDown(info);
   }
 
   void onSecondaryTapUp(TapUpDetails info) {
-    context.stateMachine.onSecondaryTapUp(info);
+    widget.context.stateMachine.onSecondaryTapUp(info);
   }
 
   void onSecondaryTapCancel() {
-    context.stateMachine.onSecondaryTapCancel();
+    widget.context.stateMachine.onSecondaryTapCancel();
   }
 
   // PanDetector
   void onPanStart(DragStartDetails info) {
-    context.stateMachine.onPanStart(info);
+    widget.context.stateMachine.onPanStart(info);
   }
 
   void onPanDown(DragDownDetails info) {
-    context.stateMachine.onPanDown(info);
+    widget.context.stateMachine.onPanDown(info);
   }
 
   void onPanUpdate(DragUpdateDetails info) {
-    context.stateMachine.onPanUpdate(info);
+    widget.context.stateMachine.onPanUpdate(info);
   }
 
   void onPanEnd(DragEndDetails info) {
-    context.stateMachine.onPanEnd(info);
+    widget.context.stateMachine.onPanEnd(info);
   }
 
   void onPanCancel() {
-    context.stateMachine.onPanCancel();
+    widget.context.stateMachine.onPanCancel();
   }
 
   // ScaleDetector
   void onScaleStart(ScaleStartDetails info) {
-    context.stateMachine.onScaleStart(info);
+    widget.context.stateMachine.onScaleStart(info);
   }
 
   void onScaleUpdate(ScaleUpdateDetails info) {
-    context.stateMachine.onScaleUpdate(info);
+    widget.context.stateMachine.onScaleUpdate(info);
   }
 
   void onScaleEnd(ScaleEndDetails info) {
-    context.stateMachine.onScaleEnd(info);
+    widget.context.stateMachine.onScaleEnd(info);
   }
 
   // MouseMovementDetector
   void onMouseMove(PointerHoverEvent info) {
-    final position = context.viewport.windowToCanvas(info.localPosition);
-    context.stateMachine.onMouseMove(MouseMoveCanvasEvent(position: position));
+    final position = widget.context.viewport.windowToCanvas(info.localPosition);
+    widget.context.stateMachine.onMouseMove(MouseMoveCanvasEvent(position: position));
   }
 
   void onScroll(PointerScrollEvent info) {
-    context.stateMachine.onScroll(info);
+    widget.context.stateMachine.onScroll(info);
   }
 
   // DragCallbacks
-  // void onDragStart(DragStartEvent event) {
-  //   context.stateMachine.onDragStart(event);
-  // }
-
-  // void onDragUpdate(DragUpdateEvent event) {
-  //   context.stateMachine.onDragUpdate(event);
-  // }
-
-  // void onDragEnd(DragEndEvent event) {
-  //   context.stateMachine.onDragEnd(event);
-  // }
-
-  // void onDragCancel(DragCancelEvent event) {
-  //   context.stateMachine.onDragCancel(event);
-  // }
-
-  // KeyboardEvents
-  // KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-  KeyEventResult onKeyEvent(FocusNode node, KeyEvent event) {
+  // KeyEventResult onKeyEvent(FocusNode node, KeyEvent event) {
+  KeyEventResult onKeyEvent(KeyEvent event) {
     // Set<LogicalKeyboardKey> keysPressed;
     final keysPressed = HardwareKeyboard.instance.logicalKeysPressed;
-    return context.stateMachine.onKeyEvent(event, keysPressed);
+    return widget.context.stateMachine.onKeyEvent(event, keysPressed);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      onKeyEvent: onKeyEvent,
-      child: MouseRegion(
-        onHover: onMouseMove,
-        child: GestureDetector(
-          onTap: onTap,
-          onTapDown: onTapDown,
-          onTapUp: onTapUp,
-          onTapCancel: onTapCancel,
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (event) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          focusNode.requestFocus();
+        });
+      },
+      child: KeyboardListener(
+        focusNode: focusNode,
+        onKeyEvent: onKeyEvent,
+        child: MouseRegion(
+          onHover: onMouseMove,
+          child: GestureDetector(
+            onTap: onTap,
+            onTapDown: onTapDown,
+            onTapUp: onTapUp,
+            onTapCancel: onTapCancel,
 
-          // onPanDown: onPanDown,
-          // onPanUpdate: onPanUpdate,
-          // onPanEnd: onPanEnd,
-          // onPanCancel: onPanCancel,
-          onSecondaryTapDown: onSecondaryTapDown,
-          onSecondaryTapUp: onSecondaryTapUp,
-          onSecondaryTapCancel: onSecondaryTapCancel,
+            // onPanDown: onPanDown,
+            // onPanUpdate: onPanUpdate,
+            // onPanEnd: onPanEnd,
+            // onPanCancel: onPanCancel,
+            onSecondaryTapDown: onSecondaryTapDown,
+            onSecondaryTapUp: onSecondaryTapUp,
+            onSecondaryTapCancel: onSecondaryTapCancel,
 
-          onScaleStart: onScaleStart,
-          onScaleUpdate: onScaleUpdate,
-          onScaleEnd: onScaleEnd,
+            onScaleStart: onScaleStart,
+            onScaleUpdate: onScaleUpdate,
+            onScaleEnd: onScaleEnd,
 
-          child: Listener(
-            onPointerSignal: (event) {
-              if (event is! PointerScrollEvent) return;
-              onScroll(event);
-            },
-            child: child,
+            child: Listener(
+              onPointerSignal: (event) {
+                if (event is! PointerScrollEvent) return;
+                onScroll(event);
+              },
+              child: widget.child,
+            ),
           ),
         ),
       ),

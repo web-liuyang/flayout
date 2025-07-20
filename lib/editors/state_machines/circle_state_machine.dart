@@ -1,132 +1,114 @@
-// import 'dart:math';
+import 'package:blueprint_master/commands/commands.dart';
+import 'package:blueprint_master/editors/graphics/graphics.dart';
+import 'package:blueprint_master/extensions/extensions.dart';
+import 'package:flutter/material.dart';
 
-// import 'package:blueprint_master/extensions/extensions.dart';
-// import 'package:blueprint_master/layouts/cubits/cubits.dart';
-// import 'package:flame/components.dart';
-// import 'package:flame/events.dart';
-// import 'package:flutter/material.dart';
+import 'state_machines.dart';
 
-// import '../editors.dart';
-// import '../shapes/shapes.dart';
-// import 'state_machines.dart';
+class CircleStateMachine extends BaseStateMachine {
+  CircleStateMachine({required super.context});
 
-// class CircleStateMachine extends BaseStateMachine {
-//   CircleStateMachine(super.game);
+  late BaseStateMachine _state = _DrawInitState(context: context, state: this);
 
-//   late _DrawState _state = _DrawInitState(this);
+  late final _CircleGraphicDraft _draft = _CircleGraphicDraft();
 
-//   late final _CircleDraftComponent _component = _CircleDraftComponent();
+  @override
+  void onTapDown(event) {
+    super.onTapDown(event);
+    _state.onTapDown(event);
+  }
 
-//   @override
-//   void onTapDown(TapDownInfo info) {
-//     if (!game.world.contains(_component)) game.world.add(_component);
-//     super.onTapDown(info);
-//     _state.onTapDown(info);
-//   }
+  @override
+  void onMouseMove(event) {
+    super.onMouseMove(event);
+    _state.onMouseMove(event);
+  }
 
-//   @override
-//   void onMouseMove(PointerHoverInfo info) {
-//     super.onMouseMove(info);
-//     _state.onMouseMove(info);
-//   }
+  @override
+  void done() {
+    super.done();
+    _state = _DrawInitState(context: context, state: this);
+    context.graphic.children.remove(_draft);
+    Actions.invoke(context.buildContext, AddGraphicIntent(context, [_draft.toGraphic()]));
+  }
 
-//   @override
-//   void done() {
-//     super.done();
+  @override
+  void exit() {
+    super.exit();
+    _state = _DrawInitState(context: context, state: this);
+    final result = context.graphic.children.remove(_draft);
+    context.render();
+    if (!result) context.stateMachineNotifier.value = SelectionStateMachine(context: context);
+  }
+}
 
-//     final position = _component.center! - Vector2.all(_component.radius);
+class _DrawInitState extends BaseStateMachine {
+  _DrawInitState({required super.context, required this.state});
 
-//     final CircleShape circle = CircleShape(position: position, radius: _component.radius);
-//     game.world.add(circle);
+  final CircleStateMachine state;
 
-//     _component.reset();
-//     game.world.remove(_component);
+  @override
+  void onTapDown(info) {
+    super.onTapDown(info);
+    state._draft.center = info.position;
+    context.graphic.children.add(state._draft);
+    context.render();
+    state._state = _DrawStartedState(context: context, state: state);
+  }
+}
 
-//     _state = _DrawInitState(this);
-//   }
+class _DrawStartedState extends BaseStateMachine {
+  _DrawStartedState({required super.context, required this.state});
 
-//   @override
-//   void exit() {
-//     super.exit();
+  final CircleStateMachine state;
 
-//     if (game.world.contains(_component)) {
-//       _component.reset();
-//       game.world.remove(_component);
-//     }
+  @override
+  void onTapDown(info) {
+    super.onTapDown(info);
+    state.done();
+  }
 
-//     drawCubit.enterSelection();
-//   }
-// }
+  @override
+  void onMouseMove(event) {
+    super.onMouseMove(event);
+    state._draft.radius = event.position.distanceTo(state._draft.center!);
+    state.context.render();
+  }
+}
 
-// class _DrawState {
-//   _DrawState(this.stateMachine);
+class _CircleGraphicDraft extends BaseGraphic {
+  _CircleGraphicDraft();
 
-//   final CircleStateMachine stateMachine;
+  Offset? center;
 
-//   StateMachineGame get game => stateMachine.game;
+  double? radius;
 
-//   _CircleDraftComponent get component => stateMachine._component;
+  final Paint _paint =
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..color = Colors.black;
 
-//   void onTapDown(TapDownInfo info) {}
+  @override
+  void paint(Context context, Offset offset) {
+    if (center == null || radius == null) return;
+    _paint.strokeWidth = context.viewport.getLogicSize(1);
+    context.canvas.drawCircle(center!, radius!, _paint);
+  }
 
-//   void onMouseMove(PointerHoverInfo info) {}
-// }
+  CircleGraphic toGraphic() {
+    return CircleGraphic(position: Offset.zero, radius: radius!, center: center!);
+  }
 
-// class _DrawInitState extends _DrawState {
-//   _DrawInitState(super.stateMachine);
+  @override
+  bool contains(Offset position) => false;
 
-//   @override
-//   void onTapDown(TapDownInfo info) {
-//     super.onTapDown(info);
+  @override
+  _CircleGraphicDraft clone() {
+    return _CircleGraphicDraft()
+      ..center = center
+      ..radius = radius;
+  }
 
-//     final Vector2 position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
-//     component.center = position;
-
-//     stateMachine._state = _DrawStartedState(stateMachine);
-//   }
-// }
-
-// class _DrawStartedState extends _DrawInitState {
-//   _DrawStartedState(super.stateMachine);
-
-//   @override
-//   void onTapDown(TapDownInfo info) {
-//     stateMachine.done();
-//   }
-
-//   @override
-//   void onMouseMove(PointerHoverInfo info) {
-//     super.onMouseMove(info);
-//     final Vector2 position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
-//     final Vector2 delta = component.center! - position;
-//     final double radius = max(delta.x.abs(), delta.y.abs());
-//     component.radius = radius;
-//   }
-// }
-
-// class _CircleDraftComponent extends Component with HasGameRef<EditorGame> {
-//   _CircleDraftComponent();
-
-//   Vector2? center;
-
-//   double radius = 0;
-
-//   final Paint _paint =
-//       Paint()
-//         ..style = PaintingStyle.stroke
-//         ..color = Colors.black;
-
-//   @override
-//   void render(Canvas canvas) {
-//     super.render(canvas);
-//     if (center == null || radius <= 0) return;
-
-//     _paint.strokeWidth = game.camera.viewfinder.getLogicSize(1);
-//     canvas.drawCircle(center!.toOffset(), radius, _paint);
-//   }
-
-//   void reset() {
-//     center = null;
-//     radius = 0;
-//   }
-// }
+  @override
+  Rect aabb() => Rect.fromCircle(center: center!, radius: radius!);
+}

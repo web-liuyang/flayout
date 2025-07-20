@@ -583,8 +583,8 @@ class ARefStructBuilder extends StructBuilder<ARefStruct> {
   @override
   ARefStruct build() {
     final [offset, totalColOffset, totalRowOffset] = points;
-    final colSpacing = ((totalColOffset - offset).toVector2() / colrow.$1.toDouble()).x;
-    final rowSpacing = ((totalRowOffset - offset).toVector2() / colrow.$2.toDouble()).y;
+    final colSpacing = ((totalColOffset - offset) / colrow.$1.toDouble()).dx;
+    final rowSpacing = ((totalRowOffset - offset) / colrow.$2.toDouble()).dy;
     return ARefStruct(
       name: name,
       vMirror: vMirror,
