@@ -8,6 +8,10 @@ import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/layouts/layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:multi_split_view/multi_split_view.dart';
+
+import 'layouts/cubits/cubits.dart';
 
 Uint8List createBitmap(int width, int height) {
   return Uint8List(width * height * 4); // RGBA
@@ -21,7 +25,17 @@ void setPixel(Uint8List bitmap, int x, int y, int width, List<int> color) {
   bitmap[index + 3] = color[3]; // A
 }
 
-void drawLine(Uint8List bitmap, int width, int height, int x1, int y1, int x2, int y2, List<int> color, [int lineWidth = 1]) {
+void drawLine(
+  Uint8List bitmap,
+  int width,
+  int height,
+  int x1,
+  int y1,
+  int x2,
+  int y2,
+  List<int> color, [
+  int lineWidth = 1,
+]) {
   final dx = x2 - x1;
   final dy = y2 - y1;
   final steps = max(dx.abs(), dy.abs());
@@ -65,7 +79,12 @@ void drawLine(Uint8List bitmap, int width, int height, int x1, int y1, int x2, i
 // }
 
 Future<ui.Image> createImageFromUint8List(Uint8List pixels, int width, int height) async {
-  final descriptor = ui.ImageDescriptor.raw(await ui.ImmutableBuffer.fromUint8List(pixels), width: width, height: height, pixelFormat: ui.PixelFormat.rgba8888);
+  final descriptor = ui.ImageDescriptor.raw(
+    await ui.ImmutableBuffer.fromUint8List(pixels),
+    width: width,
+    height: height,
+    pixelFormat: ui.PixelFormat.rgba8888,
+  );
 
   // 生成图像编码器
   final codec = await descriptor.instantiateCodec(targetWidth: width, targetHeight: height);
@@ -168,7 +187,15 @@ class BlueprintMaster extends StatelessWidget {
       title: "Blueprint Master",
       themeMode: ThemeMode.system,
       theme: theme,
-      home: Scaffold(body: const Layout()),
+      home: Scaffold(
+        body: MultiSplitViewTheme(
+          data: MultiSplitViewThemeData(dividerPainter: DividerPainters.grooved1()),
+          child: MultiBlocProvider(
+            providers: [BlocProvider.value(value: cellsCubit), BlocProvider.value(value: layersCubit)],
+            child: const Layout(),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -3,8 +3,8 @@ import 'package:blueprint_master/layouts/menubar.dart';
 import 'package:blueprint_master/layouts/resource_panel.dart';
 import 'package:blueprint_master/layouts/statusbar.dart';
 import 'package:blueprint_master/layouts/toolbar.dart';
-import 'package:blueprint_master/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:multi_split_view/multi_split_view.dart';
 import 'property_panel.dart';
 
 class Layout extends StatefulWidget {
@@ -24,13 +24,41 @@ class _LayoutState extends State<Layout> {
         Divider(height: 1),
         Container(child: Toolbar()),
         Divider(height: 1),
+
         Expanded(
-          child: Splitter(
-            axis: Axis.horizontal,
-            items: [
-              SplitterItem(child: ResourcePanel(), min: 100, size: 300),
-              SplitterItem(child: CanvasArea(), min: 100),
-              SplitterItem(child: PropertyPanel(), min: 100, size: 300),
+          child: MultiSplitView(
+            initialAreas: [
+              Area(
+                min: 100,
+                size: 300,
+                builder: (context, area) {
+                  return Container(
+                    decoration: BoxDecoration(border: Border(right: Divider.createBorderSide(context))),
+                    child: ResourcePanel(),
+                  );
+                },
+              ),
+              Area(
+                flex: 1,
+                builder: (context, area) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      border: Border.symmetric(vertical: Divider.createBorderSide(context)),
+                    ),
+                    child: CanvasArea(),
+                  );
+                },
+              ),
+              Area(
+                min: 100,
+                size: 300,
+                builder: (context, area) {
+                  return Container(
+                    decoration: BoxDecoration(border: Border(left: Divider.createBorderSide(context))),
+                    child: PropertyPanel(),
+                  );
+                },
+              ),
             ],
           ),
         ),

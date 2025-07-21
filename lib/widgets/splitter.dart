@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class SplitterItem {
   SplitterItem({required this.child, this.size, required this.min});
