@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:matrix4_transform/matrix4_transform.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../../layouts/cubits/layers_cubit.dart';
+
 class Viewport {
   Viewport();
 
@@ -134,9 +136,11 @@ class Context {
 }
 
 abstract class BaseGraphic {
-  BaseGraphic({this.position = Offset.zero});
+  BaseGraphic({this.position = Offset.zero, this.palette});
 
   Offset position;
+
+  LayerPalette? palette;
 
   void paint(Context ctx, Offset offset);
 

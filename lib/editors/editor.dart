@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
+import 'package:blueprint_master/layouts/cubits/cubits.dart';
 import 'package:flutter/widgets.dart' hide Viewport;
 import 'editor_config.dart';
 import 'state_machines/state_machines.dart';
@@ -11,15 +12,22 @@ class EditorContext {
 
   late SceneRenderObject renderObject;
 
-  late final ValueNotifier<BaseStateMachine> stateMachineNotifier = ValueNotifier<BaseStateMachine>(SelectionStateMachine(context: this));
+  late final ValueNotifier<BaseStateMachine> stateMachineNotifier = ValueNotifier<BaseStateMachine>(
+    SelectionStateMachine(context: this),
+  );
   BaseStateMachine get stateMachine => stateMachineNotifier.value;
 
   final ValueNotifier<List<BaseGraphic>> selectedGraphicsNotifier = ValueNotifier<List<BaseGraphic>>([
-    PolygonGraphic(vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50), Offset(-50, -50)]),
+    PolygonGraphic(
+      vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50), Offset(-50, -50)],
+      layer: layersCubit.layers.first,
+    ),
   ]);
   List<BaseGraphic> get selectedGraphics => selectedGraphicsNotifier.value;
 
   late BuildContext buildContext;
+
+  Layer? get currentLayer => layersCubit.current;
 
   final Viewport viewport = Viewport();
 
@@ -65,9 +73,9 @@ class SceneRenderObject extends RenderBox {
 
   final EditorContext context;
 
-  final Grid grid = Grid(dotGap: kEditorDotGap, dotSize: kEditorDotSize);
+  final Grid grid = Grid(layer: layersCubit.layers.first, dotGap: kEditorDotGap, dotSize: kEditorDotSize);
 
-  final Axis axis = Axis(axisLength: kEditorAxisLength, axisWidth: kEditorAxisWidth);
+  final Axis axis = Axis(layer: layersCubit.layers.first, axisLength: kEditorAxisLength, axisWidth: kEditorAxisWidth);
 
   @override
   void performLayout() {
@@ -80,13 +88,16 @@ class SceneRenderObject extends RenderBox {
     context.canvas.translate(offset.dx, offset.dy);
     final rect = Offset.zero & this.context.viewport.size;
     context.pushClipRect(needsCompositing, Offset.zero, rect, (PaintingContext context, ui.Offset offset) {
-      context.pushTransform(needsCompositing, offset, this.context.viewport.matrix4.matrix4, (PaintingContext context, ui.Offset offset) {
+      context.pushTransform(needsCompositing, offset, this.context.viewport.matrix4.matrix4, (
+        PaintingContext context,
+        ui.Offset offset,
+      ) {
         final ctx = Context(context: this.context, paintingContext: context);
         grid.paint(ctx, Offset.zero);
         axis.paint(ctx, Offset.zero);
         this.context.graphic.paint(ctx, Offset.zero);
 
-        Selection(graphics: this.context.selectedGraphics).paint(ctx, Offset.zero);
+        Selection(graphics: this.context.selectedGraphics, layer: layersCubit.layers.first).paint(ctx, Offset.zero);
       });
     });
     context.canvas.restore();
@@ -99,13 +110,13 @@ class SceneRenderObject extends RenderBox {
 }
 
 class Selection extends BaseGraphic {
-  Selection({required this.graphics});
+  Selection({required this.graphics, required super.layer});
 
   final List<BaseGraphic> graphics;
 
   @override
   Selection clone() {
-    return Selection(graphics: graphics);
+    return Selection(graphics: graphics, layer: layer);
   }
 
   @override
@@ -115,7 +126,13 @@ class Selection extends BaseGraphic {
   void paint(Context ctx, ui.Offset offset) {
     for (final graphic in graphics) {
       final rect = graphic.aabb();
-      ctx.canvas.drawPoints(ui.PointMode.polygon, [rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft, rect.topLeft], kEditorHighlightPaint);
+      ctx.canvas.drawPoints(ui.PointMode.polygon, [
+        rect.topLeft,
+        rect.topRight,
+        rect.bottomRight,
+        rect.bottomLeft,
+        rect.topLeft,
+      ], kEditorHighlightPaint);
     }
   }
 
@@ -140,7 +157,11 @@ class Scene extends LeafRenderObjectWidget {
 }
 
 class Grid extends BaseGraphic {
-  Grid({required this.dotGap, required this.dotSize});
+  Grid({
+    required super.layer,
+    required this.dotGap,
+    required this.dotSize,
+  });
 
   final double dotGap;
 
@@ -185,7 +206,7 @@ class Grid extends BaseGraphic {
 
   @override
   Grid clone() {
-    return Grid(dotGap: dotGap, dotSize: dotSize);
+    return Grid(layer: layer, dotGap: dotGap, dotSize: dotSize);
   }
 
   @override
@@ -193,7 +214,7 @@ class Grid extends BaseGraphic {
 }
 
 class Axis extends BaseGraphic {
-  Axis({required this.axisLength, required this.axisWidth});
+  Axis({required super.layer, required this.axisLength, required this.axisWidth});
 
   final double axisLength;
 
@@ -220,7 +241,7 @@ class Axis extends BaseGraphic {
 
   @override
   Axis clone() {
-    return Axis(axisLength: axisLength, axisWidth: axisWidth);
+    return Axis(layer: layer, axisLength: axisLength, axisWidth: axisWidth);
   }
 
   @override

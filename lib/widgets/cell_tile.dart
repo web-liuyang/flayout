@@ -12,7 +12,7 @@ class CellTile extends StatelessWidget {
     return Row(
       spacing: 8,
       children: [
-        SizedBox(width: 80, child: Text(title)),
+        SizedBox(width: 100, child: Text(title)),
         Expanded(child: trailing),
       ],
     );

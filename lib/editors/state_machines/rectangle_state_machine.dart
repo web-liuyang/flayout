@@ -9,7 +9,7 @@ class RectangleStateMachine extends BaseStateMachine {
 
   late BaseStateMachine _state = _DrawInitState(context: context, state: this);
 
-  late final _RectangleGraphicDraft _draft = _RectangleGraphicDraft();
+  late final _RectangleGraphicDraft _draft = _RectangleGraphicDraft(palette: context.currentLayer!.palette);
 
   @override
   void onTapDown(event) {
@@ -75,7 +75,7 @@ class _DrawStartedState extends BaseStateMachine {
 }
 
 class _RectangleGraphicDraft extends BaseGraphic {
-  _RectangleGraphicDraft();
+  _RectangleGraphicDraft({required super.palette});
 
   Offset? start;
 
@@ -83,10 +83,10 @@ class _RectangleGraphicDraft extends BaseGraphic {
 
   Rect? get rect => start != null && end != null ? Rect.fromPoints(start!, end!) : null;
 
-  final Paint _paint =
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..color = Colors.black;
+  // final Paint _paint =
+  //     Paint()
+  //       ..style = PaintingStyle.stroke
+  //       ..color = Colors.black;
 
   void reset() {
     start = null;
@@ -96,14 +96,21 @@ class _RectangleGraphicDraft extends BaseGraphic {
   @override
   void paint(Context context, Offset offset) {
     if (start == null || end == null) return;
-    _paint.strokeWidth = context.viewport.getLogicSize(1);
+    if (palette == null) return;
+
+    final Paint paint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = context.viewport.getLogicSize(palette!.outlineWidth)
+          ..color = palette!.outlineColor;
+
     final Rect rect = Rect.fromPoints(start!, end!);
-    context.canvas.drawRect(rect, _paint);
+    context.canvas.drawRect(rect, paint);
   }
 
   RectangleGraphic toGraphic() {
     final rect = this.rect!;
-    return RectangleGraphic(position: rect.topLeft, width: rect.width, height: rect.height);
+    return RectangleGraphic(palette: palette, position: rect.topLeft, width: rect.width, height: rect.height);
   }
 
   @override
@@ -111,7 +118,7 @@ class _RectangleGraphicDraft extends BaseGraphic {
 
   @override
   BaseGraphic clone() {
-    return _RectangleGraphicDraft()
+    return _RectangleGraphicDraft(palette: palette)
       ..start = start
       ..end = end;
   }

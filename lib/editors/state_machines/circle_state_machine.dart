@@ -1,6 +1,7 @@
 import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:blueprint_master/extensions/extensions.dart';
+import 'package:blueprint_master/layouts/cubits/cubits.dart';
 import 'package:flutter/material.dart';
 
 import 'state_machines.dart';
@@ -10,7 +11,7 @@ class CircleStateMachine extends BaseStateMachine {
 
   late BaseStateMachine _state = _DrawInitState(context: context, state: this);
 
-  late final _CircleGraphicDraft _draft = _CircleGraphicDraft();
+  late final _CircleGraphicDraft _draft = _CircleGraphicDraft(layer: layersCubit.current!);
 
   @override
   void onTapDown(event) {
@@ -77,7 +78,7 @@ class _DrawStartedState extends BaseStateMachine {
 }
 
 class _CircleGraphicDraft extends BaseGraphic {
-  _CircleGraphicDraft();
+  _CircleGraphicDraft({required super.layer});
 
   Offset? center;
 
@@ -96,7 +97,7 @@ class _CircleGraphicDraft extends BaseGraphic {
   }
 
   CircleGraphic toGraphic() {
-    return CircleGraphic(position: Offset.zero, radius: radius!, center: center!);
+    return CircleGraphic(layer: layer, position: Offset.zero, radius: radius!, center: center!);
   }
 
   @override
@@ -104,7 +105,7 @@ class _CircleGraphicDraft extends BaseGraphic {
 
   @override
   _CircleGraphicDraft clone() {
-    return _CircleGraphicDraft()
+    return _CircleGraphicDraft(layer: layer)
       ..center = center
       ..radius = radius;
   }

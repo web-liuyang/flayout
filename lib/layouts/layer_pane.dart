@@ -1,3 +1,5 @@
+import 'package:blueprint_master/editors/editor_config.dart';
+import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:blueprint_master/layouts/cubits/layers_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +7,29 @@ import 'package:multi_split_view/multi_split_view.dart';
 
 import '../widgets/widgets.dart';
 import 'cubits/cells_cubit.dart';
+
+class EditableLayer extends Layer {
+  EditableLayer({
+    required this.origin,
+    required super.name,
+    required super.layer,
+    required super.datatype,
+    required super.palette,
+  });
+
+  final Layer origin;
+
+  @override
+  EditableLayer copyWith({String? name, int? layer, int? datatype, LayerPalette? palette}) {
+    return EditableLayer(
+      origin: origin,
+      name: name ?? this.name,
+      layer: layer ?? this.layer,
+      datatype: datatype ?? this.datatype,
+      palette: palette ?? this.palette,
+    );
+  }
+}
 
 class LayerPane extends StatefulWidget {
   const LayerPane({super.key});
@@ -36,7 +61,6 @@ class _LayerPaneState extends State<LayerPane> {
           decoration: InputDecoration(
             hintText: "Search",
             prefixIcon: Icon(Icons.search),
-            // suffixIcon: IconButton(onPressed: () => setState(() => controller.text = ""), icon: Icon(Icons.clear)),
           ),
           controller: controller,
           onSubmitted: (value) => setState(() => controller.text = value),
@@ -83,19 +107,42 @@ class _LayerPaneToolbarState extends State<LayerPaneToolbar> {
 }
 
 class LayerSettingsDialog extends StatefulWidget {
-  const LayerSettingsDialog({super.key});
+  const LayerSettingsDialog({super.key, required this.layers});
 
-  static Future<String?> show(BuildContext context) {
-    return showDialog<String>(
+  final List<EditableLayer> layers;
+
+  static Future<void> show(BuildContext context) async {
+    final layersCubit = context.read<LayersCubit>();
+    final layers = layersCubit.layers;
+
+    final editableLayers =
+        layers
+            .map(
+              (layer) => EditableLayer(
+                origin: layer,
+                name: layer.name,
+                layer: layer.layer,
+                datatype: layer.datatype,
+                palette: layer.palette.copyWith(),
+              ),
+            )
+            .toList();
+
+    final List<EditableLayer>? result = await showDialog<List<EditableLayer>>(
       context: context,
-      builder: (_) {
-        return MultiBlocProvider(
-          providers: [
-            BlocProvider(create: (_) => context.watch<LayersCubit>()),
-          ],
-          child: LayerSettingsDialog(),
-        );
-      },
+      builder: (_) => LayerSettingsDialog(layers: editableLayers),
+    );
+
+    if (result == null) return;
+
+    layersCubit.setLayers(
+      result.map((editableLayer) {
+        return editableLayer.origin
+          ..name = editableLayer.name
+          ..layer = editableLayer.layer
+          ..datatype = editableLayer.datatype
+          ..palette = editableLayer.palette;
+      }).toList(),
     );
   }
 
@@ -110,7 +157,20 @@ class _LayerSettingsDialogState extends State<LayerSettingsDialog> {
 
   bool get isError => cellNameErrorText != null;
 
-  late Layer? current = context.read<LayersCubit>().current;
+  late List<EditableLayer> editableLayers =
+      widget.layers
+          .map(
+            (layer) => EditableLayer(
+              origin: layer,
+              name: layer.name,
+              layer: layer.layer,
+              datatype: layer.datatype,
+              palette: layer.palette.copyWith(),
+            ),
+          )
+          .toList();
+
+  late int currentIndex = 0;
 
   @override
   void dispose() {
@@ -119,10 +179,7 @@ class _LayerSettingsDialogState extends State<LayerSettingsDialog> {
   }
 
   void confirm() {
-    final String cellName = controller.text;
-    final bool contains = cellsCubit.contains(cellName);
-    if (contains) return;
-    Navigator.pop(context, cellName);
+    Navigator.pop<List<EditableLayer>>(context, editableLayers);
   }
 
   String? validateCellName(String value) {
@@ -142,9 +199,6 @@ class _LayerSettingsDialogState extends State<LayerSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final LayersCubit layersCubit = context.watch<LayersCubit>();
-    final List<Layer> layers = layersCubit.layers;
-
     return LayoutDialog(
       title: "Layer Settings",
       constraints: BoxConstraints.tightFor(width: 600),
@@ -157,10 +211,24 @@ class _LayerSettingsDialogState extends State<LayerSettingsDialog> {
               return Container(
                 decoration: BoxDecoration(border: Border(right: Divider.createBorderSide(context))),
                 child: LayerListView(
-                  layers: layers,
-                  current: current,
-                  onChangedCurrent: (value) {
-                    setState(() => current = value);
+                  layers: editableLayers,
+                  currentIndex: currentIndex,
+                  onChangedCurrentIndex: (value) {
+                    setState(() => currentIndex = value);
+                  },
+                  onAdd: () {
+                    setState(() {
+                      final Layer layer = Layer(name: "Layer ${editableLayers.length + 1}", layer: 1, datatype: 1);
+                      editableLayers.add(
+                        EditableLayer(
+                          origin: layer,
+                          name: layer.name,
+                          layer: layer.layer,
+                          datatype: layer.datatype,
+                          palette: layer.palette.copyWith(),
+                        ),
+                      );
+                    });
                   },
                 ),
               );
@@ -169,9 +237,21 @@ class _LayerSettingsDialogState extends State<LayerSettingsDialog> {
           Area(
             flex: 2,
             builder: (context, area) {
+              final current = editableLayers.elementAtOrNull(currentIndex);
+              if (current == null) {
+                return Center(child: Text("No layer selected"));
+              }
+
               return Container(
                 decoration: BoxDecoration(border: Border(left: Divider.createBorderSide(context))),
-                child: LayerEditor(),
+                child: LayerEditor(
+                  value: current,
+                  onChanged: (value) {
+                    setState(() {
+                      editableLayers.replaceAt(currentIndex, value);
+                    });
+                  },
+                ),
               );
             },
           ),
@@ -183,13 +263,23 @@ class _LayerSettingsDialogState extends State<LayerSettingsDialog> {
 }
 
 class LayerListView extends StatefulWidget {
-  const LayerListView({super.key, required this.layers, this.current, required this.onChangedCurrent});
+  const LayerListView({
+    super.key,
+    required this.layers,
+    required this.currentIndex,
+    required this.onChangedCurrentIndex,
+    required this.onAdd,
+  });
 
-  final List<Layer> layers;
+  final List<EditableLayer> layers;
 
-  final Layer? current;
+  final int currentIndex;
 
-  final ValueSetter<Layer?> onChangedCurrent;
+  final ValueSetter<int> onChangedCurrentIndex;
+
+  final VoidCallback onAdd;
+
+  EditableLayer? get current => layers.elementAtOrNull(currentIndex);
 
   @override
   State<LayerListView> createState() => _LayerListViewState();
@@ -206,43 +296,155 @@ class _LayerListViewState extends State<LayerListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        InputBox(
-          decoration: InputDecoration(
-            hintText: "Search",
-            prefixIcon: Icon(Icons.search),
-            // suffixIcon: IconButton(onPressed: () => setState(() => controller.text = ""), icon: Icon(Icons.clear)),
+    final layers = widget.layers.where((layer) => layer.name.contains(controller.text)).toList();
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              IconButton(onPressed: widget.onAdd, icon: Icon(Icons.add_box_outlined)),
+            ],
           ),
-          controller: controller,
-          onSubmitted: (value) => setState(() => controller.text = value),
-        ),
-        Divider(height: 1),
-        Expanded(
-          child: ListView.builder(
-            itemBuilder: (context, index) {
-              final Layer layer = widget.layers[index];
-              final String title = layer.name;
-              final bool isSelected = widget.current == layer;
-              return ListTile(
-                title: Text(title),
-                selected: isSelected,
-                onTap: () => widget.onChangedCurrent(layer),
-              );
-            },
-            itemCount: widget.layers.length,
+
+          InputBox(
+            decoration: InputDecoration(
+              hintText: "Search",
+              prefixIcon: Icon(Icons.search),
+            ),
+            controller: controller,
+            onSubmitted: (value) => setState(() => controller.text = value),
           ),
-        ),
-      ],
+          Divider(height: 1),
+          Expanded(
+            child: ListView.builder(
+              itemBuilder: (context, index) {
+                final EditableLayer layer = layers[index];
+                final String title = layer.name;
+                final bool isSelected = widget.current == layer;
+                return ListTile(
+                  title: Text(title),
+                  selected: isSelected,
+                  onTap: () => widget.onChangedCurrentIndex(widget.layers.indexOf(layer)),
+                );
+              },
+              itemCount: layers.length,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class LayerEditor extends StatelessWidget {
-  const LayerEditor({super.key});
+  const LayerEditor({super.key, required this.value, required this.onChanged});
+
+  final EditableLayer value;
+
+  final ValueSetter<EditableLayer> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        spacing: 8,
+        children: [
+          CellTile(
+            title: "Name:",
+            trailing: InputBox(
+              value: value.name,
+              onAction: (value) => onChanged(this.value.copyWith(name: value)),
+            ),
+          ),
+          CellTile(
+            title: "Layer:",
+            trailing: InputBox(
+              value: "${value.layer}",
+              onAction: (value) => onChanged(this.value.copyWith(layer: int.parse(value))),
+            ),
+          ),
+          CellTile(
+            title: "Datatype:",
+            trailing: InputBox(
+              value: "${value.datatype}",
+              onAction: (value) => onChanged(this.value.copyWith(datatype: int.parse(value))),
+            ),
+          ),
+          CellTile(
+            title: "Outline Width:",
+            trailing: InputBox(
+              value: "${value.palette.outlineWidth}",
+              onAction: (value) {
+                onChanged(
+                  this.value.copyWith(palette: this.value.palette.copyWith(outlineWidth: double.parse(value))),
+                );
+              },
+            ),
+          ),
+          CellTile(
+            title: "Outline Color:",
+            trailing: ColorSelector(
+              value: value.palette.outlineColor,
+              colors: kEditorDrawingColors,
+              onChanged: (value) {
+                onChanged(this.value.copyWith(palette: this.value.palette.copyWith(outlineColor: value)));
+              },
+            ),
+          ),
+          CellTile(
+            title: "Fill Color:",
+            trailing: ColorSelector(
+              value: value.palette.fillColor,
+              colors: kEditorDrawingColors,
+              onChanged: (value) {
+                onChanged(this.value.copyWith(palette: this.value.palette.copyWith(fillColor: value)));
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ColorSelector extends StatelessWidget {
+  const ColorSelector({super.key, required this.value, required this.colors, required this.onChanged});
+
+  final Color value;
+
+  final List<Color> colors;
+
+  final ValueSetter<Color> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final BorderSide? borderSide = theme.inputDecorationTheme.border?.borderSide;
+
+    return Container(
+      decoration: BoxDecoration(
+        border: borderSide != null ? Border.fromBorderSide(borderSide) : null,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: DropdownButton(
+        isExpanded: true,
+        isDense: true,
+        value: value,
+        underline: Container(),
+        selectedItemBuilder: (context) => colors.map((color) => Container(color: color)).toList(growable: false),
+        items: colors
+            .map(
+              (color) => DropdownMenuItem(value: color, child: Container(margin: EdgeInsets.all(8), color: color)),
+            )
+            .toList(growable: false),
+        onChanged: (value) {
+          if (value == null) return;
+          onChanged(value);
+        },
+      ),
+    );
   }
 }

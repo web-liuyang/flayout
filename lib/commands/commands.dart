@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:blueprint_master/editors/editors.dart';
 import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:flutter/foundation.dart';
@@ -44,7 +42,6 @@ class CustomDirectionalFocusAction extends DirectionalFocusAction {
       TraversalDirection.up => 3,
       TraversalDirection.down => 4,
     };
-    print(intent);
     // super.invoke(intent);
   }
 }

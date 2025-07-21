@@ -1,19 +1,32 @@
+import 'dart:ui';
+
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LayerPalette {
-  double outlineWidth = 1;
+  const LayerPalette({
+    this.outlineWidth = 1,
+    this.outlineColor = const Color(0xFF000000),
+    this.fillColor = const Color(0xFFFFFFFF),
+  });
 
-  int outlineColor = Colors.black.toARGB32();
+  final double outlineWidth;
 
-  int fillColor = Colors.transparent.toARGB32();
+  final Color outlineColor;
+
+  final Color fillColor;
+
+  LayerPalette copyWith({double? outlineWidth, Color? outlineColor, Color? fillColor}) {
+    return LayerPalette(
+      outlineWidth: outlineWidth ?? this.outlineWidth,
+      outlineColor: outlineColor ?? this.outlineColor,
+      fillColor: fillColor ?? this.fillColor,
+    );
+  }
 }
 
 class Layer {
-  Layer({required this.name, required this.layer, required this.datatype, LayerPalette? palette}) {
-    this.palette = palette ?? LayerPalette();
-  }
+  Layer({required this.name, required this.layer, required this.datatype, this.palette = const LayerPalette()});
 
   String name;
 
@@ -21,8 +34,21 @@ class Layer {
 
   int datatype;
 
-  late LayerPalette palette;
+  String get id => "$name-$layer-$datatype";
+
+  LayerPalette palette;
+
+  Layer copyWith({String? name, int? layer, int? datatype, LayerPalette? palette}) {
+    return Layer(
+      name: name ?? this.name,
+      layer: layer ?? this.layer,
+      datatype: datatype ?? this.datatype,
+      palette: palette ?? this.palette,
+    );
+  }
 }
+
+const Object freeze = Object();
 
 class LayersCubitState {
   List<Layer> layers;
@@ -33,36 +59,41 @@ class LayersCubitState {
     current ??= layers.firstOrNull;
   }
 
-  LayersCubitState copyWith({required Layer current}) {
+  LayersCubitState copyWith({Object? current = freeze, List<Layer>? layers}) {
     return LayersCubitState(
-      layers: layers,
-      current: current,
+      current: current == freeze ? this.current : current as Layer?,
+      layers: layers ?? this.layers,
     );
   }
 }
 
 class LayersCubit extends Cubit<LayersCubitState> {
-  LayersCubit(super.initialState);
+  LayersCubit(super.initialState) {
+    setLayers(state.layers);
+  }
 
   List<Layer> get layers => state.layers;
 
   Layer? get current => state.current;
 
+  Map<String, Paint> paints = {};
+
   void setCurrent(Layer layer) {
     emit(state.copyWith(current: layer));
   }
 
-  // void add(Layer cell) {
-  //   // emit([...state, cell]);
-  // }
+  void setLayers(List<Layer> layers) {
+    paints = {};
+    for (final item in layers) {
+      paints[item.id] ??= Paint();
+      final paint = paints[item.id]!;
+      if (paint.strokeWidth != item.palette.outlineWidth) paint.strokeWidth = item.palette.outlineWidth;
+      if (paint.color != item.palette.outlineColor) paint.color = item.palette.outlineColor;
+      if (paint.color != item.palette.fillColor) paint.color = item.palette.fillColor;
+    }
 
-  // Layer? find(String name) {
-  //   // return state.firstWhereOrNull((item) => item.name == name);
-  // }
-
-  // bool contains(String name) {
-  //   // return state.any((item) => item.name == name);
-  // }
+    emit(state.copyWith(layers: layers));
+  }
 }
 
 final LayersCubit layersCubit = LayersCubit(

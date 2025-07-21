@@ -4,6 +4,7 @@ class InputBox extends StatefulWidget {
   const InputBox({
     super.key,
     this.defaultValue,
+    this.value,
     this.controller,
     this.decoration = const InputDecoration(),
     this.onSubmitted,
@@ -11,6 +12,8 @@ class InputBox extends StatefulWidget {
   });
 
   final String? defaultValue;
+
+  final String? value;
 
   final TextEditingController? controller;
 
@@ -32,7 +35,10 @@ class _InputBoxState extends State<InputBox> {
   @override
   void initState() {
     super.initState();
-    if (widget.defaultValue != null) {
+
+    if (widget.value != null && widget.value != controller.text) {
+      controller.text = widget.value!;
+    } else if (widget.defaultValue != null && widget.defaultValue != controller.text) {
       controller.text = widget.defaultValue!;
     }
   }
@@ -41,6 +47,14 @@ class _InputBoxState extends State<InputBox> {
     if (!value) {
       widget.onAction?.call(controller.text);
     }
+  }
+
+  @override
+  void didUpdateWidget(covariant InputBox oldWidget) {
+    if (widget.value != null && widget.value != controller.text) {
+      controller.text = widget.value!;
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override

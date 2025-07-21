@@ -20,4 +20,8 @@ extension ListExtension<T> on List<T> {
       remove(item);
     }
   }
+
+  List<T> replacedAt(int index, T item) => List.from(this)..[index] = item;
+
+  void replaceAt(int index, T item) => this[index] = item;
 }

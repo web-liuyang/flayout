@@ -5,7 +5,7 @@ import 'package:blueprint_master/editors/editor_config.dart';
 import 'base_graphic.dart';
 
 class RectangleGraphic extends BaseGraphic {
-  RectangleGraphic({super.position, required this.width, required this.height});
+  RectangleGraphic({super.position, required super.palette, required this.width, required this.height});
 
   double width;
 
@@ -26,7 +26,7 @@ class RectangleGraphic extends BaseGraphic {
 
   @override
   RectangleGraphic clone() {
-    return RectangleGraphic(position: position, width: width, height: height);
+    return RectangleGraphic(position: position, palette: palette, width: width, height: height);
   }
 
   @override

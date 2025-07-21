@@ -6,7 +6,12 @@ import 'package:blueprint_master/editors/editor_config.dart';
 import 'base_graphic.dart';
 
 class CircleGraphic extends BaseGraphic {
-  CircleGraphic({super.position, required this.center, required this.radius});
+  CircleGraphic({
+    super.position,
+    required super.layer,
+    required this.center,
+    required this.radius,
+  });
 
   Offset center;
 
@@ -24,7 +29,7 @@ class CircleGraphic extends BaseGraphic {
   bool contains(Offset position) => path.contains(position);
 
   @override
-  CircleGraphic clone() => CircleGraphic(position: position, radius: radius, center: center);
+  CircleGraphic clone() => CircleGraphic(position: position, layer: layer, radius: radius, center: center);
 
   @override
   Rect aabb() => path.getBounds();
