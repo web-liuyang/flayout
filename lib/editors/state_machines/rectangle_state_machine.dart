@@ -13,9 +13,9 @@ class RectangleStateMachine extends BaseStateMachine {
   late final _RectangleGraphicDraft _draft = _RectangleGraphicDraft();
 
   @override
-  void onTapDown(event) {
-    super.onTapDown(event);
-    _state.onTapDown(event);
+  void onPrimaryTapDown(event) {
+    super.onPrimaryTapDown(event);
+    _state.onPrimaryTapDown(event);
   }
 
   @override
@@ -25,12 +25,33 @@ class RectangleStateMachine extends BaseStateMachine {
   }
 
   @override
+  void onPan(PanCanvasEvent event) {
+    super.onPan(event);
+    context.viewport.translate(event.delta);
+    context.render();
+  }
+
+  @override
+  void onScroll(info) {
+    super.onScroll(info);
+    final zoomFn = switch (info.direction) {
+      ScrollDirection.up => context.viewport.zoomIn,
+      ScrollDirection.down => context.viewport.zoomOut,
+    };
+
+    zoomFn(info.position);
+    context.render();
+  }
+
+  @override
   void done() {
     super.done();
     _state = _DrawInitState(context: context, state: this);
     context.graphic.children.remove(_draft);
     context.render();
     Actions.invoke(context.buildContext, AddGraphicIntent(context, [_draft.toGraphic()]));
+
+    _draft.reset();
   }
 
   @override
@@ -40,6 +61,8 @@ class RectangleStateMachine extends BaseStateMachine {
     final result = context.graphic.children.remove(_draft);
     context.render();
     if (!result) context.stateMachineNotifier.value = SelectionStateMachine(context: context);
+
+    _draft.reset();
   }
 }
 
@@ -49,7 +72,7 @@ class _DrawInitState extends BaseStateMachine {
   final RectangleStateMachine state;
 
   @override
-  void onTapDown(info) {
+  void onPrimaryTapDown(info) {
     state._draft.start = info.position;
     context.graphic.children.add(state._draft);
     context.render();
@@ -63,7 +86,7 @@ class _DrawStartedState extends BaseStateMachine {
   final RectangleStateMachine state;
 
   @override
-  void onTapDown(info) {
+  void onPrimaryTapDown(info) {
     state.done();
   }
 
@@ -121,6 +144,8 @@ class _RectangleGraphicDraft extends BaseGraphic {
   @override
   BaseGraphic clone() {
     return _RectangleGraphicDraft()
+      ..layer = layer
+      ..position = position
       ..start = start
       ..end = end;
   }

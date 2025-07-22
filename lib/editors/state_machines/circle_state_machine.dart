@@ -14,9 +14,9 @@ class CircleStateMachine extends BaseStateMachine {
   late final _CircleGraphicDraft _draft = _CircleGraphicDraft();
 
   @override
-  void onTapDown(event) {
-    super.onTapDown(event);
-    _state.onTapDown(event);
+  void onPrimaryTapDown(event) {
+    super.onPrimaryTapDown(event);
+    _state.onPrimaryTapDown(event);
   }
 
   @override
@@ -26,11 +26,33 @@ class CircleStateMachine extends BaseStateMachine {
   }
 
   @override
+  void onPan(PanCanvasEvent event) {
+    super.onPan(event);
+    context.viewport.translate(event.delta);
+    context.render();
+  }
+
+  @override
+  void onScroll(info) {
+    super.onScroll(info);
+    final zoomFn = switch (info.direction) {
+      ScrollDirection.up => context.viewport.zoomIn,
+      ScrollDirection.down => context.viewport.zoomOut,
+    };
+
+    zoomFn(info.position);
+    context.render();
+  }
+
+  @override
   void done() {
     super.done();
     _state = _DrawInitState(context: context, state: this);
     context.graphic.children.remove(_draft);
+    context.render();
     Actions.invoke(context.buildContext, AddGraphicIntent(context, [_draft.toGraphic()]));
+
+    _draft.reset();
   }
 
   @override
@@ -40,6 +62,8 @@ class CircleStateMachine extends BaseStateMachine {
     final result = context.graphic.children.remove(_draft);
     context.render();
     if (!result) context.stateMachineNotifier.value = SelectionStateMachine(context: context);
+
+    _draft.reset();
   }
 }
 
@@ -49,8 +73,8 @@ class _DrawInitState extends BaseStateMachine {
   final CircleStateMachine state;
 
   @override
-  void onTapDown(info) {
-    super.onTapDown(info);
+  void onPrimaryTapDown(info) {
+    super.onPrimaryTapDown(info);
     state._draft.center = info.position;
     context.graphic.children.add(state._draft);
     context.render();
@@ -64,8 +88,8 @@ class _DrawStartedState extends BaseStateMachine {
   final CircleStateMachine state;
 
   @override
-  void onTapDown(info) {
-    super.onTapDown(info);
+  void onPrimaryTapDown(info) {
+    super.onPrimaryTapDown(info);
     state.done();
   }
 
@@ -84,6 +108,11 @@ class _CircleGraphicDraft extends BaseGraphic {
 
   double? radius;
 
+  void reset() {
+    center = null;
+    radius = null;
+  }
+
   @override
   void paint(Context context, Offset offset) {
     if (center == null || radius == null) return;
@@ -95,7 +124,7 @@ class _CircleGraphicDraft extends BaseGraphic {
   }
 
   CircleGraphic toGraphic() {
-    return CircleGraphic(layer: layer, position: Offset.zero, radius: radius!, center: center!);
+    return CircleGraphic(layer: layersCubit.current!, position: Offset.zero, radius: radius!, center: center!);
   }
 
   @override
@@ -104,6 +133,8 @@ class _CircleGraphicDraft extends BaseGraphic {
   @override
   _CircleGraphicDraft clone() {
     return _CircleGraphicDraft()
+      ..layer = layer
+      ..position = position
       ..center = center
       ..radius = radius;
   }

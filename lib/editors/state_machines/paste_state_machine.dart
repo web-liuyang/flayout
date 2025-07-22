@@ -20,7 +20,7 @@ class PasteStateMachine extends BaseStateMachine {
   late GroupGraphic _draft;
 
   @override
-  void onTapDown(event) {
+  void onPrimaryTapDown(event) {
     done();
   }
 

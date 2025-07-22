@@ -34,87 +34,25 @@ class _StateMachineState extends State<StateMachine> {
     super.dispose();
   }
 
-  //   bloc: drawCubit,
-  void onLoad() {
-    // add(drawCubitListener);
+  void onPrimaryTapDown(PointerDownEvent event) {
+    final position = widget.context.viewport.windowToCanvas(event.localPosition);
+    widget.context.stateMachine.onPrimaryTapDown(TapDownCanvasEvent(position: position));
   }
 
-  // TapDetector
-  void onTap() {
-    widget.context.stateMachine.onTap();
-  }
-
-  void onTapDown(TapDownDetails info) {
-    final position = widget.context.viewport.windowToCanvas(info.localPosition);
-    widget.context.stateMachine.onTapDown(TapDownCanvasEvent(position: position));
-  }
-
-  void onTapUp(TapUpDetails info) {
-    final position = widget.context.viewport.windowToCanvas(info.localPosition);
-    widget.context.stateMachine.onTapUp(TapUpCanvasEvent(position: position));
-  }
-
-  void onTapCancel() {
-    widget.context.stateMachine.onTapCancel();
-  }
-
-  // SecondaryTapDetector
-  void onSecondaryTapDown(TapDownDetails info) {
-    final position = widget.context.viewport.windowToCanvas(info.localPosition);
+  void onSecondaryTapDown(PointerDownEvent event) {
+    final position = widget.context.viewport.windowToCanvas(event.localPosition);
     widget.context.stateMachine.onSecondaryTapDown(TapDownCanvasEvent(position: position));
   }
 
-  void onSecondaryTapUp(TapUpDetails info) {
-    final position = widget.context.viewport.windowToCanvas(info.localPosition);
-    widget.context.stateMachine.onSecondaryTapUp(TapUpCanvasEvent(position: position));
+  void onTertiaryTapDown(PointerDownEvent event) {
+    final position = widget.context.viewport.windowToCanvas(event.localPosition);
+    widget.context.stateMachine.onTertiaryTapDown(TapDownCanvasEvent(position: position));
   }
 
-  void onSecondaryTapCancel() {
-    widget.context.stateMachine.onSecondaryTapCancel();
-  }
-
-  // PanDetector
-  void onPanStart(DragStartDetails info) {
-    final position = widget.context.viewport.windowToCanvas(info.localPosition);
-    widget.context.stateMachine.onPanStart(DragStartCanvasEvent(position: position));
-  }
-
-  void onPanDown(DragDownDetails info) {
-    final position = widget.context.viewport.windowToCanvas(info.localPosition);
-    widget.context.stateMachine.onPanDown(DragDownCanvasEvent(position: position));
-  }
-
-  void onPanUpdate(DragUpdateDetails info) {
-    final position = widget.context.viewport.windowToCanvas(info.localPosition);
-    widget.context.stateMachine.onPanUpdate(DragUpdateCanvasEvent(position: position));
-  }
-
-  void onPanEnd(DragEndDetails info) {
-    // final position = widget.context.viewport.windowToCanvas(info.velocity.pixelsPerSecond);
-    final position = widget.context.viewport.windowToCanvas(info.localPosition);
-    widget.context.stateMachine.onPanEnd(DragEndCanvasEvent(position: position));
-  }
-
-  void onPanCancel() {
-    widget.context.stateMachine.onPanCancel();
-  }
-
-  // ScaleDetector
-  void onScaleStart(ScaleStartDetails info) {
-    final position = widget.context.viewport.windowToCanvas(info.localFocalPoint);
-    widget.context.stateMachine.onScaleStart(ScaleStartCanvasEvent(position: position));
-  }
-
-  void onScaleUpdate(ScaleUpdateDetails info) {
-    final position = widget.context.viewport.windowToCanvas(info.localFocalPoint);
-    final scale = info.scale;
-    final delta = widget.context.viewport.transform.rotateOffset(info.focalPointDelta);
-    widget.context.stateMachine.onScaleUpdate(ScaleUpdateCanvasEvent(position: position, scale: scale, delta: delta));
-  }
-
-  void onScaleEnd(ScaleEndDetails info) {
-    final position = widget.context.viewport.windowToCanvas(info.velocity.pixelsPerSecond);
-    widget.context.stateMachine.onScaleEnd(ScaleEndCanvasEvent(position: position));
+  void onPan(PointerMoveEvent event) {
+    final position = widget.context.viewport.windowToCanvas(event.localPosition);
+    final delta = widget.context.viewport.transform.rotateOffset(event.delta);
+    widget.context.stateMachine.onPan(PanCanvasEvent(position: position, delta: delta));
   }
 
   // MouseMovementDetector
@@ -124,7 +62,7 @@ class _StateMachineState extends State<StateMachine> {
   }
 
   void onScroll(PointerScrollEvent info) {
-    final position = widget.context.viewport.windowToCanvas(info.position);
+    final position = widget.context.viewport.windowToCanvas(info.localPosition);
     final direction = info.scrollDelta.dy > 0 ? ScrollDirection.down : ScrollDirection.up;
     widget.context.stateMachine.onScroll(PointerScrollCanvasEvent(position: position, direction: direction));
   }
@@ -151,31 +89,27 @@ class _StateMachineState extends State<StateMachine> {
         onKeyEvent: onKeyEvent,
         child: MouseRegion(
           onHover: onMouseMove,
-          child: GestureDetector(
-            onTap: onTap,
-            onTapDown: onTapDown,
-            onTapUp: onTapUp,
-            onTapCancel: onTapCancel,
-
-            // onPanDown: onPanDown,
-            // onPanUpdate: onPanUpdate,
-            // onPanEnd: onPanEnd,
-            // onPanCancel: onPanCancel,
-            onSecondaryTapDown: onSecondaryTapDown,
-            onSecondaryTapUp: onSecondaryTapUp,
-            onSecondaryTapCancel: onSecondaryTapCancel,
-
-            onScaleStart: onScaleStart,
-            onScaleUpdate: onScaleUpdate,
-            onScaleEnd: onScaleEnd,
-
-            child: Listener(
-              onPointerSignal: (event) {
-                if (event is! PointerScrollEvent) return;
+          child: Listener(
+            onPointerMove: (event) {
+              if (event.buttons == kTertiaryButton) {
+                onPan(event);
+              }
+            },
+            onPointerDown: (event) {
+              if (event.buttons == kPrimaryButton) {
+                onPrimaryTapDown(event);
+              } else if (event.buttons == kSecondaryButton) {
+                onSecondaryTapDown(event);
+              } else if (event.buttons == kTertiaryButton) {
+                onTertiaryTapDown(event);
+              }
+            },
+            onPointerSignal: (event) {
+              if (event is PointerScrollEvent) {
                 onScroll(event);
-              },
-              child: widget.child,
-            ),
+              }
+            },
+            child: widget.child,
           ),
         ),
       ),
