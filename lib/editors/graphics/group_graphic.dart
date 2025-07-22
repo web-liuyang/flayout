@@ -5,7 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'base_graphic.dart';
 
 class GroupGraphic extends BaseGraphic {
-  GroupGraphic({super.position, required super.layer, this.children = const []});
+  GroupGraphic({super.position, this.children = const []});
 
   final List<BaseGraphic> children;
 
@@ -41,7 +41,7 @@ class GroupGraphic extends BaseGraphic {
 
   @override
   GroupGraphic clone() {
-    return GroupGraphic(position: position, layer: layer, children: children.map((e) => e.clone()).toList());
+    return GroupGraphic(position: position, children: children.map((e) => e.clone()).toList());
   }
 
   @override

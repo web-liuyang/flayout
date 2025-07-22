@@ -1,8 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:blueprint_master/editors/editor_config.dart';
-
+import '../../layouts/cubits/cubits.dart';
 import 'base_graphic.dart';
 
 class CircleGraphic extends BaseGraphic {
@@ -21,8 +20,10 @@ class CircleGraphic extends BaseGraphic {
 
   @override
   void paint(Context ctx, Offset offset) {
+    if (layer == null) return;
     path = Path()..addArc(Rect.fromCircle(center: center + position + offset, radius: radius), 0, 2 * pi);
-    ctx.canvas.drawPath(path, kEditorPaint);
+    final paint = layersCubit.getPaint(layer!, ctx);
+    ctx.canvas.drawPath(path, paint);
   }
 
   @override

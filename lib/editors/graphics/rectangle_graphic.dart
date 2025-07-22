@@ -1,11 +1,11 @@
 import 'dart:ui';
 
-import 'package:blueprint_master/editors/editor_config.dart';
+import '../../layouts/cubits/cubits.dart';
 
 import 'base_graphic.dart';
 
 class RectangleGraphic extends BaseGraphic {
-  RectangleGraphic({super.position, required super.palette, required this.width, required this.height});
+  RectangleGraphic({super.position, required super.layer, required this.width, required this.height});
 
   double width;
 
@@ -15,8 +15,10 @@ class RectangleGraphic extends BaseGraphic {
 
   @override
   void paint(Context ctx, Offset offset) {
+    if (layer == null) return;
     path = Path()..addRect(Rect.fromLTWH(position.dx + offset.dx, position.dy + offset.dy, width, height));
-    ctx.canvas.drawPath(path, kEditorPaint);
+    final paint = layersCubit.getPaint(layer!, ctx);
+    ctx.canvas.drawPath(path, paint);
   }
 
   @override
@@ -26,7 +28,7 @@ class RectangleGraphic extends BaseGraphic {
 
   @override
   RectangleGraphic clone() {
-    return RectangleGraphic(position: position, palette: palette, width: width, height: height);
+    return RectangleGraphic(position: position, layer: layer, width: width, height: height);
   }
 
   @override

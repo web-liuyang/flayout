@@ -136,11 +136,11 @@ class Context {
 }
 
 abstract class BaseGraphic {
-  BaseGraphic({this.position = Offset.zero, this.palette});
+  BaseGraphic({this.position = Offset.zero, this.layer});
 
   Offset position;
 
-  LayerPalette? palette;
+  Layer? layer;
 
   void paint(Context ctx, Offset offset);
 

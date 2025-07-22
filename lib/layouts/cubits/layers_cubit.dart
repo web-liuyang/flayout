@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:blueprint_master/editors/graphics/base_graphic.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,6 +24,16 @@ class LayerPalette {
       fillColor: fillColor ?? this.fillColor,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! LayerPalette) return false;
+    return outlineWidth == other.outlineWidth && outlineColor == other.outlineColor && fillColor == other.fillColor;
+  }
+
+  @override
+  int get hashCode => outlineWidth.hashCode ^ outlineColor.hashCode ^ fillColor.hashCode;
 }
 
 class Layer {
@@ -45,6 +56,21 @@ class Layer {
       datatype: datatype ?? this.datatype,
       palette: palette ?? this.palette,
     );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! Layer) return false;
+    return name == other.name && layer == other.layer && datatype == other.datatype;
+  }
+
+  // @override
+  // int get hashCode => name.hashCode ^ layer.hashCode ^ datatype.hashCode ^ palette.hashCode;
+
+  @override
+  String toString() {
+    return 'Layer{name: $name, layer: $layer, datatype: $datatype, palette: $palette}';
   }
 }
 
@@ -69,7 +95,7 @@ class LayersCubitState {
 
 class LayersCubit extends Cubit<LayersCubitState> {
   LayersCubit(super.initialState) {
-    setLayers(state.layers);
+    state.current ??= state.layers.firstOrNull;
   }
 
   List<Layer> get layers => state.layers;
@@ -84,15 +110,16 @@ class LayersCubit extends Cubit<LayersCubitState> {
 
   void setLayers(List<Layer> layers) {
     paints = {};
-    for (final item in layers) {
-      paints[item.id] ??= Paint();
-      final paint = paints[item.id]!;
-      if (paint.strokeWidth != item.palette.outlineWidth) paint.strokeWidth = item.palette.outlineWidth;
-      if (paint.color != item.palette.outlineColor) paint.color = item.palette.outlineColor;
-      if (paint.color != item.palette.fillColor) paint.color = item.palette.fillColor;
-    }
-
     emit(state.copyWith(layers: layers));
+  }
+
+  Paint getPaint(Layer layer, Context context) {
+    final paint = paints[layer.id] ??= Paint();
+
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = context.viewport.getLogicSize(layer.palette.outlineWidth);
+    paint.color = layer.palette.outlineColor;
+    return paint;
   }
 }
 

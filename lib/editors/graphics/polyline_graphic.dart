@@ -1,11 +1,15 @@
 import 'dart:ui';
 
-import 'package:blueprint_master/editors/editor_config.dart';
-
+import '../../layouts/cubits/cubits.dart';
 import 'base_graphic.dart';
 
 class PolylineGraphic extends BaseGraphic {
-  PolylineGraphic({super.position, required this.vertices, required this.halfWidth});
+  PolylineGraphic({
+    super.position,
+    required super.layer,
+    required this.vertices,
+    required this.halfWidth,
+  });
 
   final List<Offset> vertices;
 
@@ -13,8 +17,10 @@ class PolylineGraphic extends BaseGraphic {
 
   @override
   void paint(Context ctx, Offset offset) {
+    if (layer == null) return;
     final vertices = this.vertices.map((e) => e + position + offset).toList();
-    ctx.canvas.drawPoints(PointMode.lines, vertices, kEditorPaint);
+    final paint = layersCubit.getPaint(layer!, ctx);
+    ctx.canvas.drawPoints(PointMode.lines, vertices, paint);
   }
 
   @override
@@ -24,7 +30,7 @@ class PolylineGraphic extends BaseGraphic {
 
   @override
   PolylineGraphic clone() {
-    return PolylineGraphic(position: position, vertices: vertices, halfWidth: halfWidth);
+    return PolylineGraphic(position: position, layer: layer, vertices: vertices, halfWidth: halfWidth);
   }
 
   @override

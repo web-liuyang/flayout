@@ -11,7 +11,7 @@ class CircleStateMachine extends BaseStateMachine {
 
   late BaseStateMachine _state = _DrawInitState(context: context, state: this);
 
-  late final _CircleGraphicDraft _draft = _CircleGraphicDraft(layer: layersCubit.current!);
+  late final _CircleGraphicDraft _draft = _CircleGraphicDraft();
 
   @override
   void onTapDown(event) {
@@ -78,22 +78,20 @@ class _DrawStartedState extends BaseStateMachine {
 }
 
 class _CircleGraphicDraft extends BaseGraphic {
-  _CircleGraphicDraft({required super.layer});
+  _CircleGraphicDraft();
 
   Offset? center;
 
   double? radius;
 
-  final Paint _paint =
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..color = Colors.black;
-
   @override
   void paint(Context context, Offset offset) {
     if (center == null || radius == null) return;
-    _paint.strokeWidth = context.viewport.getLogicSize(1);
-    context.canvas.drawCircle(center!, radius!, _paint);
+    final layer = layersCubit.current;
+    if (layer == null) return;
+
+    final paint = layersCubit.getPaint(layer, context);
+    context.canvas.drawCircle(center!, radius!, paint);
   }
 
   CircleGraphic toGraphic() {
@@ -105,7 +103,7 @@ class _CircleGraphicDraft extends BaseGraphic {
 
   @override
   _CircleGraphicDraft clone() {
-    return _CircleGraphicDraft(layer: layer)
+    return _CircleGraphicDraft()
       ..center = center
       ..radius = radius;
   }

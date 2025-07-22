@@ -22,7 +22,6 @@ class _StateMachineState extends State<StateMachine> {
 
   @override
   void initState() {
-    print("initState");
     focusNode.requestFocus();
     // HardwareKeyboard.instance.a(focusNode);
     super.initState();
@@ -30,7 +29,6 @@ class _StateMachineState extends State<StateMachine> {
 
   @override
   void dispose() {
-    print("dispose");
     focusNode.dispose();
     super.dispose();
   }

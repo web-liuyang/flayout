@@ -115,18 +115,19 @@ class LayerSettingsDialog extends StatefulWidget {
     final layersCubit = context.read<LayersCubit>();
     final layers = layersCubit.layers;
 
+    print("First layer: ${layers.first.hashCode}");
     final editableLayers =
-        layers
-            .map(
-              (layer) => EditableLayer(
-                origin: layer,
-                name: layer.name,
-                layer: layer.layer,
-                datatype: layer.datatype,
-                palette: layer.palette.copyWith(),
-              ),
-            )
-            .toList();
+        layers.map(
+          (layer) {
+            return EditableLayer(
+              origin: layer,
+              name: layer.name,
+              layer: layer.layer,
+              datatype: layer.datatype,
+              palette: layer.palette.copyWith(),
+            );
+          },
+        ).toList();
 
     final List<EditableLayer>? result = await showDialog<List<EditableLayer>>(
       context: context,
@@ -136,12 +137,13 @@ class LayerSettingsDialog extends StatefulWidget {
     if (result == null) return;
 
     layersCubit.setLayers(
-      result.map((editableLayer) {
-        return editableLayer.origin
-          ..name = editableLayer.name
-          ..layer = editableLayer.layer
-          ..datatype = editableLayer.datatype
-          ..palette = editableLayer.palette;
+      result.map((item) {
+        return item.origin
+          ..name = item.name
+          ..layer = item.layer
+          ..datatype = item.datatype
+          ..palette = item.palette;
+        ;
       }).toList(),
     );
   }
@@ -158,17 +160,17 @@ class _LayerSettingsDialogState extends State<LayerSettingsDialog> {
   bool get isError => cellNameErrorText != null;
 
   late List<EditableLayer> editableLayers =
-      widget.layers
-          .map(
-            (layer) => EditableLayer(
-              origin: layer,
-              name: layer.name,
-              layer: layer.layer,
-              datatype: layer.datatype,
-              palette: layer.palette.copyWith(),
-            ),
-          )
-          .toList();
+      widget.layers.map(
+        (layer) {
+          return EditableLayer(
+            origin: layer.origin,
+            name: layer.name,
+            layer: layer.layer,
+            datatype: layer.datatype,
+            palette: layer.palette.copyWith(),
+          );
+        },
+      ).toList();
 
   late int currentIndex = 0;
 

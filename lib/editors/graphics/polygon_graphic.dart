@@ -1,7 +1,6 @@
 import 'dart:ui';
 
-import 'package:blueprint_master/editors/editor_config.dart';
-
+import '../../layouts/cubits/cubits.dart';
 import 'base_graphic.dart';
 
 class PolygonGraphic extends BaseGraphic {
@@ -15,9 +14,11 @@ class PolygonGraphic extends BaseGraphic {
 
   @override
   void paint(Context ctx, Offset offset) {
+    if (layer == null) return;
     final List<Offset> vertices = this.vertices.map((e) => e + position + offset).toList();
     path = Path()..addPolygon(vertices, close);
-    ctx.canvas.drawPath(path, kEditorPaint);
+    final paint = layersCubit.getPaint(layer!, ctx);
+    ctx.canvas.drawPath(path, paint);
   }
 
   @override

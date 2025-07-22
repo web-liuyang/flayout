@@ -2,6 +2,7 @@ import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:flutter/material.dart';
 
+import '../../layouts/cubits/cubits.dart';
 import 'state_machines.dart';
 
 class RectangleStateMachine extends BaseStateMachine {
@@ -9,7 +10,7 @@ class RectangleStateMachine extends BaseStateMachine {
 
   late BaseStateMachine _state = _DrawInitState(context: context, state: this);
 
-  late final _RectangleGraphicDraft _draft = _RectangleGraphicDraft(palette: context.currentLayer!.palette);
+  late final _RectangleGraphicDraft _draft = _RectangleGraphicDraft();
 
   @override
   void onTapDown(event) {
@@ -75,7 +76,7 @@ class _DrawStartedState extends BaseStateMachine {
 }
 
 class _RectangleGraphicDraft extends BaseGraphic {
-  _RectangleGraphicDraft({required super.palette});
+  _RectangleGraphicDraft();
 
   Offset? start;
 
@@ -96,21 +97,22 @@ class _RectangleGraphicDraft extends BaseGraphic {
   @override
   void paint(Context context, Offset offset) {
     if (start == null || end == null) return;
-    if (palette == null) return;
+    final layer = layersCubit.current;
+    if (layer == null) return;
 
-    final Paint paint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = context.viewport.getLogicSize(palette!.outlineWidth)
-          ..color = palette!.outlineColor;
-
+    final paint = layersCubit.getPaint(layer, context);
     final Rect rect = Rect.fromPoints(start!, end!);
     context.canvas.drawRect(rect, paint);
   }
 
   RectangleGraphic toGraphic() {
     final rect = this.rect!;
-    return RectangleGraphic(palette: palette, position: rect.topLeft, width: rect.width, height: rect.height);
+    return RectangleGraphic(
+      layer: layersCubit.current!,
+      position: rect.topLeft,
+      width: rect.width,
+      height: rect.height,
+    );
   }
 
   @override
@@ -118,7 +120,7 @@ class _RectangleGraphicDraft extends BaseGraphic {
 
   @override
   BaseGraphic clone() {
-    return _RectangleGraphicDraft(palette: palette)
+    return _RectangleGraphicDraft()
       ..start = start
       ..end = end;
   }
