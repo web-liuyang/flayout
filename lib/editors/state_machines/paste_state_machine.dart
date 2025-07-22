@@ -6,7 +6,10 @@ import 'state_machines.dart';
 
 class PasteStateMachine extends BaseStateMachine {
   PasteStateMachine({required super.context, required List<BaseGraphic> graphics}) {
-    _aabb = graphics.fold(graphics.first.aabb(), (previousValue, element) => previousValue.expandToInclude(element.aabb()));
+    _aabb = graphics.fold(
+      graphics.first.aabb(),
+      (previousValue, element) => previousValue.expandToInclude(element.aabb()),
+    );
     _draft = GroupGraphic(children: graphics.map((e) => e.clone()).toList(growable: false));
     context.graphic.children.add(_draft);
     context.render();
@@ -31,7 +34,9 @@ class PasteStateMachine extends BaseStateMachine {
   @override
   void done() {
     super.done();
-    final List<BaseGraphic> children = _draft.children.map((child) => child.clone()..position = child.position + _draft.position).toList(growable: false);
+    final List<BaseGraphic> children = _draft.children
+        .map((child) => child.clone()..position = child.position + _draft.position)
+        .toList(growable: false);
     Actions.invoke(context.buildContext, AddGraphicIntent(context, children));
     context.render();
   }

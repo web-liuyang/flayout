@@ -97,6 +97,13 @@ extension Matrix4TransformExtension on Matrix4Transform {
 
     return Vector3(x, y, z);
   }
+
+  Offset rotateOffset(Offset offset) {
+    final x = m[0] * offset.dx + m[4] * offset.dy;
+    final y = m[1] * offset.dx + m[5] * offset.dy;
+
+    return Offset(x, y);
+  }
   // void setTranslation(double tx, double ty) {
   //   setEntry(0, 2, tx);
   //   setEntry(1, 2, ty);

@@ -8,8 +8,6 @@ class SelectionStateMachine extends BaseStateMachine {
 
   late double startZoom;
 
-  late ScaleStartDetails scaleStartDetails;
-
   late double prevZoom;
 
   @override
@@ -36,32 +34,30 @@ class SelectionStateMachine extends BaseStateMachine {
 
   @override
   void onScaleStart(info) {
-    scaleStartDetails = info;
     prevZoom = 1;
   }
 
   @override
   void onScaleUpdate(info) {
+    print(1);
     // scale
     if (prevZoom != info.scale) {
       final zoomFn = prevZoom < info.scale ? context.viewport.zoomIn : context.viewport.zoomOut;
-      final point = context.viewport.windowToCanvas(info.localFocalPoint);
-      zoomFn(point);
+      zoomFn(info.position);
       prevZoom = info.scale;
     }
 
-    context.viewport.translate(info.focalPointDelta);
+    context.viewport.translate(info.delta);
     context.render();
   }
 
   @override
   void onScroll(info) {
-    final point = context.viewport.windowToCanvas(info.localPosition);
     final zoomFn = switch (info.direction) {
       ScrollDirection.up => context.viewport.zoomIn,
       ScrollDirection.down => context.viewport.zoomOut,
     };
-    zoomFn(point);
+    zoomFn(info.position);
     context.render();
   }
 }

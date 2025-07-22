@@ -4,6 +4,7 @@ import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:blueprint_master/layouts/cubits/cubits.dart';
 import 'package:flutter/widgets.dart' hide Viewport;
+import 'package:matrix4_transform/matrix4_transform.dart';
 import 'editor_config.dart';
 import 'state_machines/state_machines.dart';
 
@@ -84,23 +85,33 @@ class SceneRenderObject extends RenderBox {
 
   @override
   void paint(PaintingContext context, ui.Offset offset) {
-    context.canvas.save();
-    context.canvas.translate(offset.dx, offset.dy);
-    final rect = Offset.zero & this.context.viewport.size;
-    context.pushClipRect(needsCompositing, Offset.zero, rect, (PaintingContext context, ui.Offset offset) {
-      context.pushTransform(needsCompositing, offset, this.context.viewport.matrix4.matrix4, (
-        PaintingContext context,
-        ui.Offset offset,
-      ) {
-        final ctx = Context(context: this.context, paintingContext: context);
-        grid.paint(ctx, Offset.zero);
-        axis.paint(ctx, Offset.zero);
-        this.context.graphic.paint(ctx, Offset.zero);
+    // context.canvas.translate(offset.dx, offset.dy);
+    // final Matrix4 matrix = Matrix4.identity();
 
-        Selection(graphics: this.context.selectedGraphics, layer: layersCubit.layers.first).paint(ctx, Offset.zero);
+    final Matrix4Transform matrix =
+        Matrix4Transform().translate(x: offset.dx, y: offset.dy + this.context.viewport.size.height).flipVertically();
+
+    this.context.viewport.transform = matrix;
+
+    context.pushTransform(needsCompositing, Offset.zero, matrix.m, (
+      PaintingContext context,
+      ui.Offset offset,
+    ) {
+      final rect = Offset.zero & this.context.viewport.size;
+      context.pushClipRect(needsCompositing, Offset.zero, rect, (PaintingContext context, ui.Offset offset) {
+        context.pushTransform(needsCompositing, offset, this.context.viewport.matrix4.m, (
+          PaintingContext context,
+          ui.Offset offset,
+        ) {
+          final ctx = Context(context: this.context, paintingContext: context);
+          grid.paint(ctx, Offset.zero);
+          axis.paint(ctx, Offset.zero);
+          this.context.graphic.paint(ctx, Offset.zero);
+
+          Selection(graphics: this.context.selectedGraphics, layer: layersCubit.layers.first).paint(ctx, Offset.zero);
+        });
       });
     });
-    context.canvas.restore();
   }
 
   @override
@@ -246,7 +257,7 @@ class Axis extends BaseGraphic {
 
   @override
   Rect aabb() {
-    throw UnimplementedError();
+    throw UnimplementedError("Axis aabb");
   }
 }
 

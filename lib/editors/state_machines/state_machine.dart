@@ -1,4 +1,5 @@
 import 'package:blueprint_master/editors/editor.dart';
+import 'package:blueprint_master/extensions/matrix4_extension.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -49,7 +50,8 @@ class _StateMachineState extends State<StateMachine> {
   }
 
   void onTapUp(TapUpDetails info) {
-    widget.context.stateMachine.onTapUp(info);
+    final position = widget.context.viewport.windowToCanvas(info.localPosition);
+    widget.context.stateMachine.onTapUp(TapUpCanvasEvent(position: position));
   }
 
   void onTapCancel() {
@@ -58,11 +60,13 @@ class _StateMachineState extends State<StateMachine> {
 
   // SecondaryTapDetector
   void onSecondaryTapDown(TapDownDetails info) {
-    widget.context.stateMachine.onSecondaryTapDown(info);
+    final position = widget.context.viewport.windowToCanvas(info.localPosition);
+    widget.context.stateMachine.onSecondaryTapDown(TapDownCanvasEvent(position: position));
   }
 
   void onSecondaryTapUp(TapUpDetails info) {
-    widget.context.stateMachine.onSecondaryTapUp(info);
+    final position = widget.context.viewport.windowToCanvas(info.localPosition);
+    widget.context.stateMachine.onSecondaryTapUp(TapUpCanvasEvent(position: position));
   }
 
   void onSecondaryTapCancel() {
@@ -71,19 +75,24 @@ class _StateMachineState extends State<StateMachine> {
 
   // PanDetector
   void onPanStart(DragStartDetails info) {
-    widget.context.stateMachine.onPanStart(info);
+    final position = widget.context.viewport.windowToCanvas(info.localPosition);
+    widget.context.stateMachine.onPanStart(DragStartCanvasEvent(position: position));
   }
 
   void onPanDown(DragDownDetails info) {
-    widget.context.stateMachine.onPanDown(info);
+    final position = widget.context.viewport.windowToCanvas(info.localPosition);
+    widget.context.stateMachine.onPanDown(DragDownCanvasEvent(position: position));
   }
 
   void onPanUpdate(DragUpdateDetails info) {
-    widget.context.stateMachine.onPanUpdate(info);
+    final position = widget.context.viewport.windowToCanvas(info.localPosition);
+    widget.context.stateMachine.onPanUpdate(DragUpdateCanvasEvent(position: position));
   }
 
   void onPanEnd(DragEndDetails info) {
-    widget.context.stateMachine.onPanEnd(info);
+    // final position = widget.context.viewport.windowToCanvas(info.velocity.pixelsPerSecond);
+    final position = widget.context.viewport.windowToCanvas(info.localPosition);
+    widget.context.stateMachine.onPanEnd(DragEndCanvasEvent(position: position));
   }
 
   void onPanCancel() {
@@ -92,15 +101,20 @@ class _StateMachineState extends State<StateMachine> {
 
   // ScaleDetector
   void onScaleStart(ScaleStartDetails info) {
-    widget.context.stateMachine.onScaleStart(info);
+    final position = widget.context.viewport.windowToCanvas(info.localFocalPoint);
+    widget.context.stateMachine.onScaleStart(ScaleStartCanvasEvent(position: position));
   }
 
   void onScaleUpdate(ScaleUpdateDetails info) {
-    widget.context.stateMachine.onScaleUpdate(info);
+    final position = widget.context.viewport.windowToCanvas(info.localFocalPoint);
+    final scale = info.scale;
+    final delta = widget.context.viewport.transform.rotateOffset(info.focalPointDelta);
+    widget.context.stateMachine.onScaleUpdate(ScaleUpdateCanvasEvent(position: position, scale: scale, delta: delta));
   }
 
   void onScaleEnd(ScaleEndDetails info) {
-    widget.context.stateMachine.onScaleEnd(info);
+    final position = widget.context.viewport.windowToCanvas(info.velocity.pixelsPerSecond);
+    widget.context.stateMachine.onScaleEnd(ScaleEndCanvasEvent(position: position));
   }
 
   // MouseMovementDetector
@@ -110,7 +124,9 @@ class _StateMachineState extends State<StateMachine> {
   }
 
   void onScroll(PointerScrollEvent info) {
-    widget.context.stateMachine.onScroll(info);
+    final position = widget.context.viewport.windowToCanvas(info.position);
+    final direction = info.scrollDelta.dy > 0 ? ScrollDirection.down : ScrollDirection.up;
+    widget.context.stateMachine.onScroll(PointerScrollCanvasEvent(position: position, direction: direction));
   }
 
   // DragCallbacks
@@ -165,10 +181,4 @@ class _StateMachineState extends State<StateMachine> {
       ),
     );
   }
-}
-
-enum ScrollDirection { up, down }
-
-extension PointerScrollEventExtension on PointerScrollEvent {
-  ScrollDirection get direction => scrollDelta.dy > 0 ? ScrollDirection.down : ScrollDirection.up;
 }

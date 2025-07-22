@@ -5,7 +5,6 @@ import 'package:blueprint_master/editors/editor_config.dart';
 import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix4_transform/matrix4_transform.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import '../../layouts/cubits/layers_cubit.dart';
 
@@ -36,6 +35,11 @@ class Viewport {
 
   Matrix4Transform matrix4 = Matrix4Transform();
 
+  /// 屏幕坐标系 转换到 平面坐标系的矩阵。
+  ///
+  /// 在每次渲染时重新赋值
+  Matrix4Transform transform = Matrix4Transform();
+
   void setZoom(double zoom, {Offset? origin}) {
     final newZoom = zoom.clamp(kMinZoom, kMaxZoom);
     matrix4 = matrix4.setZoom(newZoom, origin: origin);
@@ -60,7 +64,7 @@ class Viewport {
     return switch (zoom) {
       < 1.0 => size / ((zoom * kMaxZoom).floorToDouble() / kMaxZoom),
       >= 1.0 => size / zoom.floorToDouble(),
-      double() => throw UnimplementedError(),
+      double() => throw UnimplementedError("zoom: $zoom"),
     };
   }
 
@@ -77,7 +81,12 @@ class Viewport {
     final y = (position.dy - ty) / m[5];
     // final z = (position.z - tz) / m[10];
 
-    return Offset(x, y);
+    // print(transform.localToGlobal(Vector3(x, y, 0)).toOffset());
+
+    //
+    // return Offset(x, -y);
+    return transform.rotateOffset(Offset(x, y));
+    // return transform.localToGlobal(Vector3(x, y, 0)).toOffset();
   }
 
   double getZoom() {

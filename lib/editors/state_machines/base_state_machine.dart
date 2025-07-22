@@ -9,6 +9,68 @@ class TapDownCanvasEvent {
   final Offset position;
 }
 
+class TapUpCanvasEvent {
+  const TapUpCanvasEvent({required this.position});
+
+  final Offset position;
+}
+
+class DragStartCanvasEvent {
+  const DragStartCanvasEvent({required this.position});
+
+  final Offset position;
+}
+
+class DragDownCanvasEvent {
+  const DragDownCanvasEvent({required this.position});
+
+  final Offset position;
+}
+
+class DragUpdateCanvasEvent {
+  const DragUpdateCanvasEvent({required this.position});
+
+  final Offset position;
+}
+
+class DragEndCanvasEvent {
+  const DragEndCanvasEvent({required this.position});
+
+  final Offset position;
+}
+
+class ScaleStartCanvasEvent {
+  const ScaleStartCanvasEvent({required this.position});
+
+  final Offset position;
+}
+
+class ScaleUpdateCanvasEvent {
+  const ScaleUpdateCanvasEvent({required this.position, required this.scale, required this.delta});
+
+  final Offset position;
+
+  final double scale;
+
+  final Offset delta;
+}
+
+class ScaleEndCanvasEvent {
+  const ScaleEndCanvasEvent({required this.position});
+
+  final Offset position;
+}
+
+enum ScrollDirection { up, down }
+
+class PointerScrollCanvasEvent {
+  const PointerScrollCanvasEvent({required this.position, required this.direction});
+
+  final Offset position;
+
+  final ScrollDirection direction;
+}
+
 class MouseMoveCanvasEvent {
   const MouseMoveCanvasEvent({required this.position});
 
@@ -24,39 +86,37 @@ abstract class BaseStateMachine {
 
   void onTapDown(TapDownCanvasEvent event) {}
 
-  void onTapUp(TapUpDetails info) {}
+  void onTapUp(TapUpCanvasEvent info) {}
 
   void onTapCancel() {}
 
-  void onSecondaryTapDown(TapDownDetails info) {
-    done();
-  }
+  void onSecondaryTapDown(TapDownCanvasEvent info) {}
 
-  void onSecondaryTapUp(TapUpDetails info) {}
+  void onSecondaryTapUp(TapUpCanvasEvent info) {}
 
   void onSecondaryTapCancel() {}
 
-  void onPanStart(DragStartDetails info) {}
+  void onPanStart(DragStartCanvasEvent info) {}
 
-  void onPanDown(DragDownDetails info) {}
+  void onPanDown(DragDownCanvasEvent info) {}
 
-  void onPanUpdate(DragUpdateDetails info) {}
+  void onPanUpdate(DragUpdateCanvasEvent info) {}
 
-  void onPanEnd(DragEndDetails info) {}
+  void onPanEnd(DragEndCanvasEvent info) {}
 
   void onPanCancel() {}
 
-  void onScaleStart(ScaleStartDetails info) {}
+  void onScaleStart(ScaleStartCanvasEvent info) {}
 
-  void onScaleUpdate(ScaleUpdateDetails info) {}
+  void onScaleUpdate(ScaleUpdateCanvasEvent info) {}
 
-  void onScaleEnd(ScaleEndDetails info) {}
+  void onScaleEnd(ScaleEndCanvasEvent info) {}
 
   void onMouseMove(MouseMoveCanvasEvent event) {
     // final position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
     // mouseCubit.update(position);
   }
-  void onScroll(PointerScrollEvent info) {}
+  void onScroll(PointerScrollCanvasEvent info) {}
 
   // void onDragStart(DragStartEvent event) {}
 
