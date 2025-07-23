@@ -15,6 +15,7 @@ class CellPane extends StatefulWidget {
 
 class _CellPaneState extends State<CellPane> {
   final TextEditingController controller = TextEditingController();
+
   String get searchValue => controller.text;
 
   @override
@@ -25,17 +26,18 @@ class _CellPaneState extends State<CellPane> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredCells = context.watch<CellsCubit>().filtered(searchValue);
+    final CellsCubit cellsCubit = context.watch<CellsCubit>();
+    final List<Cell> filteredCells = cellsCubit.filteredCells(searchValue);
+    final Cell? current = cellsCubit.current;
 
     return Column(
       children: [
-        CellPaneToolbar(),
+        CellPaneToolbar(current: current),
         Divider(height: 1),
         InputBox(
           decoration: InputDecoration(
             hintText: "Search",
             prefixIcon: Icon(Icons.search),
-            // suffixIcon: IconButton(onPressed: () => setState(() => controller.text = ""), icon: Icon(Icons.clear)),
           ),
           controller: controller,
           onSubmitted: (value) => setState(() => controller.text = value),
@@ -44,10 +46,13 @@ class _CellPaneState extends State<CellPane> {
         Expanded(
           child: ListView.builder(
             itemBuilder: (context, index) {
-              final title = filteredCells[index].name;
+              final Cell item = filteredCells[index];
+              final String title = item.name;
               return ListTile(
                 title: Text(title),
+                selected: current == item,
                 onTap: () {
+                  cellsCubit.setCurrent(item);
                   editorManager.createEditor(EditorConfig(title: title));
                 },
               );
@@ -61,7 +66,9 @@ class _CellPaneState extends State<CellPane> {
 }
 
 class CellPaneToolbar extends StatefulWidget {
-  const CellPaneToolbar({super.key});
+  const CellPaneToolbar({super.key, this.current});
+
+  final Cell? current;
 
   @override
   State<CellPaneToolbar> createState() => _CellPaneToolbarState();
@@ -71,12 +78,31 @@ class _CellPaneToolbarState extends State<CellPaneToolbar> {
   Future<void> createCell() async {
     final String? cellName = await CreateCellDialog.show(context);
     if (cellName == null) return;
-    cellsCubit.add(Cell(name: cellName, graphic: RootGraphic(children: [])));
+    final newCell = Cell(name: cellName, graphic: RootGraphic(children: []));
+    cellsCubit.addCell(newCell);
+    cellsCubit.setCurrent(newCell);
+    editorManager.createEditor(EditorConfig(title: newCell.name));
+  }
+
+  void deleteCell() {
+    cellsCubit.removeCell(widget.current!);
+    editorManager.removeEditor(widget.current!.name);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [IconButton(icon: Icon(Icons.add_box_outlined), onPressed: createCell)]);
+    return Row(
+      children: [
+        Tooltip(
+          message: "Create Cell",
+          child: IconButton(icon: Icon(Icons.add_box_outlined), onPressed: createCell),
+        ),
+        Tooltip(
+          message: "Delete Cell",
+          child: IconButton(icon: Icon(Icons.delete), onPressed: widget.current != null ? deleteCell : null),
+        ),
+      ],
+    );
   }
 }
 

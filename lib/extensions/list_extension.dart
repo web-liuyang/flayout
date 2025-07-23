@@ -24,4 +24,6 @@ extension ListExtension<T> on List<T> {
   List<T> replacedAt(int index, T item) => List.from(this)..[index] = item;
 
   void replaceAt(int index, T item) => this[index] = item;
+
+  List<T> removedAt(int index) => [...sublist(0, index), ...sublist(index + 1)];
 }

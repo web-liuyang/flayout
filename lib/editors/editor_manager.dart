@@ -28,7 +28,7 @@ class EditorManager {
   Editor? get currentEditor => currentEditorNotifier.value;
 
   void createEditor(EditorConfig config) {
-    final Cell? cell = cellsCubit.find(config.title);
+    final Cell? cell = cellsCubit.findCell(config.title);
     if (cell == null) return;
 
     final int index = tabs.indexWhere((tab) => tab.title == config.title);

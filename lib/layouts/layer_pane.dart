@@ -51,7 +51,8 @@ class _LayerPaneState extends State<LayerPane> {
   @override
   Widget build(BuildContext context) {
     final LayersCubit layersCubit = context.watch<LayersCubit>();
-    final List<Layer> layers = layersCubit.layers;
+    final List<Layer> filteredLayers = layersCubit.filteredLayers(searchValue);
+    final Layer? current = layersCubit.current;
 
     return Column(
       children: [
@@ -69,18 +70,15 @@ class _LayerPaneState extends State<LayerPane> {
         Expanded(
           child: ListView.builder(
             itemBuilder: (context, index) {
-              final Layer layer = layers[index];
-              final String title = layer.name;
-              final bool isSelected = layersCubit.current == layer;
+              final Layer item = filteredLayers[index];
+              final String title = item.name;
               return ListTile(
                 title: Text(title),
-                selected: isSelected,
-                onTap: () {
-                  layersCubit.setCurrent(layer);
-                },
+                selected: current == item,
+                onTap: () => layersCubit.setCurrent(item),
               );
             },
-            itemCount: layers.length,
+            itemCount: filteredLayers.length,
           ),
         ),
       ],
@@ -102,7 +100,10 @@ class _LayerPaneToolbarState extends State<LayerPaneToolbar> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [IconButton(icon: Icon(Icons.settings), onPressed: showLayerSettings)]);
+    return Tooltip(
+      message: "Layers Settings",
+      child: Row(children: [IconButton(icon: Icon(Icons.settings), onPressed: showLayerSettings)]),
+    );
   }
 }
 

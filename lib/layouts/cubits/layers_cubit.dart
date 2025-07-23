@@ -85,24 +85,26 @@ class LayersCubitState {
     current ??= layers.firstOrNull;
   }
 
-  LayersCubitState copyWith({Object? current = freeze, List<Layer>? layers}) {
+  LayersCubitState copyWith({List<Layer>? layers, Object? current = freeze}) {
     return LayersCubitState(
-      current: current == freeze ? this.current : current as Layer?,
       layers: layers ?? this.layers,
+      current: current == freeze ? this.current : current as Layer?,
     );
   }
 }
 
 class LayersCubit extends Cubit<LayersCubitState> {
-  LayersCubit(super.initialState) {
-    state.current ??= state.layers.firstOrNull;
-  }
+  LayersCubit(super.initialState);
 
   List<Layer> get layers => state.layers;
 
   Layer? get current => state.current;
 
   Map<String, Paint> paints = {};
+
+  List<Layer> filteredLayers(String title) {
+    return layers.where((item) => item.name.contains(title)).toList();
+  }
 
   void setCurrent(Layer layer) {
     if (layer == state.current) return;
