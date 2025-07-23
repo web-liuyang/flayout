@@ -24,13 +24,15 @@ TODO
 [√] Copy/Paste
 [√] 创建 Cell, CellName 不可重名的判断
 [√] 创建 Cell 图形仓库，发布订阅时方便刷新等
-[] 创建 Layer
-[] 创建 Layer 图形仓库，发布订阅时方便刷新等
+[√] 创建 Layer
+[√] 创建 Layer 图形仓库，发布订阅时方便刷新等
 
 [] 状态栏当前画布的比例与当前鼠标位置
 [] 目前只支持单个选中, 后期会加上多选
 [] 快捷键触发问题
-[] PropertyPanel 改变图形没有校验
+[] PropertyPanel 改变图形没有校验数值
+[] 当 Layer 没有被使用时可以被删除
+[] 网格吸附
 
 [] PolylineGraphic AABB 是错误的
 [] Pan 或 Zoom 后 绘图坐标出错
