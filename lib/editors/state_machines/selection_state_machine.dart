@@ -1,3 +1,5 @@
+import 'package:blueprint_master/extensions/extensions.dart';
+
 import '../graphics/graphics.dart';
 import 'base_state_machine.dart';
 
@@ -39,9 +41,6 @@ class SelectionStateMachine extends BaseStateMachine {
 
     context.selectedGraphicsNotifier.value = [...context.selectedGraphics];
     context.render();
-    // print(event);
-    // context.viewport.translate(event.delta);
-    // context.render();
   }
 
   @override
@@ -53,6 +52,13 @@ class SelectionStateMachine extends BaseStateMachine {
     };
 
     zoomFn(info.position);
+    context.render();
+  }
+
+  @override
+  void delete() {
+    context.graphic.children.removeAll(context.selectedGraphics);
+    context.selectedGraphicsNotifier.value = [];
     context.render();
   }
 }

@@ -73,6 +73,12 @@ abstract class BaseStateMachine {
         exit();
         return KeyEventResult.handled;
       }
+
+      if (event.logicalKey == LogicalKeyboardKey.backspace || event.logicalKey == LogicalKeyboardKey.delete) {
+        print("delete");
+        delete();
+        return KeyEventResult.handled;
+      }
     }
 
     return KeyEventResult.handled;
@@ -81,4 +87,6 @@ abstract class BaseStateMachine {
   void done() {}
 
   void exit() {}
+
+  void delete() {}
 }
