@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../layouts/cubits/cubits.dart';
 import 'state_machines.dart';
@@ -93,7 +96,23 @@ class _DrawStartedState extends BaseStateMachine {
   @override
   void onMove(event) {
     super.onMove(event);
-    state._draft.end = event.position;
+    final isShift =
+        HardwareKeyboard.instance.logicalKeysPressed
+            .intersection(
+              LogicalKeyboardKey.expandSynonyms({LogicalKeyboardKey.shift}),
+            )
+            .isNotEmpty;
+
+    if (isShift) {
+      final dx = event.position.dx - state._draft.start!.dx;
+      final dy = event.position.dy - state._draft.start!.dy;
+      final size = min(dx.abs(), dy.abs());
+      final end = Offset(state._draft.start!.dx + size * dx.sign, state._draft.start!.dy + size * dy.sign);
+      state._draft.end = end;
+    } else {
+      state._draft.end = event.position;
+    }
+
     context.render();
   }
 }
@@ -107,11 +126,6 @@ class _RectangleGraphicDraft extends BaseGraphic {
 
   Rect? get rect => start != null && end != null ? Rect.fromPoints(start!, end!) : null;
 
-  // final Paint _paint =
-  //     Paint()
-  //       ..style = PaintingStyle.stroke
-  //       ..color = Colors.black;
-
   void reset() {
     start = null;
     end = null;
@@ -124,6 +138,7 @@ class _RectangleGraphicDraft extends BaseGraphic {
     if (layer == null) return;
 
     final paint = layersCubit.getPaint(layer, context);
+
     final Rect rect = Rect.fromPoints(start!, end!);
     context.canvas.drawRect(rect, paint);
   }

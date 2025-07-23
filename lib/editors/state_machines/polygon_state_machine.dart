@@ -1,8 +1,10 @@
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../layouts/cubits/cubits.dart';
 import 'state_machines.dart';
@@ -94,8 +96,8 @@ class _DrawInitSecondPointState extends BaseStateMachine {
   final PolygonStateMachine state;
 
   @override
-  void onPrimaryTapDown(info) {
-    state._draft.vertices.add(info.position);
+  void onPrimaryTapDown(_) {
+    state._draft.vertices.add(state._draft.auxiliary!);
     context.render();
     state._state = _DrawStartedState(context: context, state: state);
   }
@@ -103,7 +105,12 @@ class _DrawInitSecondPointState extends BaseStateMachine {
   @override
   void onMove(event) {
     super.onMove(event);
-    state._draft.auxiliary = event.position;
+    final isShift =
+        HardwareKeyboard.instance.logicalKeysPressed
+            .intersection(LogicalKeyboardKey.expandSynonyms({LogicalKeyboardKey.shift}))
+            .isNotEmpty;
+
+    state._draft.auxiliary = isShift ? snapTo45Degree(state._draft.vertices.last, event.position) : event.position;
     context.render();
   }
 }
@@ -114,8 +121,8 @@ class _DrawStartedState extends BaseStateMachine {
   final PolygonStateMachine state;
 
   @override
-  void onPrimaryTapDown(info) {
-    state._draft.vertices.add(info.position);
+  void onPrimaryTapDown(_) {
+    state._draft.vertices.add(state._draft.auxiliary!);
     context.render();
     state._state = _DrawStartedState(context: context, state: state);
   }
@@ -128,7 +135,12 @@ class _DrawStartedState extends BaseStateMachine {
   @override
   void onMove(event) {
     super.onMove(event);
-    state._draft.auxiliary = event.position;
+    final isShift =
+        HardwareKeyboard.instance.logicalKeysPressed
+            .intersection(LogicalKeyboardKey.expandSynonyms({LogicalKeyboardKey.shift}))
+            .isNotEmpty;
+
+    state._draft.auxiliary = isShift ? snapTo45Degree(state._draft.vertices.last, event.position) : event.position;
     context.render();
   }
 }
@@ -180,4 +192,13 @@ class _PolygonStateMachineGraphicDraft extends BaseGraphic {
 
   @override
   Rect aabb() => throw UnimplementedError("_PolygonStateMachineGraphicDraft aabb()");
+}
+
+Offset snapTo45Degree(Offset start, Offset end) {
+  final delta = end - start;
+  final angle = delta.direction;
+  // 45度 = pi/4
+  final snappedAngle = (angle / (pi / 4)).round() * (pi / 4);
+  final length = delta.distance;
+  return start + Offset.fromDirection(snappedAngle, length);
 }
