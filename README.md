@@ -30,6 +30,7 @@ TODO
 [√] Pan 或 Zoom 后 绘图坐标出错
 [√] 按住 Shift 绘制 Rectangle => Square 与 Polygon => Poylygon 45 degree
 [√] 当 Layer 没有被使用时可以被删除
+[√] 按下 Backspace/Delete 删除选中的图形
 
 [] 目前只支持单个选中, 后期会加上多选
 [] 快捷键触发问题
