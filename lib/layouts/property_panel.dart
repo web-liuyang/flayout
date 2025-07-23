@@ -1,7 +1,9 @@
 import 'package:blueprint_master/editors/editors.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
+import 'package:blueprint_master/layouts/cubits/cubits.dart';
 import 'package:blueprint_master/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class PropertyPanel extends StatefulWidget {
   const PropertyPanel({super.key});
@@ -82,12 +84,19 @@ class _PolygonPropertyPane extends StatefulWidget {
 }
 
 class _PolygonPropertyPaneState extends State<_PolygonPropertyPane> {
+  bool isExpandedLayers = true;
+
   bool isExpandedLocations = true;
 
   bool isExpandedVertices = true;
 
   void onChanged(List<PolygonGraphic> graphics) {
     widget.onChanged(graphics);
+  }
+
+  void onChangedLayer(Layer layer) {
+    widget.graphics.first.layer = layer;
+    onChanged(widget.graphics);
   }
 
   void onChangedPosition(Offset position) {
@@ -102,6 +111,8 @@ class _PolygonPropertyPaneState extends State<_PolygonPropertyPane> {
 
   @override
   Widget build(BuildContext context) {
+    final LayersCubit layersCubit = context.watch<LayersCubit>();
+    final List<Layer> layers = layersCubit.layers;
     final PolygonGraphic graphic = widget.graphics.first;
     final BoxDecoration decoration = BoxDecoration(border: Border(top: Divider.createBorderSide(context)));
 
@@ -111,11 +122,30 @@ class _PolygonPropertyPaneState extends State<_PolygonPropertyPane> {
         materialGapSize: 0,
         expansionCallback: (panelIndex, isExpanded) {
           setState(() {
-            if (panelIndex == 0) isExpandedLocations = isExpanded;
-            if (panelIndex == 1) isExpandedVertices = isExpanded;
+            if (panelIndex == 0) isExpandedLayers = isExpanded;
+            if (panelIndex == 1) isExpandedLocations = isExpanded;
+            if (panelIndex == 2) isExpandedVertices = isExpanded;
           });
         },
         children: [
+          ExpansionPanel(
+            canTapOnHeader: true,
+            isExpanded: isExpandedLayers,
+            headerBuilder: (BuildContext context, bool isExpanded) => ListTile(title: Text("Layers")),
+            body: Container(
+              decoration: decoration,
+              padding: EdgeInsets.all(8),
+              child: Column(
+                spacing: 8,
+                children: [
+                  CellTile(
+                    title: "Layers:",
+                    trailing: LayerSelector(value: graphic.layer!, layers: layers, onChanged: onChangedLayer),
+                  ),
+                ],
+              ),
+            ),
+          ),
           ExpansionPanel(
             canTapOnHeader: true,
             isExpanded: isExpandedLocations,
@@ -234,10 +264,17 @@ class _CirclePropertyPane extends StatefulWidget {
 }
 
 class _CirclePropertyPaneState extends State<_CirclePropertyPane> {
+  bool isExpandedLayers = true;
+
   bool isExpandedLocations = true;
 
   void onChanged(List<CircleGraphic> graphics) {
     widget.onChanged(graphics);
+  }
+
+  void onChangedLayer(Layer layer) {
+    widget.graphics.first.layer = layer;
+    onChanged(widget.graphics);
   }
 
   void onChangedPosition(Offset position) {
@@ -257,6 +294,8 @@ class _CirclePropertyPaneState extends State<_CirclePropertyPane> {
 
   @override
   Widget build(BuildContext context) {
+    final LayersCubit layersCubit = context.watch<LayersCubit>();
+    final List<Layer> layers = layersCubit.layers;
     final CircleGraphic graphic = widget.graphics.first;
     final BoxDecoration decoration = BoxDecoration(border: Border(top: Divider.createBorderSide(context)));
 
@@ -266,10 +305,29 @@ class _CirclePropertyPaneState extends State<_CirclePropertyPane> {
         materialGapSize: 0,
         expansionCallback: (panelIndex, isExpanded) {
           setState(() {
-            if (panelIndex == 0) isExpandedLocations = isExpanded;
+            if (panelIndex == 0) isExpandedLayers = isExpanded;
+            if (panelIndex == 1) isExpandedLocations = isExpanded;
           });
         },
         children: [
+          ExpansionPanel(
+            canTapOnHeader: true,
+            isExpanded: isExpandedLayers,
+            headerBuilder: (BuildContext context, bool isExpanded) => ListTile(title: Text("Layers")),
+            body: Container(
+              decoration: decoration,
+              padding: EdgeInsets.all(8),
+              child: Column(
+                spacing: 8,
+                children: [
+                  CellTile(
+                    title: "Layers:",
+                    trailing: LayerSelector(value: graphic.layer!, layers: layers, onChanged: onChangedLayer),
+                  ),
+                ],
+              ),
+            ),
+          ),
           ExpansionPanel(
             canTapOnHeader: true,
             isExpanded: isExpandedLocations,
@@ -351,10 +409,17 @@ class _RectanglePropertyPane extends StatefulWidget {
 }
 
 class _RectanglePropertyPaneState extends State<_RectanglePropertyPane> {
+  bool isExpandedLayers = true;
+
   bool isExpandedLocations = true;
 
   void onChanged(List<RectangleGraphic> graphics) {
     widget.onChanged(graphics);
+  }
+
+  void onChangedLayer(Layer layer) {
+    widget.graphics.first.layer = layer;
+    onChanged(widget.graphics);
   }
 
   void onChangedPosition(Offset position) {
@@ -374,6 +439,8 @@ class _RectanglePropertyPaneState extends State<_RectanglePropertyPane> {
 
   @override
   Widget build(BuildContext context) {
+    final LayersCubit layersCubit = context.watch<LayersCubit>();
+    final List<Layer> layers = layersCubit.layers;
     final RectangleGraphic graphic = widget.graphics.first;
     final BoxDecoration decoration = BoxDecoration(border: Border(top: Divider.createBorderSide(context)));
 
@@ -383,10 +450,29 @@ class _RectanglePropertyPaneState extends State<_RectanglePropertyPane> {
         materialGapSize: 0,
         expansionCallback: (panelIndex, isExpanded) {
           setState(() {
-            if (panelIndex == 0) isExpandedLocations = isExpanded;
+            if (panelIndex == 0) isExpandedLayers = isExpanded;
+            if (panelIndex == 1) isExpandedLocations = isExpanded;
           });
         },
         children: [
+          ExpansionPanel(
+            canTapOnHeader: true,
+            isExpanded: isExpandedLayers,
+            headerBuilder: (BuildContext context, bool isExpanded) => ListTile(title: Text("Layers")),
+            body: Container(
+              decoration: decoration,
+              padding: EdgeInsets.all(8),
+              child: Column(
+                spacing: 8,
+                children: [
+                  CellTile(
+                    title: "Layers:",
+                    trailing: LayerSelector(value: graphic.layer!, layers: layers, onChanged: onChangedLayer),
+                  ),
+                ],
+              ),
+            ),
+          ),
           ExpansionPanel(
             canTapOnHeader: true,
             isExpanded: isExpandedLocations,
