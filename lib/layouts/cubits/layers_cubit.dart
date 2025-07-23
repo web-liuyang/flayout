@@ -1,27 +1,23 @@
 import 'dart:ui';
 
 import 'package:blueprint_master/editors/graphics/base_graphic.dart';
-import 'package:collection/collection.dart';
+import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LayerPalette {
   const LayerPalette({
     this.outlineWidth = 1,
     this.outlineColor = const Color(0xFF000000),
-    this.fillColor = const Color(0xFFFFFFFF),
   });
 
   final double outlineWidth;
 
   final Color outlineColor;
 
-  final Color fillColor;
-
-  LayerPalette copyWith({double? outlineWidth, Color? outlineColor, Color? fillColor}) {
+  LayerPalette copyWith({double? outlineWidth, Color? outlineColor}) {
     return LayerPalette(
       outlineWidth: outlineWidth ?? this.outlineWidth,
       outlineColor: outlineColor ?? this.outlineColor,
-      fillColor: fillColor ?? this.fillColor,
     );
   }
 
@@ -29,11 +25,11 @@ class LayerPalette {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! LayerPalette) return false;
-    return outlineWidth == other.outlineWidth && outlineColor == other.outlineColor && fillColor == other.fillColor;
+    return outlineWidth == other.outlineWidth && outlineColor == other.outlineColor;
   }
 
   @override
-  int get hashCode => outlineWidth.hashCode ^ outlineColor.hashCode ^ fillColor.hashCode;
+  int get hashCode => outlineWidth.hashCode ^ outlineColor.hashCode;
 }
 
 class Layer {
@@ -81,9 +77,7 @@ class LayersCubitState {
 
   Layer? current;
 
-  LayersCubitState({required this.layers, this.current}) {
-    current ??= layers.firstOrNull;
-  }
+  LayersCubitState({required this.layers, this.current});
 
   LayersCubitState copyWith({List<Layer>? layers, Object? current = freeze}) {
     return LayersCubitState(
@@ -111,10 +105,9 @@ class LayersCubit extends Cubit<LayersCubitState> {
     emit(state.copyWith(current: layer));
   }
 
-  void setLayers(List<Layer> layers) {
-    if (layers == state.layers) return;
-    paints = {};
-    emit(state.copyWith(layers: layers));
+  void addLayer(Layer layer) {
+    if (layers.any((item) => item == layer)) return;
+    emit(state.copyWith(layers: [...state.layers, layer]));
   }
 
   Paint getPaint(Layer layer, Context context) {
@@ -124,6 +117,24 @@ class LayersCubit extends Cubit<LayersCubitState> {
     paint.strokeWidth = context.viewport.getLogicSize(layer.palette.outlineWidth);
     paint.color = layer.palette.outlineColor;
     return paint;
+  }
+
+  bool contains(String name) {
+    return layers.any((item) => item.name == name);
+  }
+
+  void removeLayer(Layer layer) {
+    final int index = layers.indexOf(layer);
+    if (index < 0) return;
+    final current = layers[index] == this.current ? null : this.current;
+    emit(state.copyWith(layers: layers.removedAt(index), current: current));
+  }
+
+  void updateLayer(Layer layer) {
+    paints = {};
+    final int index = layers.indexOf(layer);
+    if (index < 0) return;
+    emit(state.copyWith(layers: layers.replacedAt(index, layer)));
   }
 }
 

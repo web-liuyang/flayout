@@ -66,7 +66,7 @@ class _CellPaneState extends State<CellPane> {
 }
 
 class CellPaneToolbar extends StatefulWidget {
-  const CellPaneToolbar({super.key, this.current});
+  const CellPaneToolbar({super.key, required this.current});
 
   final Cell? current;
 
@@ -112,6 +112,7 @@ class CreateCellDialog extends StatefulWidget {
   static Future<String?> show(BuildContext context) {
     return showDialog<String>(
       context: context,
+      barrierDismissible: false,
       builder: (context) => const CreateCellDialog(),
     );
   }
@@ -123,9 +124,9 @@ class CreateCellDialog extends StatefulWidget {
 class _CreateCellDialogState extends State<CreateCellDialog> {
   final TextEditingController controller = TextEditingController();
 
-  String? cellNameErrorText;
+  String? nameErrorText;
 
-  bool get isError => cellNameErrorText != null;
+  bool get isError => nameErrorText != null && controller.text.isEmpty;
 
   @override
   void dispose() {
@@ -152,7 +153,7 @@ class _CreateCellDialogState extends State<CreateCellDialog> {
 
   void onActionCellName(String value) {
     final String? errorText = validateCellName(value);
-    setState(() => cellNameErrorText = errorText);
+    setState(() => nameErrorText = errorText);
   }
 
   @override
@@ -176,12 +177,7 @@ class _CreateCellDialogState extends State<CreateCellDialog> {
                     decoration: InputDecoration(
                       hintText: "Cell Name",
                       suffixIcon:
-                          cellNameErrorText != null
-                              ? Tooltip(
-                                message: cellNameErrorText,
-                                child: Icon(Icons.error),
-                              )
-                              : null,
+                          nameErrorText != null ? Tooltip(message: nameErrorText, child: Icon(Icons.error)) : null,
                     ),
                     onAction: onActionCellName,
                   ),

@@ -49,7 +49,8 @@ class CellsCubit extends Cubit<CellsCubitState> {
   void removeCell(Cell cell) {
     final int index = cells.indexOf(cell);
     if (index < 0) return;
-    emit(state.copyWith(cells: cells.removedAt(index)));
+    final current = cells[index] == this.current ? null : this.current;
+    emit(state.copyWith(cells: cells.removedAt(index), current: current));
   }
 
   Cell? findCell(String name) {
@@ -74,12 +75,12 @@ final CellsCubit cellsCubit = CellsCubit(
         graphic: RootGraphic(
           children: [
             PolygonGraphic(
-              layer: layersCubit.current!,
+              layer: layersCubit.layers.first,
               vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50)],
               close: true,
             ),
             PolygonGraphic(
-              layer: layersCubit.current!,
+              layer: layersCubit.layers.first,
               close: true,
               vertices: [
                 Offset(-150, -150),
@@ -88,7 +89,7 @@ final CellsCubit cellsCubit = CellsCubit(
                 Offset(-150, -100),
               ],
             ),
-            RectangleGraphic(layer: layersCubit.current!, width: 100, height: 100),
+            RectangleGraphic(layer: layersCubit.layers.first, width: 100, height: 100),
           ],
         ),
       ),
@@ -97,10 +98,10 @@ final CellsCubit cellsCubit = CellsCubit(
         graphic: RootGraphic(
           children: [
             PolygonGraphic(
-              layer: layersCubit.current!,
+              layer: layersCubit.layers.first,
               vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50), Offset(-50, -50)],
             ),
-            CircleGraphic(layer: layersCubit.current!, center: Offset(0, 0), radius: 50),
+            CircleGraphic(layer: layersCubit.layers.first, center: Offset(0, 0), radius: 50),
           ],
         ),
       ),
