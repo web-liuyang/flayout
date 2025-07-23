@@ -22,6 +22,7 @@ class CellsCubit extends Cubit<List<Cell>> {
   }
 
   void add(Cell cell) {
+    if (state.any((item) => item == cell)) return;
     emit([...state, cell]);
   }
 

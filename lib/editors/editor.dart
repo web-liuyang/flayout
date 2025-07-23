@@ -30,7 +30,6 @@ class EditorContext {
   final CommandManager commands = CommandManager();
 
   void render() {
-    canvasCubit.setZoom(viewport.getZoom());
     renderObject.markNeedsPaint();
   }
 
@@ -117,6 +116,8 @@ class SceneRenderObject extends RenderBox {
           ..layout(ui.ParagraphConstraints(width: double.infinity));
 
     context.canvas.drawParagraph(paragraph, Offset(offset.dx + 50, offset.dy + viewport.size.height - 50));
+
+    canvasCubit.setZoom(viewport.getZoom());
   }
 
   @override

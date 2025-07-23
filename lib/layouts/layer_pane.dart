@@ -115,7 +115,6 @@ class LayerSettingsDialog extends StatefulWidget {
     final layersCubit = context.read<LayersCubit>();
     final layers = layersCubit.layers;
 
-    print("First layer: ${layers.first.hashCode}");
     final editableLayers =
         layers.map(
           (layer) {
@@ -137,14 +136,15 @@ class LayerSettingsDialog extends StatefulWidget {
     if (result == null) return;
 
     layersCubit.setLayers(
-      result.map((item) {
-        return item.origin
-          ..name = item.name
-          ..layer = item.layer
-          ..datatype = item.datatype
-          ..palette = item.palette;
-        ;
-      }).toList(),
+      result.map(
+        (item) {
+          return item.origin
+            ..name = item.name
+            ..layer = item.layer
+            ..datatype = item.datatype
+            ..palette = item.palette;
+        },
+      ).toList(),
     );
   }
 
@@ -232,6 +232,12 @@ class _LayerSettingsDialogState extends State<LayerSettingsDialog> {
                       );
                     });
                   },
+
+                  onDelete: () {
+                    setState(() {
+                      editableLayers.removeAt(currentIndex);
+                    });
+                  },
                 ),
               );
             },
@@ -271,6 +277,7 @@ class LayerListView extends StatefulWidget {
     required this.currentIndex,
     required this.onChangedCurrentIndex,
     required this.onAdd,
+    required this.onDelete,
   });
 
   final List<EditableLayer> layers;
@@ -280,6 +287,8 @@ class LayerListView extends StatefulWidget {
   final ValueSetter<int> onChangedCurrentIndex;
 
   final VoidCallback onAdd;
+
+  final VoidCallback onDelete;
 
   EditableLayer? get current => layers.elementAtOrNull(currentIndex);
 
@@ -307,6 +316,7 @@ class _LayerListViewState extends State<LayerListView> {
           Row(
             children: [
               IconButton(onPressed: widget.onAdd, icon: Icon(Icons.add_box_outlined)),
+              IconButton(onPressed: widget.onDelete, icon: Icon(Icons.delete)),
             ],
           ),
 
@@ -407,45 +417,6 @@ class LayerEditor extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class ColorSelector extends StatelessWidget {
-  const ColorSelector({super.key, required this.value, required this.colors, required this.onChanged});
-
-  final Color value;
-
-  final List<Color> colors;
-
-  final ValueSetter<Color> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final BorderSide? borderSide = theme.inputDecorationTheme.border?.borderSide;
-
-    return Container(
-      decoration: BoxDecoration(
-        border: borderSide != null ? Border.fromBorderSide(borderSide) : null,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: DropdownButton(
-        isExpanded: true,
-        isDense: true,
-        value: value,
-        underline: Container(),
-        selectedItemBuilder: (context) => colors.map((color) => Container(color: color)).toList(growable: false),
-        items: colors
-            .map(
-              (color) => DropdownMenuItem(value: color, child: Container(margin: EdgeInsets.all(8), color: color)),
-            )
-            .toList(growable: false),
-        onChanged: (value) {
-          if (value == null) return;
-          onChanged(value);
-        },
       ),
     );
   }

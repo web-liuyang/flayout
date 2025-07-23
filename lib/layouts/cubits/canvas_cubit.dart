@@ -24,10 +24,12 @@ class CanvasCubit extends Cubit<CanvasCubitState> {
   CanvasCubit(super.initialState);
 
   void setPosition(Offset position) {
+    if (position == state.position) return;
     emit(state.copyWith(position: position));
   }
 
   void setZoom(double zoom) {
+    if (zoom == state.zoom) return;
     emit(state.copyWith(zoom: zoom));
   }
 }

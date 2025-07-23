@@ -65,8 +65,8 @@ class Layer {
     return name == other.name && layer == other.layer && datatype == other.datatype;
   }
 
-  // @override
-  // int get hashCode => name.hashCode ^ layer.hashCode ^ datatype.hashCode ^ palette.hashCode;
+  @override
+  int get hashCode => name.hashCode ^ layer.hashCode ^ datatype.hashCode ^ palette.hashCode;
 
   @override
   String toString() {
@@ -105,10 +105,12 @@ class LayersCubit extends Cubit<LayersCubitState> {
   Map<String, Paint> paints = {};
 
   void setCurrent(Layer layer) {
+    if (layer == state.current) return;
     emit(state.copyWith(current: layer));
   }
 
   void setLayers(List<Layer> layers) {
+    if (layers == state.layers) return;
     paints = {};
     emit(state.copyWith(layers: layers));
   }
