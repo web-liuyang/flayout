@@ -25,8 +25,8 @@ class PasteStateMachine extends BaseStateMachine {
   }
 
   @override
-  void onMouseMove(event) {
-    super.onMouseMove(event);
+  void onMove(event) {
+    super.onMove(event);
     _draft.position = event.position - _aabb.center;
     context.render();
   }

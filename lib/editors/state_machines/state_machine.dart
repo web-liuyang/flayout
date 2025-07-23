@@ -1,11 +1,11 @@
 import 'package:blueprint_master/editors/editor.dart';
 import 'package:blueprint_master/extensions/matrix4_extension.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Viewport;
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../layouts/cubits/cubits.dart';
+import '../graphics/graphics.dart';
 import 'state_machines.dart';
 
 class StateMachine extends StatefulWidget {
@@ -22,10 +22,11 @@ class StateMachine extends StatefulWidget {
 class _StateMachineState extends State<StateMachine> {
   final FocusNode focusNode = FocusNode(debugLabel: "StateMachine");
 
+  Viewport get viewport => widget.context.viewport;
+
   @override
   void initState() {
     focusNode.requestFocus();
-    // HardwareKeyboard.instance.a(focusNode);
     super.initState();
   }
 
@@ -51,13 +52,17 @@ class _StateMachineState extends State<StateMachine> {
     widget.context.stateMachine.onPan(event);
   }
 
-  // MouseMovementDetector
-  void onMouseMove(MouseMoveCanvasEvent event) {
-    canvasCubit.setPosition(event.position);
-    widget.context.stateMachine.onMouseMove(event);
+  void onDrag(DragCanvasEvent event) {
+    widget.context.stateMachine.onDrag(event);
   }
 
-  void onScroll(PointerScrollCanvasEvent event) {
+  // MouseMovementDetector
+  void onMove(MoveCanvasEvent event) {
+    canvasCubit.setPosition(event.position);
+    widget.context.stateMachine.onMove(event);
+  }
+
+  void onScroll(ScrollCanvasEvent event) {
     widget.context.stateMachine.onScroll(event);
   }
 
@@ -87,31 +92,31 @@ class _StateMachineState extends State<StateMachine> {
         onKeyEvent: onKeyEvent,
         child: Listener(
           onPointerHover: (event) {
-            final position = widget.context.viewport.windowToCanvas(event.localPosition);
-            onMouseMove(MouseMoveCanvasEvent(position: position));
+            final position = viewport.windowToCanvas(event.localPosition);
+            onMove(MoveCanvasEvent(position: position));
           },
           onPointerPanZoomStart: (event) {
-            position = widget.context.viewport.windowToCanvas(event.localPosition);
+            position = viewport.windowToCanvas(event.localPosition);
           },
           onPointerPanZoomUpdate: (event) {
             if (event.panDelta != Offset.zero) {
-              final position = widget.context.viewport.windowToCanvas(event.localPosition);
-              final delta = widget.context.viewport.transform.screenToPlane(event.panDelta);
+              final position = viewport.windowToCanvas(event.localPosition);
+              final delta = viewport.transform.screenToPlane(event.panDelta);
               onPan(PanCanvasEvent(position: position, delta: delta));
               return;
             }
             if (event.scale != 1) {
               // 缩放的位置不能改变
-              // final position = widget.context.viewport.windowToCanvas(event.localPosition);
+              // final position = viewport.windowToCanvas(event.localPosition);
               final direction = event.scale < prevScale ? ScrollDirection.down : ScrollDirection.up;
               prevScale = event.scale;
-              onScroll(PointerScrollCanvasEvent(position: position, direction: direction));
+              onScroll(ScrollCanvasEvent(position: position, direction: direction));
               return;
             }
           },
 
           onPointerDown: (event) {
-            final position = widget.context.viewport.windowToCanvas(event.localPosition);
+            final position = viewport.windowToCanvas(event.localPosition);
             if (event.buttons == kPrimaryButton) {
               onPrimaryTapDown(TapDownCanvasEvent(position: position));
             } else if (event.buttons == kSecondaryButton) {
@@ -121,17 +126,21 @@ class _StateMachineState extends State<StateMachine> {
             }
           },
           onPointerMove: (event) {
+            final position = viewport.windowToCanvas(event.localPosition);
+            final delta = viewport.transform.screenToPlane(event.delta);
+            if (event.buttons == kPrimaryButton) {
+              onDrag(DragCanvasEvent(position: position, delta: delta / viewport.getZoom()));
+            }
+
             if (event.buttons == kTertiaryButton) {
-              final position = widget.context.viewport.windowToCanvas(event.localPosition);
-              final delta = widget.context.viewport.transform.screenToPlane(event.delta);
               onPan(PanCanvasEvent(position: position, delta: delta));
             }
           },
           onPointerSignal: (event) {
             if (event is PointerScrollEvent) {
-              final position = widget.context.viewport.windowToCanvas(event.localPosition);
+              final position = viewport.windowToCanvas(event.localPosition);
               final direction = event.scrollDelta.dy > 0 ? ScrollDirection.down : ScrollDirection.up;
-              onScroll(PointerScrollCanvasEvent(position: position, direction: direction));
+              onScroll(ScrollCanvasEvent(position: position, direction: direction));
             }
           },
           child: widget.child,

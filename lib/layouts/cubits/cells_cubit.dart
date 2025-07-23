@@ -41,16 +41,17 @@ final CellsCubit cellsCubit = CellsCubit([
       children: [
         PolygonGraphic(
           layer: layersCubit.current!,
-          vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50), Offset(-50, -50)],
+          vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50)],
+          close: true,
         ),
         PolygonGraphic(
           layer: layersCubit.current!,
+          close: true,
           vertices: [
             Offset(-150, -150),
             Offset(-100, -150),
             Offset(-100, -100),
             Offset(-150, -100),
-            Offset(-150, -150),
           ],
         ),
         RectangleGraphic(layer: layersCubit.current!, width: 100, height: 100),

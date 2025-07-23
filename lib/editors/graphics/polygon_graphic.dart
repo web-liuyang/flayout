@@ -10,20 +10,20 @@ class PolygonGraphic extends BaseGraphic {
 
   final bool close;
 
-  Path path = Path();
+  Path _path = Path();
 
   @override
   void paint(Context ctx, Offset offset) {
     if (layer == null) return;
     final List<Offset> vertices = this.vertices.map((e) => e + position + offset).toList();
-    path = Path()..addPolygon(vertices, close);
+    _path = Path()..addPolygon(vertices, close);
     final paint = layersCubit.getPaint(layer!, ctx);
-    ctx.canvas.drawPath(path, paint);
+    ctx.canvas.drawPath(_path, paint);
   }
 
   @override
   bool contains(Offset position) {
-    return path.contains(position);
+    return _path.contains(position);
   }
 
   @override
@@ -32,5 +32,5 @@ class PolygonGraphic extends BaseGraphic {
   }
 
   @override
-  Rect aabb() => path.getBounds();
+  Rect aabb() => _path.getBounds();
 }

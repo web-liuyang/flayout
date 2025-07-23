@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:ui' hide kEditorTextStyle;
 
 import 'package:blueprint_master/editors/editor_config.dart';
 import 'package:blueprint_master/layers/layers.dart';

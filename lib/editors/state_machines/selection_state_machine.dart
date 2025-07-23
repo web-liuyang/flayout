@@ -1,3 +1,4 @@
+import '../graphics/graphics.dart';
 import 'base_state_machine.dart';
 
 class SelectionStateMachine extends BaseStateMachine {
@@ -27,6 +28,20 @@ class SelectionStateMachine extends BaseStateMachine {
     super.onPan(event);
     context.viewport.translate(event.delta);
     context.render();
+  }
+
+  @override
+  void onDrag(DragCanvasEvent event) {
+    super.onDrag(event);
+    for (final BaseGraphic g in context.selectedGraphics) {
+      g.position += event.delta;
+    }
+
+    context.selectedGraphicsNotifier.value = [...context.selectedGraphics];
+    context.render();
+    // print(event);
+    // context.viewport.translate(event.delta);
+    // context.render();
   }
 
   @override

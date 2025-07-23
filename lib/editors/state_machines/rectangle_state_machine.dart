@@ -19,9 +19,9 @@ class RectangleStateMachine extends BaseStateMachine {
   }
 
   @override
-  void onMouseMove(event) {
-    super.onMouseMove(event);
-    _state.onMouseMove(event);
+  void onMove(event) {
+    super.onMove(event);
+    _state.onMove(event);
   }
 
   @override
@@ -91,8 +91,8 @@ class _DrawStartedState extends BaseStateMachine {
   }
 
   @override
-  void onMouseMove(event) {
-    super.onMouseMove(event);
+  void onMove(event) {
+    super.onMove(event);
     state._draft.end = event.position;
     context.render();
   }

@@ -44,7 +44,13 @@ class _PropertyPanelState extends State<PropertyPanel> {
                               onChanged: (graphics) => onChanged(editorContext, graphics),
                             ),
                           ),
-                        if (polygonGraphics.isNotEmpty) Expanded(child: _PolygonPropertyPane(graphics: polygonGraphics)),
+                        if (polygonGraphics.isNotEmpty)
+                          Expanded(
+                            child: _PolygonPropertyPane(
+                              graphics: polygonGraphics,
+                              onChanged: (graphics) => onChanged(editorContext, graphics),
+                            ),
+                          ),
                         if (circleGraphics.isNotEmpty)
                           Expanded(
                             child: _CirclePropertyPane(
@@ -65,23 +71,39 @@ class _PropertyPanelState extends State<PropertyPanel> {
 }
 
 class _PolygonPropertyPane extends StatefulWidget {
-  const _PolygonPropertyPane({required this.graphics});
+  const _PolygonPropertyPane({required this.graphics, required this.onChanged});
 
   final List<PolygonGraphic> graphics;
+
+  final ValueSetter<List<PolygonGraphic>> onChanged;
 
   @override
   _PolygonPropertyPaneState createState() => _PolygonPropertyPaneState();
 }
 
 class _PolygonPropertyPaneState extends State<_PolygonPropertyPane> {
+  bool isExpandedLocations = true;
+
   bool isExpandedVertices = true;
 
-  bool isExpandedLocations = true;
+  void onChanged(List<PolygonGraphic> graphics) {
+    widget.onChanged(graphics);
+  }
+
+  void onChangedPosition(Offset position) {
+    widget.graphics.first.position = position;
+    onChanged(widget.graphics);
+  }
+
+  void onChangedVertex(Offset vertex, int index) {
+    widget.graphics.first.vertices[index] = vertex;
+    onChanged(widget.graphics);
+  }
 
   @override
   Widget build(BuildContext context) {
     final PolygonGraphic graphic = widget.graphics.first;
-    final decoration = BoxDecoration(border: Border(top: Divider.createBorderSide(context)));
+    final BoxDecoration decoration = BoxDecoration(border: Border(top: Divider.createBorderSide(context)));
 
     return SingleChildScrollView(
       child: ExpansionPanelList(
@@ -89,11 +111,47 @@ class _PolygonPropertyPaneState extends State<_PolygonPropertyPane> {
         materialGapSize: 0,
         expansionCallback: (panelIndex, isExpanded) {
           setState(() {
-            if (panelIndex == 0) isExpandedVertices = isExpanded;
-            if (panelIndex == 1) isExpandedLocations = isExpanded;
+            if (panelIndex == 0) isExpandedLocations = isExpanded;
+            if (panelIndex == 1) isExpandedVertices = isExpanded;
           });
         },
         children: [
+          ExpansionPanel(
+            canTapOnHeader: true,
+            isExpanded: isExpandedLocations,
+            headerBuilder: (BuildContext context, bool isExpanded) => ListTile(title: Text("Locations")),
+            body: Container(
+              decoration: decoration,
+              padding: EdgeInsets.all(8),
+              child: Column(
+                spacing: 8,
+                children: [
+                  CellTile(
+                    title: "Position:",
+                    trailing: Row(
+                      spacing: 8,
+                      children: [
+                        Expanded(
+                          child: InputBox(
+                            value: "${graphic.position.dx}",
+                            onAction:
+                                (String value) => onChangedPosition(Offset(double.parse(value), graphic.position.dy)),
+                          ),
+                        ),
+                        Expanded(
+                          child: InputBox(
+                            value: "${graphic.position.dy}",
+                            onAction:
+                                (String value) => onChangedPosition(Offset(graphic.position.dx, double.parse(value))),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           ExpansionPanel(
             canTapOnHeader: true,
             isExpanded: isExpandedVertices,
@@ -103,20 +161,60 @@ class _PolygonPropertyPaneState extends State<_PolygonPropertyPane> {
               padding: EdgeInsets.all(8),
               child: Table(
                 border: TableBorder.all(),
-                columnWidths: const <int, TableColumnWidth>{0: FixedColumnWidth(32), 1: FlexColumnWidth(), 2: FlexColumnWidth()},
+                columnWidths: const <int, TableColumnWidth>{
+                  0: FixedColumnWidth(32),
+                  1: FlexColumnWidth(),
+                  2: FlexColumnWidth(),
+                },
                 children: <TableRow>[
-                  TableRow(children: [TableCell(child: Text("#")), TableCell(child: Text("X")), TableCell(child: Text("Y"))]),
+                  TableRow(
+                    children: [
+                      TableCell(
+                        child: Padding(padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), child: Text("#")),
+                      ),
+                      TableCell(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          child: Text("X"),
+                        ),
+                      ),
+                      TableCell(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          child: Text("Y"),
+                        ),
+                      ),
+                    ],
+                  ),
                   for (final (index, item) in graphic.vertices.indexed)
-                    TableRow(children: [TableCell(child: Text("$index")), TableCell(child: Text("${item.dx}")), TableCell(child: Text("${item.dy}"))]),
+                    TableRow(
+                      children: [
+                        TableCell(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                            alignment: Alignment.center,
+                            child: Text("$index"),
+                          ),
+                        ),
+                        TableCell(
+                          child: InputBox(
+                            value: "${item.dx}",
+                            decoration: InputDecoration(border: OutlineInputBorder(borderSide: BorderSide.none)),
+                            onAction: (value) => onChangedVertex(Offset(double.parse(value), item.dy), index),
+                          ),
+                        ),
+                        TableCell(
+                          child: InputBox(
+                            value: "${item.dy}",
+                            decoration: InputDecoration(border: OutlineInputBorder(borderSide: BorderSide.none)),
+                            onAction: (value) => onChangedVertex(Offset(item.dx, double.parse(value)), index),
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
-          ),
-          ExpansionPanel(
-            canTapOnHeader: true,
-            isExpanded: isExpandedLocations,
-            headerBuilder: (BuildContext context, bool isExpanded) => ListTile(title: Text("Locations")),
-            body: Container(decoration: decoration, child: Text("Locations Content")),
           ),
         ],
       ),
@@ -184,13 +282,13 @@ class _CirclePropertyPaneState extends State<_CirclePropertyPane> {
                       children: [
                         Expanded(
                           child: InputBox(
-                            defaultValue: "${graphic.center.dx}",
+                            value: "${graphic.center.dx}",
                             onAction: (String value) => onChangedCenter(Offset(double.parse(value), graphic.center.dy)),
                           ),
                         ),
                         Expanded(
                           child: InputBox(
-                            defaultValue: "${graphic.center.dy}",
+                            value: "${graphic.center.dy}",
                             onAction: (String value) => onChangedCenter(Offset(graphic.center.dx, double.parse(value))),
                           ),
                         ),
@@ -200,7 +298,7 @@ class _CirclePropertyPaneState extends State<_CirclePropertyPane> {
                   CellTile(
                     title: "Radius:",
                     trailing: InputBox(
-                      defaultValue: "${graphic.radius}",
+                      value: "${graphic.radius}",
                       onAction: (String value) => onChangedRadius(double.parse(value)),
                     ),
                   ),
@@ -279,14 +377,16 @@ class _RectanglePropertyPaneState extends State<_RectanglePropertyPane> {
                       children: [
                         Expanded(
                           child: InputBox(
-                            defaultValue: "${graphic.position.dx}",
-                            onAction: (String value) => onChangedPosition(Offset(double.parse(value), graphic.position.dy)),
+                            value: "${graphic.position.dx}",
+                            onAction:
+                                (String value) => onChangedPosition(Offset(double.parse(value), graphic.position.dy)),
                           ),
                         ),
                         Expanded(
                           child: InputBox(
-                            defaultValue: "${graphic.position.dy}",
-                            onAction: (String value) => onChangedPosition(Offset(graphic.position.dx, double.parse(value))),
+                            value: "${graphic.position.dy}",
+                            onAction:
+                                (String value) => onChangedPosition(Offset(graphic.position.dx, double.parse(value))),
                           ),
                         ),
                       ],
@@ -295,14 +395,14 @@ class _RectanglePropertyPaneState extends State<_RectanglePropertyPane> {
                   CellTile(
                     title: "Width:",
                     trailing: InputBox(
-                      defaultValue: "${graphic.width}",
+                      value: "${graphic.width}",
                       onAction: (String value) => onChangedWidth(double.parse(value)),
                     ),
                   ),
                   CellTile(
                     title: "Height:",
                     trailing: InputBox(
-                      defaultValue: "${graphic.height}",
+                      value: "${graphic.height}",
                       onAction: (String value) => onChangedHeight(double.parse(value)),
                     ),
                   ),

@@ -23,16 +23,24 @@ class PanCanvasEvent {
   final Offset delta;
 }
 
-class MouseMoveCanvasEvent {
-  const MouseMoveCanvasEvent({required this.position});
+class DragCanvasEvent {
+  const DragCanvasEvent({required this.position, required this.delta});
+
+  final Offset position;
+
+  final Offset delta;
+}
+
+class MoveCanvasEvent {
+  const MoveCanvasEvent({required this.position});
 
   final Offset position;
 }
 
 enum ScrollDirection { up, down }
 
-class PointerScrollCanvasEvent {
-  const PointerScrollCanvasEvent({required this.position, required this.direction});
+class ScrollCanvasEvent {
+  const ScrollCanvasEvent({required this.position, required this.direction});
 
   final Offset position;
 
@@ -52,12 +60,11 @@ abstract class BaseStateMachine {
 
   void onPan(PanCanvasEvent event) {}
 
-  void onMouseMove(MouseMoveCanvasEvent event) {
-    // final position = game.camera.viewfinder.globalToLocal(info.eventPosition.widget);
-    // mouseCubit.update(position);
-  }
+  void onDrag(DragCanvasEvent event) {}
 
-  void onScroll(PointerScrollCanvasEvent info) {}
+  void onMove(MoveCanvasEvent event) {}
+
+  void onScroll(ScrollCanvasEvent info) {}
 
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (event is KeyDownEvent) {
