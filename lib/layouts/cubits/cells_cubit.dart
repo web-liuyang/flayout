@@ -53,11 +53,7 @@ final CellsCubit cellsCubit = CellsCubit([
             Offset(-150, -150),
           ],
         ),
-        RectangleGraphic(
-          layer: layersCubit.current!,
-          width: 100,
-          height: 100
-        ),
+        RectangleGraphic(layer: layersCubit.current!, width: 100, height: 100),
       ],
     ),
   ),

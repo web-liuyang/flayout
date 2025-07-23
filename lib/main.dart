@@ -191,7 +191,11 @@ class BlueprintMaster extends StatelessWidget {
         body: MultiSplitViewTheme(
           data: MultiSplitViewThemeData(dividerPainter: DividerPainters.grooved1()),
           child: MultiBlocProvider(
-            providers: [BlocProvider.value(value: cellsCubit), BlocProvider.value(value: layersCubit)],
+            providers: [
+              BlocProvider.value(value: cellsCubit),
+              BlocProvider.value(value: layersCubit),
+              BlocProvider.value(value: canvasCubit),
+            ],
             child: const Layout(),
           ),
         ),

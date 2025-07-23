@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/graphics/graphics.dart';
+import 'package:blueprint_master/extensions/extensions.dart';
 import 'package:blueprint_master/layouts/cubits/cubits.dart';
 import 'package:flutter/widgets.dart' hide Viewport;
 import 'package:matrix4_transform/matrix4_transform.dart';
@@ -34,7 +35,10 @@ class EditorContext {
 
   final CommandManager commands = CommandManager();
 
-  void render() => renderObject.markNeedsPaint();
+  void render() {
+    canvasCubit.setZoom(viewport.matrix4.zoom);
+    renderObject.markNeedsPaint();
+  }
 
   bool canSee(Rect aabb) {
     return viewport.visibleWorldRect.overlaps(aabb);
@@ -85,11 +89,9 @@ class SceneRenderObject extends RenderBox {
 
   @override
   void paint(PaintingContext context, ui.Offset offset) {
-    // context.canvas.translate(offset.dx, offset.dy);
-    // final Matrix4 matrix = Matrix4.identity();
-
-    final Matrix4Transform matrix =
-        Matrix4Transform().translate(x: offset.dx, y: offset.dy + this.context.viewport.size.height).flipVertically();
+    final Matrix4Transform matrix = Matrix4Transform()
+        .translate(x: offset.dx, y: offset.dy + this.context.viewport.size.height)
+        .scaleVertically(-1);
 
     this.context.viewport.transform = matrix;
 

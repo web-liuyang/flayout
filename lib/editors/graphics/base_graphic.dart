@@ -33,6 +33,7 @@ class Viewport {
 
   Size size = Size.zero;
 
+  /// 平面坐标系的矩阵
   Matrix4Transform matrix4 = Matrix4Transform();
 
   /// 屏幕坐标系 转换到 平面坐标系的矩阵。
@@ -46,12 +47,12 @@ class Viewport {
   }
 
   void zoomIn(Offset origin) {
-    final zoom = getZoom() + 0.01;
+    final zoom = getZoom() + 0.1;
     setZoom(zoom, origin: origin);
   }
 
   void zoomOut(Offset origin) {
-    final zoom = getZoom() - 0.01;
+    final zoom = getZoom() - 0.1;
     setZoom(zoom, origin: origin);
   }
 
@@ -68,25 +69,21 @@ class Viewport {
     };
   }
 
-  // Vector3 localToGlobal(Vector3 position) {
-  //   return matrix4.localToGlobal(position);
-  // }
-
   Offset windowToCanvas(Offset position) {
+    // 获取当前的变换矩阵
     final m = matrix4.m;
+
+    // 取出平移和缩放分量
     final tx = m[12];
     final ty = m[13];
-    // final tz = m[14];
-    final x = (position.dx - tx) / m[0];
-    final y = (position.dy - ty) / m[5];
-    // final z = (position.z - tz) / m[10];
+    final scaleX = m[0];
+    final scaleY = m[5];
 
-    // print(transform.localToGlobal(Vector3(x, y, 0)).toOffset());
+    // 先减去平移，再除以缩放，得到平面坐标
+    final x = (position.dx - tx) / scaleX;
+    final y = ((size.height - position.dy) - ty) / scaleY;
 
-    //
-    // return Offset(x, -y);
-    return transform.rotateOffset(Offset(x, y));
-    // return transform.localToGlobal(Vector3(x, y, 0)).toOffset();
+    return Offset(x, y);
   }
 
   double getZoom() {
@@ -108,29 +105,7 @@ class Viewport {
   Offset getTranslation() {
     return matrix4.getTranslation();
   }
-
-  // void setTranslation(double tx, double ty) {
-  //   matrix4.setTranslation(tx, ty);
-  // }
 }
-
-// class World {
-//   final List<BaseGraphic> _graphics = [];
-
-//   void add(BaseGraphic graphic) {
-//     _graphics.add(graphic);
-//   }
-
-//   late Viewport viewport;
-
-//   late Element context;
-
-//   late SceneRenderObject renderObject;
-
-//   void render() async {
-//     renderObject.markNeedsPaint();
-//   }
-// }
 
 class Context {
   final EditorContext context;
