@@ -240,6 +240,11 @@ class _CirclePropertyPaneState extends State<_CirclePropertyPane> {
     widget.onChanged(graphics);
   }
 
+  void onChangedPosition(Offset position) {
+    widget.graphics.first.position = position;
+    onChanged(widget.graphics);
+  }
+
   void onChangedCenter(Offset center) {
     widget.graphics.first.center = center;
     onChanged(widget.graphics);
@@ -253,7 +258,7 @@ class _CirclePropertyPaneState extends State<_CirclePropertyPane> {
   @override
   Widget build(BuildContext context) {
     final CircleGraphic graphic = widget.graphics.first;
-    final decoration = BoxDecoration(border: Border(top: Divider.createBorderSide(context)));
+    final BoxDecoration decoration = BoxDecoration(border: Border(top: Divider.createBorderSide(context)));
 
     return SingleChildScrollView(
       child: ExpansionPanelList(
@@ -275,6 +280,28 @@ class _CirclePropertyPaneState extends State<_CirclePropertyPane> {
               child: Column(
                 spacing: 8,
                 children: [
+                  CellTile(
+                    title: "Position:",
+                    trailing: Row(
+                      spacing: 8,
+                      children: [
+                        Expanded(
+                          child: InputBox(
+                            value: "${graphic.position.dx}",
+                            onAction:
+                                (String value) => onChangedPosition(Offset(double.parse(value), graphic.position.dy)),
+                          ),
+                        ),
+                        Expanded(
+                          child: InputBox(
+                            value: "${graphic.position.dy}",
+                            onAction:
+                                (String value) => onChangedPosition(Offset(graphic.position.dx, double.parse(value))),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   CellTile(
                     title: "Center:",
                     trailing: Row(
@@ -348,7 +375,7 @@ class _RectanglePropertyPaneState extends State<_RectanglePropertyPane> {
   @override
   Widget build(BuildContext context) {
     final RectangleGraphic graphic = widget.graphics.first;
-    final decoration = BoxDecoration(border: Border(top: Divider.createBorderSide(context)));
+    final BoxDecoration decoration = BoxDecoration(border: Border(top: Divider.createBorderSide(context)));
 
     return SingleChildScrollView(
       child: ExpansionPanelList(

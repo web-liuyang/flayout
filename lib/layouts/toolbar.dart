@@ -20,7 +20,8 @@ class _ToolbarState extends State<Toolbar> {
       listenable: editorManager.currentEditorNotifier,
       builder: (context, _) {
         final EditorContext? editorContext = editorManager.currentEditor?.context;
-        final ValueNotifier<BaseStateMachine>? stateMachineNotifier = editorManager.currentEditor?.context.stateMachineNotifier;
+        final ValueNotifier<BaseStateMachine>? stateMachineNotifier =
+            editorManager.currentEditor?.context.stateMachineNotifier;
         final CommandManager? commands = editorManager.currentEditor?.context.commands;
 
         return ListenableBuilder(
@@ -52,6 +53,10 @@ class _ToolbarState extends State<Toolbar> {
               editorContext.stateMachineNotifier.value = RectangleStateMachine(context: editorContext);
             }
 
+            void onPolygon(EditorContext editorContext) {
+              editorContext.stateMachineNotifier.value = PolygonStateMachine(context: editorContext);
+            }
+
             void onCircle(EditorContext editorContext) {
               editorContext.stateMachineNotifier.value = CircleStateMachine(context: editorContext);
             }
@@ -76,10 +81,16 @@ class _ToolbarState extends State<Toolbar> {
                   tooltip: "Rectange",
                 ),
                 IconButton(
+                  onPressed: invoke(onPolygon),
+                  isSelected: editorContext?.stateMachine is PolygonStateMachine,
+                  icon: const Icon(Icons.tab),
+                  tooltip: "Polygon",
+                ),
+                IconButton(
                   onPressed: invoke(onCircle),
                   isSelected: editorContext?.stateMachine is CircleStateMachine,
                   icon: const Icon(Icons.circle_outlined),
-                  tooltip: "Rectange",
+                  tooltip: "Circle",
                 ),
               ],
             );
