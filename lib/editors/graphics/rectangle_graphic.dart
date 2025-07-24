@@ -11,19 +11,21 @@ class RectangleGraphic extends BaseGraphic {
 
   double height;
 
-  Path path = Path();
+  Path _path = Path();
 
   @override
   void paint(Context ctx, Offset offset) {
     if (layer == null) return;
-    path = Path()..addRect(Rect.fromLTWH(position.dx + offset.dx, position.dy + offset.dy, width, height));
-    final paint = layersCubit.getPaint(layer!, ctx);
-    ctx.canvas.drawPath(path, paint);
+    _path = Path()..addRect(Rect.fromLTWH(position.dx + offset.dx, position.dy + offset.dy, width, height));
+    if (ctx.viewport.canSee(aabb())) {
+      final paint = layersCubit.getPaint(layer!, ctx);
+      ctx.canvas.drawPath(_path, paint);
+    }
   }
 
   @override
   bool contains(Offset position) {
-    return path.contains(position);
+    return _path.contains(position);
   }
 
   @override
@@ -32,5 +34,5 @@ class RectangleGraphic extends BaseGraphic {
   }
 
   @override
-  Rect aabb() => path.getBounds();
+  Rect aabb() => _path.getBounds();
 }

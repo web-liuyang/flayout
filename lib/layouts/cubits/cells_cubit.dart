@@ -99,9 +99,29 @@ final CellsCubit cellsCubit = CellsCubit(
           children: [
             PolygonGraphic(
               layer: layersCubit.layers.first,
-              vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50), Offset(-50, -50)],
+              close: true,
+              vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50)],
             ),
             CircleGraphic(layer: layersCubit.layers.first, center: Offset(0, 0), radius: 50),
+          ],
+        ),
+      ),
+      Cell(
+        name: "big Cell_3 10000",
+        graphic: RootGraphic(
+          children: [
+            for (double i = 0; i < 1000_0; i++)
+              PolygonGraphic(
+                layer: layersCubit.layers.first,
+                close: true,
+                position: Offset(i * 50, i * 50),
+                vertices: [
+                  Offset(-50, -50),
+                  Offset(50, -50),
+                  Offset(50, 50),
+                  Offset(-50, 50),
+                ],
+              ),
           ],
         ),
       ),

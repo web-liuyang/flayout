@@ -17,8 +17,10 @@ class PolygonGraphic extends BaseGraphic {
     if (layer == null) return;
     final List<Offset> vertices = this.vertices.map((e) => e + position + offset).toList();
     _path = Path()..addPolygon(vertices, close);
-    final paint = layersCubit.getPaint(layer!, ctx);
-    ctx.canvas.drawPath(_path, paint);
+    if (ctx.viewport.canSee(aabb())) {
+      final paint = layersCubit.getPaint(layer!, ctx);
+      ctx.canvas.drawPath(_path, paint);
+    }
   }
 
   @override

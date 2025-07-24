@@ -56,8 +56,6 @@ class Viewport {
     setZoom(zoom, origin: origin);
   }
 
-  void moveToCenter() {}
-
   void fitToWindow() {}
 
   double getLogicSize(double size) {
@@ -104,6 +102,11 @@ class Viewport {
 
   Offset getTranslation() {
     return matrix4.getTranslation();
+  }
+
+  bool canSee(Rect rect) {
+    final worldRect = visibleWorldRect;
+    return worldRect.overlaps(rect);
   }
 }
 

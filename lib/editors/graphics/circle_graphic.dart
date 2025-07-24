@@ -16,22 +16,24 @@ class CircleGraphic extends BaseGraphic {
 
   double radius;
 
-  Path path = Path();
+  Path _path = Path();
 
   @override
   void paint(Context ctx, Offset offset) {
     if (layer == null) return;
-    path = Path()..addArc(Rect.fromCircle(center: center + position + offset, radius: radius), 0, 2 * pi);
-    final paint = layersCubit.getPaint(layer!, ctx);
-    ctx.canvas.drawPath(path, paint);
+    _path = Path()..addArc(Rect.fromCircle(center: center + position + offset, radius: radius), 0, 2 * pi);
+    if (ctx.viewport.canSee(aabb())) {
+      final paint = layersCubit.getPaint(layer!, ctx);
+      ctx.canvas.drawPath(_path, paint);
+    }
   }
 
   @override
-  bool contains(Offset position) => path.contains(position);
+  bool contains(Offset position) => _path.contains(position);
 
   @override
   CircleGraphic clone() => CircleGraphic(position: position, layer: layer, radius: radius, center: center);
 
   @override
-  Rect aabb() => path.getBounds();
+  Rect aabb() => _path.getBounds();
 }
