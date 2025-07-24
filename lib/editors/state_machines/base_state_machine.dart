@@ -64,7 +64,7 @@ abstract class BaseStateMachine {
 
   void onMove(MoveCanvasEvent event) {}
 
-  void onScroll(ScrollCanvasEvent info) {}
+  void onScroll(ScrollCanvasEvent event) {}
 
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (event is KeyDownEvent) {

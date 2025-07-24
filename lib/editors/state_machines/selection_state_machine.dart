@@ -44,14 +44,14 @@ class SelectionStateMachine extends BaseStateMachine {
   }
 
   @override
-  void onScroll(info) {
-    super.onScroll(info);
-    final zoomFn = switch (info.direction) {
+  void onScroll(event) {
+    super.onScroll(event);
+    final zoomFn = switch (event.direction) {
       ScrollDirection.up => context.viewport.zoomIn,
       ScrollDirection.down => context.viewport.zoomOut,
     };
 
-    zoomFn(info.position);
+    zoomFn(event.position);
     context.render();
   }
 

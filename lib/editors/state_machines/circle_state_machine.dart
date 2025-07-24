@@ -20,6 +20,12 @@ class CircleStateMachine extends BaseStateMachine {
   }
 
   @override
+  void onSecondaryTapDown(event) {
+    super.onSecondaryTapDown(event);
+    _state.onSecondaryTapDown(event);
+  }
+
+  @override
   void onMove(event) {
     super.onMove(event);
     _state.onMove(event);
@@ -33,14 +39,14 @@ class CircleStateMachine extends BaseStateMachine {
   }
 
   @override
-  void onScroll(info) {
-    super.onScroll(info);
-    final zoomFn = switch (info.direction) {
+  void onScroll(event) {
+    super.onScroll(event);
+    final zoomFn = switch (event.direction) {
       ScrollDirection.up => context.viewport.zoomIn,
       ScrollDirection.down => context.viewport.zoomOut,
     };
 
-    zoomFn(info.position);
+    zoomFn(event.position);
     context.render();
   }
 
@@ -73,9 +79,9 @@ class _DrawInitState extends BaseStateMachine {
   final CircleStateMachine state;
 
   @override
-  void onPrimaryTapDown(info) {
-    super.onPrimaryTapDown(info);
-    state._draft.center = info.position;
+  void onPrimaryTapDown(event) {
+    super.onPrimaryTapDown(event);
+    state._draft.center = event.position;
     context.graphic.children.add(state._draft);
     context.render();
     state._state = _DrawStartedState(context: context, state: state);
@@ -88,8 +94,14 @@ class _DrawStartedState extends BaseStateMachine {
   final CircleStateMachine state;
 
   @override
-  void onPrimaryTapDown(info) {
-    super.onPrimaryTapDown(info);
+  void onPrimaryTapDown(event) {
+    super.onPrimaryTapDown(event);
+    state.done();
+  }
+
+  @override
+  void onSecondaryTapDown(event) {
+    super.onSecondaryTapDown(event);
     state.done();
   }
 

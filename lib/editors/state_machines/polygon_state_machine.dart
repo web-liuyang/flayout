@@ -42,14 +42,14 @@ class PolygonStateMachine extends BaseStateMachine {
   }
 
   @override
-  void onScroll(info) {
-    super.onScroll(info);
-    final zoomFn = switch (info.direction) {
+  void onScroll(event) {
+    super.onScroll(event);
+    final zoomFn = switch (event.direction) {
       ScrollDirection.up => context.viewport.zoomIn,
       ScrollDirection.down => context.viewport.zoomOut,
     };
 
-    zoomFn(info.position);
+    zoomFn(event.position);
     context.render();
   }
 
@@ -82,8 +82,8 @@ class _DrawInitFirstPointState extends BaseStateMachine {
   final PolygonStateMachine state;
 
   @override
-  void onPrimaryTapDown(info) {
-    state._draft.vertices.add(info.position);
+  void onPrimaryTapDown(event) {
+    state._draft.vertices.add(event.position);
     context.graphic.children.add(state._draft);
     context.render();
     state._state = _DrawInitSecondPointState(context: context, state: state);
@@ -96,7 +96,8 @@ class _DrawInitSecondPointState extends BaseStateMachine {
   final PolygonStateMachine state;
 
   @override
-  void onPrimaryTapDown(_) {
+  void onPrimaryTapDown(event) {
+    super.onPrimaryTapDown(event);
     state._draft.vertices.add(state._draft.auxiliary!);
     context.render();
     state._state = _DrawStartedState(context: context, state: state);
@@ -121,14 +122,16 @@ class _DrawStartedState extends BaseStateMachine {
   final PolygonStateMachine state;
 
   @override
-  void onPrimaryTapDown(_) {
+  void onPrimaryTapDown(event) {
+    super.onPrimaryTapDown(event);
     state._draft.vertices.add(state._draft.auxiliary!);
     context.render();
     state._state = _DrawStartedState(context: context, state: state);
   }
 
   @override
-  void onSecondaryTapDown(info) {
+  void onSecondaryTapDown(event) {
+    super.onSecondaryTapDown(event);
     state.done();
   }
 
