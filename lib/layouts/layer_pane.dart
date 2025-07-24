@@ -537,7 +537,7 @@ class _CreateLayerDialogState extends State<CreateLayerDialog> {
   @override
   Widget build(BuildContext context) {
     return LayoutDialog(
-      title: "Create Cell",
+      title: "Create Layer",
       constraints: BoxConstraints.tightFor(width: 400),
       onConfirmed: isError ? null : confirm,
       child: LayerEditor(value: layer, onChanged: onChanged, onError: onError),
@@ -596,7 +596,7 @@ class _UpdateLayerDialogState extends State<UpdateLayerDialog> {
   @override
   Widget build(BuildContext context) {
     return LayoutDialog(
-      title: "Create Cell",
+      title: "Update Layer",
       constraints: BoxConstraints.tightFor(width: 400),
       onConfirmed: isError ? null : confirm,
       child: LayerEditor(value: layer, onChanged: onChanged, onError: onError),

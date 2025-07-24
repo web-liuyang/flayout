@@ -1,6 +1,8 @@
 import 'package:blueprint_master/commands/commands.dart';
 import 'package:blueprint_master/editors/editors.dart';
+import 'package:blueprint_master/layouts/cubits/cubits.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../editors/state_machines/state_machines.dart';
 
@@ -29,6 +31,8 @@ class _ToolbarState extends State<Toolbar> {
           builder: (context, _) {
             final bool canUndo = (commands?.canUndo ?? false);
             final bool canRedo = (commands?.canRedo ?? false);
+            final bool canDraw = context.watch<LayersCubit>().current != null;
+
             // final bool canRedo = (commands?.canRedo ?? false);
 
             VoidCallback? invoke(ValueSetter<EditorContext> callback) {
@@ -69,25 +73,25 @@ class _ToolbarState extends State<Toolbar> {
                 // IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.copy), tooltip: "Copy"),
                 // IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.paste), tooltip: "Paste"),
                 IconButton(
-                  onPressed: invoke(onSelection),
+                  onPressed: canDraw ? invoke(onSelection) : null,
                   isSelected: editorContext?.stateMachine is SelectionStateMachine,
                   icon: const Icon(Icons.north_west),
                   tooltip: "Selection",
                 ),
                 IconButton(
-                  onPressed: invoke(onRectangle),
+                  onPressed: canDraw ? invoke(onRectangle) : null,
                   isSelected: editorContext?.stateMachine is RectangleStateMachine,
                   icon: const Icon(Icons.rectangle_outlined),
                   tooltip: "Rectange",
                 ),
                 IconButton(
-                  onPressed: invoke(onPolygon),
+                  onPressed: canDraw ? invoke(onPolygon) : null,
                   isSelected: editorContext?.stateMachine is PolygonStateMachine,
                   icon: const Icon(Icons.tab),
                   tooltip: "Polygon",
                 ),
                 IconButton(
-                  onPressed: invoke(onCircle),
+                  onPressed: canDraw ? invoke(onCircle) : null,
                   isSelected: editorContext?.stateMachine is CircleStateMachine,
                   icon: const Icon(Icons.circle_outlined),
                   tooltip: "Circle",
