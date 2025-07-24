@@ -69,7 +69,6 @@ class _StateMachineState extends State<StateMachine> {
   // DragCallbacks
   // KeyEventResult onKeyEvent(FocusNode node, KeyEvent event) {
   KeyEventResult onKeyEvent(KeyEvent event) {
-    // Set<LogicalKeyboardKey> keysPressed;
     final keysPressed = HardwareKeyboard.instance.logicalKeysPressed;
     return widget.context.stateMachine.onKeyEvent(event, keysPressed);
   }

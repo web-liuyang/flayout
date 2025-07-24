@@ -68,6 +68,7 @@ abstract class BaseStateMachine {
 
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (event is KeyDownEvent) {
+      // print(event);
       if (event.logicalKey == LogicalKeyboardKey.escape) {
         print("escape");
         exit();

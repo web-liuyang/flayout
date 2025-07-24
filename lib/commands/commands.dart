@@ -33,6 +33,14 @@ class PasteIntent extends BaseIntent {
   PasteIntent();
 }
 
+class ZoomInIntent extends BaseIntent {
+  ZoomInIntent();
+}
+
+class ZoomOutIntent extends BaseIntent {
+  ZoomOutIntent();
+}
+
 class CustomDirectionalFocusAction extends DirectionalFocusAction {
   @override
   void invoke(DirectionalFocusIntent intent) {
@@ -154,6 +162,24 @@ Map<Type, Action<BaseIntent>> createEditorActions() {
         return;
       },
     ),
+    ZoomInIntent: CallbackAction<ZoomInIntent>(
+      onInvoke: (intent) {
+        final EditorContext? context = editorManager.currentEditor?.context;
+        if (context == null) return;
+        context.viewport.zoomIn(context.viewport.visibleWorldRect.center);
+        context.render();
+        return;
+      },
+    ),
+    ZoomOutIntent: CallbackAction<ZoomOutIntent>(
+      onInvoke: (intent) {
+        final EditorContext? context = editorManager.currentEditor?.context;
+        if (context == null) return;
+        context.viewport.zoomOut(context.viewport.visibleWorldRect.center);
+        context.render();
+        return;
+      },
+    ),
   };
 
   return actions;
@@ -179,6 +205,8 @@ Map<ShortcutActivator, Intent> _createEditorShortcuts() {
     SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true): RedoIntent(),
     SingleActivator(LogicalKeyboardKey.keyC, control: true): CopyIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteIntent(),
+    SingleActivator(LogicalKeyboardKey.equal, control: true): ZoomInIntent(),
+    SingleActivator(LogicalKeyboardKey.minus, control: true): ZoomOutIntent(),
   };
 }
 
@@ -188,5 +216,7 @@ Map<ShortcutActivator, Intent> _createEditorShortcutsAppleOs() {
     SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true): RedoIntent(),
     SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopyIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, meta: true): PasteIntent(),
+    SingleActivator(LogicalKeyboardKey.equal, meta: true): ZoomInIntent(),
+    SingleActivator(LogicalKeyboardKey.minus, meta: true): ZoomOutIntent(),
   };
 }
