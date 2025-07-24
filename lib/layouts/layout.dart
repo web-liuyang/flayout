@@ -18,13 +18,12 @@ class _LayoutState extends State<Layout> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: <Widget>[
-        // //
-        Container(child: Menubar(), alignment: Alignment.centerLeft),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Menubar(),
         Divider(height: 1),
-        Container(child: Toolbar()),
+        Toolbar(),
         Divider(height: 1),
-
         Expanded(
           child: MultiSplitView(
             initialAreas: [
@@ -62,9 +61,8 @@ class _LayoutState extends State<Layout> {
             ],
           ),
         ),
-
         Divider(height: 1),
-        Container(child: Statusbar()),
+        Statusbar(),
       ],
     );
   }

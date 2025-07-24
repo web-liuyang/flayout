@@ -16,8 +16,6 @@ class Toolbar extends StatefulWidget {
 class _ToolbarState extends State<Toolbar> {
   @override
   Widget build(BuildContext context) {
-    // final DrawCubit drawCubit = context.watch<DrawCubit>();
-
     return ListenableBuilder(
       listenable: editorManager.currentEditorNotifier,
       builder: (context, _) {

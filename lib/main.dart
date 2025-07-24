@@ -166,6 +166,13 @@ class BlueprintMaster extends StatelessWidget {
       brightness: Brightness.light,
       useMaterial3: true,
       colorSchemeSeed: Colors.blue,
+      menuBarTheme: MenuBarThemeData(
+        style: MenuStyle(
+          backgroundColor: WidgetStateProperty.all(Colors.transparent),
+          shadowColor: WidgetStateProperty.all(Colors.transparent),
+          padding: WidgetStateProperty.all(EdgeInsets.zero),
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         constraints: const BoxConstraints(maxHeight: 32),
         contentPadding: EdgeInsets.symmetric(horizontal: 4),
@@ -182,6 +189,7 @@ class BlueprintMaster extends StatelessWidget {
     );
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       actions: createEditorActions(),
       shortcuts: createEditorShortcuts(),
       title: "Blueprint Master",
