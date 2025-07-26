@@ -2,9 +2,9 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:blueprint_master/editors/business_graphics/business_graphics.dart';
-import 'package:blueprint_master/editors/editor_config.dart';
-import 'package:blueprint_master/layers/layers.dart';
+import 'package:flayout/editors/business_graphics/business_graphics.dart';
+import 'package:flayout/editors/editor_config.dart';
+import 'package:flayout/layers/layers.dart';
 
 import 'base_business_graphic.dart';
 

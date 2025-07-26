@@ -1,7 +1,7 @@
-import 'package:blueprint_master/commands/commands.dart';
-import 'package:blueprint_master/editors/graphics/graphics.dart';
-import 'package:blueprint_master/extensions/extensions.dart';
-import 'package:blueprint_master/layouts/cubits/cubits.dart';
+import 'package:flayout/commands/commands.dart';
+import 'package:flayout/editors/graphics/graphics.dart';
+import 'package:flayout/extensions/extensions.dart';
+import 'package:flayout/layouts/cubits/cubits.dart';
 import 'package:flutter/material.dart';
 
 import 'state_machines.dart';

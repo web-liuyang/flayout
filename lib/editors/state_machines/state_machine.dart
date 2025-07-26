@@ -1,5 +1,5 @@
-import 'package:blueprint_master/editors/editor.dart';
-import 'package:blueprint_master/extensions/matrix4_extension.dart';
+import 'package:flayout/editors/editor.dart';
+import 'package:flayout/extensions/matrix4_extension.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Viewport;
 import 'package:flutter/services.dart';

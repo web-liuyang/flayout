@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:blueprint_master/extensions/point_extension.dart';
+import 'package:flayout/extensions/point_extension.dart';
 import 'package:flutter/widgets.dart';
 
 import 'gdsii.dart';

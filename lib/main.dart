@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'dart:isolate';
 import 'dart:ui' as ui;
 
-import 'package:blueprint_master/commands/commands.dart';
-import 'package:blueprint_master/layouts/layout.dart';
+import 'package:flayout/commands/commands.dart';
+import 'package:flayout/layouts/layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -154,11 +154,11 @@ void main() async {
 
   // print('图片已保存为 line.png');
 
-  runApp(const BlueprintMaster());
+  runApp(const FLayout());
 }
 
-class BlueprintMaster extends StatelessWidget {
-  const BlueprintMaster({super.key});
+class FLayout extends StatelessWidget {
+  const FLayout({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +192,7 @@ class BlueprintMaster extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       actions: createEditorActions(),
       shortcuts: createEditorShortcuts(),
-      title: "Blueprint Master",
+      title: "FLayout",
       themeMode: ThemeMode.system,
       theme: theme,
       home: Scaffold(

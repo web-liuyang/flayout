@@ -1,4 +1,4 @@
-import 'package:blueprint_master/editors/editor.dart';
+import 'package:flayout/editors/editor.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';

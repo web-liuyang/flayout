@@ -1,4 +1,4 @@
-package com.example.blueprint_master
+package com.example.flayout
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,7 +1,7 @@
-import 'package:blueprint_master/editors/editors.dart';
-import 'package:blueprint_master/editors/graphics/graphics.dart';
-import 'package:blueprint_master/layouts/cubits/cubits.dart';
-import 'package:blueprint_master/widgets/widgets.dart';
+import 'package:flayout/editors/editors.dart';
+import 'package:flayout/editors/graphics/graphics.dart';
+import 'package:flayout/layouts/cubits/cubits.dart';
+import 'package:flayout/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -25,7 +25,7 @@ class _PropertyPanelState extends State<PropertyPanel> {
         final EditorContext? editorContext = editorManager.currentEditor?.context;
         return Column(
           children: [
-            Container(height: 32, padding: EdgeInsets.only(left: 8), child: Row(children: [Text("Properties")])),
+            Container(height: 32, padding: EdgeInsets.only(left: 8), child: Row(children: [Text("PROPERTIES")])),
             Divider(height: 1),
             if (editorContext != null)
               Expanded(

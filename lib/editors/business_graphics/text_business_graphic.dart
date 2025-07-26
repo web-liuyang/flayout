@@ -1,7 +1,7 @@
 import 'dart:ui' hide kEditorTextStyle;
 
-import 'package:blueprint_master/editors/editor_config.dart';
-import 'package:blueprint_master/layers/layers.dart';
+import 'package:flayout/editors/editor_config.dart';
+import 'package:flayout/layers/layers.dart';
 
 import 'base_business_graphic.dart';
 

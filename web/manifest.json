@@ -1,6 +1,6 @@
 {
-    "name": "blueprint_master",
-    "short_name": "blueprint_master",
+    "name": "flayout",
+    "short_name": "flayout",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:blueprint_master/editors/business_graphics/business_graphics.dart';
-import 'package:blueprint_master/editors/editor_config.dart';
+import 'package:flayout/editors/business_graphics/business_graphics.dart';
+import 'package:flayout/editors/editor_config.dart';
 
 class ArrayBusinessGraphic extends BaseBusinessGraphic {
   ArrayBusinessGraphic({

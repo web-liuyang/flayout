@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:blueprint_master/editors/business_graphics/business_graphics.dart';
+import 'package:flayout/editors/business_graphics/business_graphics.dart';
 
 class CellBusinessGraphic extends BaseBusinessGraphic {
   CellBusinessGraphic({required this.name, this.children = const []});

@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:blueprint_master/layers/layers.dart';
+import 'package:flayout/layers/layers.dart';
 
 class TextParagraph {
   TextParagraph({required this.paragraph, required this.offset});

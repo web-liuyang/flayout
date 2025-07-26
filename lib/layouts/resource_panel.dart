@@ -16,7 +16,7 @@ class _ResourcePanelState extends State<ResourcePanel> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(height: 32, padding: EdgeInsets.only(left: 8), child: Row(children: [Text("Resources")])),
+        Container(height: 32, padding: EdgeInsets.only(left: 8), child: Row(children: [Text("RESOURCES")])),
         Divider(height: 1),
         Expanded(
           child: MultiSplitView(

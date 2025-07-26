@@ -1,5 +1,5 @@
-import 'package:blueprint_master/editors/editors.dart';
-import 'package:blueprint_master/extensions/extensions.dart';
+import 'package:flayout/editors/editors.dart';
+import 'package:flayout/extensions/extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';

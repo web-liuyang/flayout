@@ -1,8 +1,8 @@
-import 'package:blueprint_master/layouts/canvas_area.dart';
-import 'package:blueprint_master/layouts/menubar.dart';
-import 'package:blueprint_master/layouts/resource_panel.dart';
-import 'package:blueprint_master/layouts/statusbar.dart';
-import 'package:blueprint_master/layouts/toolbar.dart';
+import 'package:flayout/layouts/canvas_area.dart';
+import 'package:flayout/layouts/menubar.dart';
+import 'package:flayout/layouts/resource_panel.dart';
+import 'package:flayout/layouts/statusbar.dart';
+import 'package:flayout/layouts/toolbar.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'property_panel.dart';

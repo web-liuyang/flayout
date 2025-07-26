@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:blueprint_master/editors/editor.dart';
-import 'package:blueprint_master/editors/editor_config.dart';
-import 'package:blueprint_master/extensions/extensions.dart';
+import 'package:flayout/editors/editor.dart';
+import 'package:flayout/editors/editor_config.dart';
+import 'package:flayout/extensions/extensions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix4_transform/matrix4_transform.dart';
 

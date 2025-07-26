@@ -33,7 +33,6 @@ class _CellPaneState extends State<CellPane> {
     return Column(
       children: [
         CellPaneToolbar(current: current),
-        Divider(height: 1),
         InputBox(
           decoration: InputDecoration(
             hintText: "Search",
@@ -42,7 +41,6 @@ class _CellPaneState extends State<CellPane> {
           controller: controller,
           onSubmitted: (value) => setState(() => controller.text = value),
         ),
-        Divider(height: 1),
         Expanded(
           child: ListView.builder(
             itemBuilder: (context, index) {
@@ -53,7 +51,7 @@ class _CellPaneState extends State<CellPane> {
                 selected: current == item,
                 onTap: () {
                   cellsCubit.setCurrent(item);
-                  editorManager.createEditor(EditorConfig(title: title));
+                  editorManager.createEditor(EditorConfig(cell: item));
                 },
               );
             },
@@ -81,25 +79,140 @@ class _CellPaneToolbarState extends State<CellPaneToolbar> {
     final newCell = Cell(name: cellName, graphic: RootGraphic(children: []));
     cellsCubit.addCell(newCell);
     cellsCubit.setCurrent(newCell);
-    editorManager.createEditor(EditorConfig(title: newCell.name));
+    editorManager.createEditor(EditorConfig(cell: newCell));
   }
 
-  void deleteCell() {
-    cellsCubit.removeCell(widget.current!);
-    editorManager.removeEditor(widget.current!.name);
+  void deleteCell(Cell cell) {
+    cellsCubit.removeCell(cell);
+    editorManager.removeEditor(cell.name);
+  }
+
+  Future<void> updateCell(Cell cell) async {
+    final Cell? newCell = await UpdateCellDialog.show(context, cell);
+    if (newCell == null) return;
+    final title = cell.name;
+    final newTitle = newCell.name;
+    cell.name = newCell.name;
+    cellsCubit.updateCell(cell);
+    editorManager.updateEditorTitle(title, newTitle);
   }
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
+        Expanded(child: Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("Cells"))),
         Tooltip(
           message: "Create Cell",
           child: IconButton(icon: Icon(Icons.add_box_outlined), onPressed: createCell),
         ),
         Tooltip(
+          message: "Update Cell",
+          child: IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: widget.current != null ? () => updateCell(widget.current!) : null,
+          ),
+        ),
+        Tooltip(
           message: "Delete Cell",
-          child: IconButton(icon: Icon(Icons.delete), onPressed: widget.current != null ? deleteCell : null),
+          child: IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: widget.current != null ? () => deleteCell(widget.current!) : null,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class EditableCell {
+  EditableCell({
+    required this.name,
+  });
+
+  final String name;
+
+  EditableCell copyWith({String? name}) {
+    return EditableCell(
+      name: name ?? this.name,
+    );
+  }
+}
+
+class CellEditor extends StatefulWidget {
+  const CellEditor({super.key, required this.value, required this.onChanged, required this.onError});
+
+  final EditableCell value;
+
+  final ValueSetter<EditableCell> onChanged;
+
+  final ValueSetter<bool> onError;
+
+  @override
+  State<CellEditor> createState() => _CellEditorState();
+}
+
+class _CellEditorState extends State<CellEditor> {
+  late final TextEditingController nameController = TextEditingController(text: widget.value.name);
+
+  String? nameErrorText;
+
+  bool get isError => nameErrorText != null && nameController.text.isEmpty;
+
+  @override
+  void didUpdateWidget(covariant CellEditor oldWidget) {
+    if (nameController.text != widget.value.name) nameController.text = widget.value.name;
+
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
+  }
+
+  String? validateName(String value) {
+    final bool isEmpty = value.isEmpty;
+    if (isEmpty) return "Cell name cannot be empty";
+
+    final bool contains = cellsCubit.contains(value);
+    if (contains) return "Cell name already exists";
+
+    return null;
+  }
+
+  void onActionName(String value) {
+    final String? errorText = validateName(value);
+    setState(() => nameErrorText = errorText);
+    widget.onError(isError);
+    widget.onChanged(widget.value.copyWith(name: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      spacing: 8,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            spacing: 8,
+            children: [
+              Text("Cell Name:"),
+              Expanded(
+                child: InputBox(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    hintText: "Cell Name",
+                    suffixIcon:
+                        nameErrorText != null ? Tooltip(message: nameErrorText, child: Icon(Icons.error)) : null,
+                  ),
+                  onAction: onActionName,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -122,39 +235,18 @@ class CreateCellDialog extends StatefulWidget {
 }
 
 class _CreateCellDialogState extends State<CreateCellDialog> {
-  final TextEditingController controller = TextEditingController();
+  EditableCell cell = EditableCell(name: "");
 
-  String? nameErrorText;
-
-  bool get isError => nameErrorText != null && controller.text.isEmpty;
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
+  bool isError = true;
 
   void confirm() {
-    final String cellName = controller.text;
-    final bool contains = cellsCubit.contains(cellName);
-    if (contains) return;
-    Navigator.pop(context, cellName);
+    final Cell newCell = Cell(name: cell.name, graphic: RootGraphic(children: []));
+    Navigator.pop(context, newCell);
   }
 
-  String? validateCellName(String value) {
-    final bool isEmpty = value.isEmpty;
-    if (isEmpty) return "Cell name cannot be empty";
+  void onError(bool value) => setState(() => isError = value);
 
-    final bool contains = cellsCubit.contains(value);
-    if (contains) return "Cell name already exists";
-
-    return null;
-  }
-
-  void onActionCellName(String value) {
-    final String? errorText = validateCellName(value);
-    setState(() => nameErrorText = errorText);
-  }
+  void onChanged(EditableCell value) => setState(() => cell = value);
 
   @override
   Widget build(BuildContext context) {
@@ -162,32 +254,49 @@ class _CreateCellDialogState extends State<CreateCellDialog> {
       title: "Create Cell",
       constraints: BoxConstraints.tightFor(width: 400),
       onConfirmed: isError ? null : confirm,
-      child: Column(
-        spacing: 8,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              spacing: 8,
-              children: [
-                Text("Cell Name:"),
-                Expanded(
-                  child: InputBox(
-                    controller: controller,
-                    decoration: InputDecoration(
-                      hintText: "Cell Name",
-                      suffixIcon:
-                          nameErrorText != null ? Tooltip(message: nameErrorText, child: Icon(Icons.error)) : null,
-                    ),
-                    onAction: onActionCellName,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      // onClosed: () => setState(() {}),
+      child: CellEditor(value: cell, onChanged: onChanged, onError: onError),
+    );
+  }
+}
+
+class UpdateCellDialog extends StatefulWidget {
+  const UpdateCellDialog({super.key, required this.cell});
+
+  final Cell cell;
+
+  static Future<Cell?> show(BuildContext context, Cell cell) {
+    return showDialog<Cell>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => UpdateCellDialog(cell: cell),
+    );
+  }
+
+  @override
+  State<UpdateCellDialog> createState() => _UpdateCellDialogState();
+}
+
+class _UpdateCellDialogState extends State<UpdateCellDialog> {
+  late EditableCell cell = EditableCell(name: widget.cell.name);
+
+  bool isError = false;
+
+  void confirm() {
+    final Cell newCell = Cell(name: cell.name, graphic: RootGraphic(children: []));
+    Navigator.pop(context, newCell);
+  }
+
+  void onError(bool value) => setState(() => isError = value);
+
+  void onChanged(EditableCell value) => setState(() => cell = value);
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutDialog(
+      title: "Update Cell",
+      constraints: BoxConstraints.tightFor(width: 400),
+      onConfirmed: isError ? null : confirm,
+      child: CellEditor(value: cell, onChanged: onChanged, onError: onError),
     );
   }
 }

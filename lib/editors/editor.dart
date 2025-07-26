@@ -1,8 +1,8 @@
 import 'dart:ui' as ui;
 
-import 'package:blueprint_master/commands/commands.dart';
-import 'package:blueprint_master/editors/graphics/graphics.dart';
-import 'package:blueprint_master/layouts/cubits/cubits.dart';
+import 'package:flayout/commands/commands.dart';
+import 'package:flayout/editors/graphics/graphics.dart';
+import 'package:flayout/layouts/cubits/cubits.dart';
 import 'package:flutter/widgets.dart' hide Viewport;
 import 'package:matrix4_transform/matrix4_transform.dart';
 import 'editor_config.dart';
@@ -108,16 +108,7 @@ class SceneRenderObject extends RenderBox {
       });
     });
 
-    final paragraph =
-        (ui.ParagraphBuilder(ui.ParagraphStyle())
-              ..pushStyle(kEditorTextStyle)
-              ..addText("${viewport.getLogicSize(kEditorDotGap)}"))
-            .build()
-          ..layout(ui.ParagraphConstraints(width: double.infinity));
-
-    context.canvas.drawParagraph(paragraph, Offset(offset.dx + 50, offset.dy + viewport.size.height - 50));
-
-    canvasCubit.setZoom(viewport.getZoom());
+    canvasCubit.set(zoom: viewport.getZoom(), grid: viewport.getLogicSize(kEditorDotGap));
   }
 
   @override

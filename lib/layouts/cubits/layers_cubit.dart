@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:blueprint_master/editors/graphics/base_graphic.dart';
-import 'package:blueprint_master/extensions/extensions.dart';
+import 'package:flayout/editors/graphics/base_graphic.dart';
+import 'package:flayout/extensions/extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LayerPalette {
@@ -140,7 +140,7 @@ class LayersCubit extends Cubit<LayersCubitState> {
 
 final LayersCubit layersCubit = LayersCubit(
   LayersCubitState(
-    layers: [
+    layers: [] ?? [
       Layer(
         name: "Layer_1",
         layer: 1,

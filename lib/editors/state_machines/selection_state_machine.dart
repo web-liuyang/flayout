@@ -1,4 +1,4 @@
-import 'package:blueprint_master/extensions/extensions.dart';
+import 'package:flayout/extensions/extensions.dart';
 
 import '../graphics/graphics.dart';
 import 'base_state_machine.dart';

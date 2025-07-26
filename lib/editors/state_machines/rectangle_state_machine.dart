@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:blueprint_master/commands/commands.dart';
-import 'package:blueprint_master/editors/graphics/graphics.dart';
+import 'package:flayout/commands/commands.dart';
+import 'package:flayout/editors/graphics/graphics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
