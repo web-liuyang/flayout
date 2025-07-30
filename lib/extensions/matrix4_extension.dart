@@ -11,11 +11,6 @@ extension Matrix4TransformExtension on Matrix4Transform {
     return Offset(m.entry(0, 3), m.entry(1, 3));
   }
 
-  double get zoom {
-    print(m.getMaxScaleOnAxis());
-    return m.getMaxScaleOnAxis();
-  }
-
   Matrix4Transform setZoom(double zoom, {Offset? origin}) {
     if (zoom == 1) {
       return this;

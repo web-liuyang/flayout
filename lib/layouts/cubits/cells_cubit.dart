@@ -37,8 +37,8 @@ class CellsCubit extends Cubit<CellsCubitState> {
 
   Cell? get current => state.current;
 
-  List<Cell> filteredCells(String title) {
-    return cells.where((item) => item.name.contains(title)).toList();
+  List<Cell> filteredCells(String name) {
+    return cells.where((item) => item.name.contains(name)).toList();
   }
 
   void addCell(Cell cell) {
@@ -75,64 +75,62 @@ class CellsCubit extends Cubit<CellsCubitState> {
 
 final CellsCubit cellsCubit = CellsCubit(
   CellsCubitState(
-    cells:
-        [] ??
-        [
-          Cell(
-            name: "Cell_1",
-            graphic: RootGraphic(
-              children: [
-                PolygonGraphic(
-                  layer: layersCubit.layers.first,
-                  vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50)],
-                  close: true,
-                ),
-                PolygonGraphic(
-                  layer: layersCubit.layers.first,
-                  close: true,
-                  vertices: [
-                    Offset(-150, -150),
-                    Offset(-100, -150),
-                    Offset(-100, -100),
-                    Offset(-150, -100),
-                  ],
-                ),
-                RectangleGraphic(layer: layersCubit.layers.first, width: 100, height: 100),
+    cells: [
+      Cell(
+        name: "Cell_1",
+        graphic: RootGraphic(
+          children: [
+            PolygonGraphic(
+              layer: layersCubit.layers.first,
+              vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50)],
+              close: true,
+            ),
+            PolygonGraphic(
+              layer: layersCubit.layers.first,
+              close: true,
+              vertices: [
+                Offset(-150, -150),
+                Offset(-100, -150),
+                Offset(-100, -100),
+                Offset(-150, -100),
               ],
             ),
-          ),
-          Cell(
-            name: "Cell_2",
-            graphic: RootGraphic(
-              children: [
-                PolygonGraphic(
-                  layer: layersCubit.layers.first,
-                  close: true,
-                  vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50)],
-                ),
-                CircleGraphic(layer: layersCubit.layers.first, center: Offset(0, 0), radius: 50),
-              ],
+            RectangleGraphic(layer: layersCubit.layers.first, width: 100, height: 100),
+          ],
+        ),
+      ),
+      Cell(
+        name: "Cell_2",
+        graphic: RootGraphic(
+          children: [
+            PolygonGraphic(
+              layer: layersCubit.layers.first,
+              close: true,
+              vertices: [Offset(-50, -50), Offset(50, -50), Offset(50, 50), Offset(-50, 50)],
             ),
-          ),
-          Cell(
-            name: "big Cell_3 10000",
-            graphic: RootGraphic(
-              children: [
-                for (double i = 0; i < 1000_0; i++)
-                  PolygonGraphic(
-                    layer: layersCubit.layers.first,
-                    close: true,
-                    position: Offset(i * 50, i * 50),
-                    vertices: [
-                      Offset(-50, -50),
-                      Offset(50, -50),
-                      Offset(50, 50),
-                      Offset(-50, 50),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-        ],
+            CircleGraphic(layer: layersCubit.layers.first, center: Offset(0, 0), radius: 50),
+          ],
+        ),
+      ),
+      Cell(
+        name: "big Cell_3 10000",
+        graphic: RootGraphic(
+          children: [
+            for (double i = 0; i < 1000_00; i++)
+              PolygonGraphic(
+                layer: layersCubit.layers.first,
+                close: true,
+                position: Offset(i * 50, i * 50),
+                vertices: [
+                  Offset(-50, -50),
+                  Offset(50, -50),
+                  Offset(50, 50),
+                  Offset(-50, 50),
+                ],
+              ),
+          ],
+        ),
+      ),
+    ],
   ),
 );

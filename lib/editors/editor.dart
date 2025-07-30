@@ -4,6 +4,7 @@ import 'package:flayout/commands/commands.dart';
 import 'package:flayout/editors/graphics/graphics.dart';
 import 'package:flayout/layouts/cubits/cubits.dart';
 import 'package:flutter/widgets.dart' hide Viewport;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:matrix4_transform/matrix4_transform.dart';
 import 'editor_config.dart';
 import 'state_machines/state_machines.dart';
@@ -13,6 +14,8 @@ class EditorContext {
 
   late SceneRenderObject renderObject;
 
+  late BuildContext buildContext;
+
   late final ValueNotifier<BaseStateMachine> stateMachineNotifier = ValueNotifier<BaseStateMachine>(
     SelectionStateMachine(context: this),
   );
@@ -21,9 +24,7 @@ class EditorContext {
   final ValueNotifier<List<BaseGraphic>> selectedGraphicsNotifier = ValueNotifier<List<BaseGraphic>>([]);
   List<BaseGraphic> get selectedGraphics => selectedGraphicsNotifier.value;
 
-  late BuildContext buildContext;
-
-  Layer? get currentLayer => layersCubit.current;
+  Layer? get currentLayer => buildContext.read<LayersCubit>().current;
 
   final Viewport viewport = Viewport();
 
@@ -31,14 +32,6 @@ class EditorContext {
 
   void render() {
     renderObject.markNeedsPaint();
-  }
-
-  bool canSee(Rect aabb) {
-    return viewport.visibleWorldRect.overlaps(aabb);
-  }
-
-  bool canSeePoint(Offset offset) {
-    return viewport.visibleWorldRect.contains(offset);
   }
 }
 

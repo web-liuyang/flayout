@@ -140,7 +140,7 @@ class LayersCubit extends Cubit<LayersCubitState> {
 
 final LayersCubit layersCubit = LayersCubit(
   LayersCubitState(
-    layers: [] ?? [
+    layers: [
       Layer(
         name: "Layer_1",
         layer: 1,

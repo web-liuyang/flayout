@@ -41,11 +41,11 @@ class RectangleStateMachine extends BaseStateMachine {
   }
 
   @override
-  void onScroll(event) {
-    super.onScroll(event);
+  void onZoom(event) {
+    super.onZoom(event);
     final zoomFn = switch (event.direction) {
-      ScrollDirection.up => context.viewport.zoomIn,
-      ScrollDirection.down => context.viewport.zoomOut,
+      ZoomDirection.zoomIn => context.viewport.zoomIn,
+      ZoomDirection.zoomOut => context.viewport.zoomOut,
     };
 
     zoomFn(event.position);
@@ -145,7 +145,7 @@ class _RectangleGraphicDraft extends BaseGraphic {
   @override
   void paint(Context context, Offset offset) {
     if (start == null || end == null) return;
-    final layer = layersCubit.current;
+    final layer = context.context.currentLayer;
     if (layer == null) return;
 
     final paint = layersCubit.getPaint(layer, context);

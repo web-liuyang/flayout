@@ -34,6 +34,7 @@ class _PropertyPanelState extends State<PropertyPanel> {
                   builder: (context, child) {
                     final graphics = editorContext.selectedGraphics;
                     if (graphics.isEmpty) return Container();
+
                     final rectangleGraphics = graphics.whereType<RectangleGraphic>().toList(growable: false);
                     final polygonGraphics = graphics.whereType<PolygonGraphic>().toList(growable: false);
                     final circleGraphics = graphics.whereType<CircleGraphic>().toList(growable: false);

@@ -1,5 +1,4 @@
 import 'package:flayout/editors/editor.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -37,14 +36,14 @@ class MoveCanvasEvent {
   final Offset position;
 }
 
-enum ScrollDirection { up, down }
+enum ZoomDirection { zoomIn, zoomOut }
 
-class ScrollCanvasEvent {
-  const ScrollCanvasEvent({required this.position, required this.direction});
+class ZoomCanvasEvent {
+  const ZoomCanvasEvent({required this.position, required this.direction});
 
   final Offset position;
 
-  final ScrollDirection direction;
+  final ZoomDirection direction;
 }
 
 abstract class BaseStateMachine {
@@ -64,7 +63,7 @@ abstract class BaseStateMachine {
 
   void onMove(MoveCanvasEvent event) {}
 
-  void onScroll(ScrollCanvasEvent event) {}
+  void onZoom(ZoomCanvasEvent event) {}
 
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (event is KeyDownEvent) {

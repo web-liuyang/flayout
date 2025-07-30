@@ -62,8 +62,8 @@ class _StateMachineState extends State<StateMachine> {
     widget.context.stateMachine.onMove(event);
   }
 
-  void onScroll(ScrollCanvasEvent event) {
-    widget.context.stateMachine.onScroll(event);
+  void onZoom(ZoomCanvasEvent event) {
+    widget.context.stateMachine.onZoom(event);
   }
 
   // DragCallbacks
@@ -107,9 +107,9 @@ class _StateMachineState extends State<StateMachine> {
             if (event.scale != 1) {
               // 缩放的位置不能改变
               // final position = viewport.windowToCanvas(event.localPosition);
-              final direction = event.scale < prevScale ? ScrollDirection.down : ScrollDirection.up;
+              final direction = event.scale < prevScale ? ZoomDirection.zoomOut : ZoomDirection.zoomIn;
               prevScale = event.scale;
-              onScroll(ScrollCanvasEvent(position: position, direction: direction));
+              onZoom(ZoomCanvasEvent(position: position, direction: direction));
               return;
             }
           },
@@ -138,8 +138,8 @@ class _StateMachineState extends State<StateMachine> {
           onPointerSignal: (event) {
             if (event is PointerScrollEvent) {
               final position = viewport.windowToCanvas(event.localPosition);
-              final direction = event.scrollDelta.dy > 0 ? ScrollDirection.down : ScrollDirection.up;
-              onScroll(ScrollCanvasEvent(position: position, direction: direction));
+              final direction = event.scrollDelta.dy > 0 ? ZoomDirection.zoomOut : ZoomDirection.zoomIn;
+              onZoom(ZoomCanvasEvent(position: position, direction: direction));
             }
           },
           child: widget.child,

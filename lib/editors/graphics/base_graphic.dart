@@ -11,6 +11,8 @@ import '../../layouts/cubits/layers_cubit.dart';
 class Viewport {
   Viewport();
 
+  Size size = Size.zero;
+
   void setSize(Size size) {
     if (size == this.size) return;
     this.size = size;
@@ -30,8 +32,6 @@ class Viewport {
 
     return Rect.fromLTWH(tx, ty, width, height);
   }
-
-  Size size = Size.zero;
 
   /// 平面坐标系的矩阵
   Matrix4Transform matrix4 = Matrix4Transform();
@@ -56,7 +56,17 @@ class Viewport {
     setZoom(zoom, origin: origin);
   }
 
-  void fitToWindow() {}
+  double getZoom() {
+    return max(matrix4.m.entry(0, 0), matrix4.m.entry(1, 1));
+  }
+
+  void translate(Offset offset) {
+    matrix4 = matrix4.translate(x: offset.dx, y: offset.dy);
+  }
+
+  Offset getTranslation() {
+    return matrix4.getTranslation();
+  }
 
   double getLogicSize(double size) {
     final zoom = getZoom();
@@ -82,26 +92,6 @@ class Viewport {
     final y = ((size.height - position.dy) - ty) / scaleY;
 
     return Offset(x, y);
-  }
-
-  double getZoom() {
-    return max(matrix4.m.entry(0, 0), matrix4.m.entry(1, 1));
-  }
-
-  void translate(Offset offset) {
-    matrix4 = matrix4.translate(x: offset.dx, y: offset.dy);
-  }
-
-  void setTranslation(Offset offset) {
-    matrix4 = Matrix4Transform.from(
-      matrix4.matrix4
-        ..[4] = offset.dx
-        ..[8] = offset.dy,
-    );
-  }
-
-  Offset getTranslation() {
-    return matrix4.getTranslation();
   }
 
   bool canSee(Rect rect) {

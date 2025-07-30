@@ -122,7 +122,6 @@ List<BaseGraphic> _clipboardGraphics = [];
 
 Map<Type, Action<BaseIntent>> createEditorActions() {
   final Map<Type, Action<BaseIntent>> actions = {
-    // DirectionalFocusIntent: CustomDirectionalFocusAction(),
     UndoIntent: CallbackAction<UndoIntent>(
       onInvoke: (intent) {
         final EditorContext? context = editorManager.currentEditor?.context;
@@ -198,7 +197,6 @@ Map<ShortcutActivator, Intent> createEditorShortcuts() {
   }
 }
 
-// UndoIntent(context),
 Map<ShortcutActivator, Intent> _createEditorShortcuts() {
   return {
     SingleActivator(LogicalKeyboardKey.keyZ, control: true): UndoIntent(),

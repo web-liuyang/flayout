@@ -50,9 +50,13 @@ class CanvasAreaState extends State<CanvasArea> {
                             child: ListTile(
                               minTileHeight: 32,
                               contentPadding: EdgeInsets.only(left: 8),
-                              selected: editorManager.currentEditor == tab.editor,
+                              selected: currentEditor == tab.editor,
                               leading: Text(tab.title),
-                              trailing: IconButton(iconSize: 12, onPressed: () => editorManager.removeEditor(tab.title), icon: Icon(Icons.close)),
+                              trailing: IconButton(
+                                iconSize: 12,
+                                onPressed: () => editorManager.removeEditor(tab.title),
+                                icon: Icon(Icons.close),
+                              ),
                               onTap: () {
                                 editorManager.currentEditorNotifier.value = tab.editor;
                               },
@@ -69,7 +73,7 @@ class CanvasAreaState extends State<CanvasArea> {
                       for (final tab in editorManager.tabs) {
                         tab.editor.context.viewport.setSize(c.biggest);
                       }
-                      return Container(child: editorManager.currentEditor);
+                      return Container(child: currentEditor);
                     },
                   ),
                 ),
