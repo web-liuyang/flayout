@@ -110,19 +110,6 @@ class LayersCubit extends Cubit<LayersCubitState> {
     emit(state.copyWith(layers: [...state.layers, layer]));
   }
 
-  Paint getPaint(Layer layer, Context context) {
-    final paint = paints[layer.id] ??= Paint();
-
-    paint.style = PaintingStyle.stroke;
-    paint.strokeWidth = context.viewport.getLogicSize(layer.palette.outlineWidth);
-    paint.color = layer.palette.outlineColor;
-    return paint;
-  }
-
-  bool contains(String name) {
-    return layers.any((item) => item.name == name);
-  }
-
   void removeLayer(Layer layer) {
     final int index = layers.indexOf(layer);
     if (index < 0) return;
@@ -135,6 +122,19 @@ class LayersCubit extends Cubit<LayersCubitState> {
     final int index = layers.indexOf(layer);
     if (index < 0) return;
     emit(state.copyWith(layers: layers.replacedAt(index, layer)));
+  }
+
+  Paint getPaint(Layer layer, Context context) {
+    final paint = paints[layer.id] ??= Paint();
+
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = context.viewport.getLogicSize(layer.palette.outlineWidth);
+    paint.color = layer.palette.outlineColor;
+    return paint;
+  }
+
+  bool contains(String name) {
+    return layers.any((item) => item.name == name);
   }
 }
 
