@@ -11,16 +11,19 @@ class EditorConfig {
 }
 
 class EditorTab {
-  EditorTab({required this.title, required this.editor});
+  const EditorTab({required this.title, required this.editor, this.dirty = false});
 
   final String title;
 
   final Editor editor;
 
+  final bool dirty;
+
   EditorTab copyWith({required String title}) {
     return EditorTab(
       title: title,
       editor: editor,
+      dirty: dirty,
     );
   }
 }

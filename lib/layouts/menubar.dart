@@ -1,6 +1,7 @@
-import 'dart:io';
-
+import 'package:flayout/project_manager.dart';
+import 'package:flayout/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class Menubar extends StatefulWidget {
   const Menubar({super.key});
@@ -12,7 +13,13 @@ class Menubar extends StatefulWidget {
 class _MenubarState extends State<Menubar> {
   void onCreateProject() {}
 
-  void onOpenProject(String path) {}
+  void onOpenProject([String? path]) async {
+    path ??= await openProjectSelector();
+    if (path == null) return;
+    projectManager.openProject(path);
+  }
+
+  void onSaveProject() {}
 
   void onSetting() {}
 
@@ -23,7 +30,7 @@ class _MenubarState extends State<Menubar> {
   void onDocument() {}
 
   void onExit() {
-    exit(0);
+    SystemNavigator.pop();
   }
 
   @override
@@ -39,6 +46,7 @@ class _MenubarState extends State<Menubar> {
         SubmenuButton(
           menuChildren: [
             MenuItemButton(onPressed: onCreateProject, child: Text("New")),
+            MenuItemButton(onPressed: onOpenProject, child: Text("Open")),
             SubmenuButton(
               menuChildren: recent
                   .map(
@@ -50,6 +58,7 @@ class _MenubarState extends State<Menubar> {
                   .toList(growable: false),
               child: Text("Open Recent"),
             ),
+            MenuItemButton(onPressed: onSaveProject, child: Text("Save")),
             MenuItemButton(onPressed: onExit, child: Text("Exit")),
           ],
           child: Center(child: Text("File")),
@@ -62,9 +71,9 @@ class _MenubarState extends State<Menubar> {
         ),
         SubmenuButton(
           menuChildren: [
-            MenuItemButton(onPressed: onAbout, child: Text("About")),
-            MenuItemButton(onPressed: onFeedback, child: Text("Feedback")),
             MenuItemButton(onPressed: onDocument, child: Text("Document")),
+            MenuItemButton(onPressed: onFeedback, child: Text("Feedback")),
+            MenuItemButton(onPressed: onAbout, child: Text("About")),
           ],
           child: Center(child: Text("Help")),
         ),

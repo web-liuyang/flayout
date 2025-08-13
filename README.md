@@ -19,6 +19,7 @@ TODO
 [√] 当 Layer 没有被使用时可以被删除
 [√] 按下 Backspace/Delete 删除选中的图形
 
+[] Delete 图形加入Redo/Undo
 [] 目前只支持单个选中, 后期会加上多选
 [] 快捷键触发问题
 [] PropertyPanel 改变图形没有校验数值
