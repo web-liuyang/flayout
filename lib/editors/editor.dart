@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flayout/commands/commands.dart';
@@ -8,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:matrix4_transform/matrix4_transform.dart';
 import 'editor_config.dart';
 import 'state_machines/state_machines.dart';
+import 'package:image/image.dart' as img;
 
 class EditorContext {
   late RootGraphic graphic;
@@ -57,9 +60,45 @@ class _EditorState extends State<Editor> with AutomaticKeepAliveClientMixin {
   }
 }
 
+Future<ui.Image> convertImageToFlutterUi(img.Image image) async {
+  if (image.format != img.Format.uint8 || image.numChannels != 4) {
+    final cmd =
+        img.Command()
+          ..image(image)
+          ..convert(format: img.Format.uint8, numChannels: 4);
+    final rgba8 = await cmd.getImageThread();
+    if (rgba8 != null) {
+      image = rgba8;
+    }
+  }
+
+  ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(image.toUint8List());
+
+  ui.ImageDescriptor id = ui.ImageDescriptor.raw(
+    buffer,
+    height: image.height,
+    width: image.width,
+    pixelFormat: ui.PixelFormat.rgba8888,
+  );
+
+  ui.Codec codec = await id.instantiateCodec(targetHeight: image.height, targetWidth: image.width);
+  ui.FrameInfo fi = await codec.getNextFrame();
+  ui.Image uiImage = fi.image;
+
+  return uiImage;
+}
+
+ui.Image? flutterImage;
+
 class SceneRenderObject extends RenderBox {
   SceneRenderObject({required this.context}) {
     context.renderObject = this;
+    (() async {
+      final t = img.Image(width: 100, height: 100, backgroundColor: img.ColorUint1.rgb(255, 0, 255));
+      img.drawCircle(t, x: 50, y: 50, radius: 50, color: img.ColorUint1.rgb(255, 255, 255), antialias: true);
+      // final pngBytes = image.encodePng(img);
+      flutterImage = await convertImageToFlutterUi(t);
+    })();
   }
 
   final EditorContext context;
@@ -97,6 +136,9 @@ class SceneRenderObject extends RenderBox {
           this.context.graphic.paint(ctx, Offset.zero);
 
           Selection(graphics: this.context.selectedGraphics).paint(ctx, Offset.zero);
+          // if (flutterImage != null) {
+          //   ctx.canvas.drawImage(flutterImage!, Offset.zero, Paint());
+          // }
         });
       });
     });

@@ -57,6 +57,7 @@ class SelectionStateMachine extends BaseStateMachine {
 
   @override
   void delete() {
+    super.delete();
     context.graphic.children.removeAll(context.selectedGraphics);
     context.selectedGraphicsNotifier.value = [];
     context.render();

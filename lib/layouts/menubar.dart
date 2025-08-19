@@ -21,6 +21,10 @@ class _MenubarState extends State<Menubar> {
 
   void onSaveProject() {}
 
+  void onSaveAsProject() {}
+
+  void onCloseProject() {}
+
   void onSetting() {}
 
   void onAbout() {}
@@ -59,19 +63,21 @@ class _MenubarState extends State<Menubar> {
               child: Text("Open Recent"),
             ),
             MenuItemButton(onPressed: onSaveProject, child: Text("Save")),
+            MenuItemButton(onPressed: onSaveAsProject, child: Text("Save As")),
+            MenuItemButton(onPressed: onCloseProject, child: Text("Close")),
             MenuItemButton(onPressed: onExit, child: Text("Exit")),
           ],
           child: Center(child: Text("File")),
         ),
         SubmenuButton(
           menuChildren: [
-            MenuItemButton(onPressed: onSetting, child: Text("Setting")),
+            MenuItemButton(onPressed: onSetting, child: Text("Settings")),
           ],
           child: Center(child: Text("Setting")),
         ),
         SubmenuButton(
           menuChildren: [
-            MenuItemButton(onPressed: onDocument, child: Text("Document")),
+            MenuItemButton(onPressed: onDocument, child: Text("Docs")),
             MenuItemButton(onPressed: onFeedback, child: Text("Feedback")),
             MenuItemButton(onPressed: onAbout, child: Text("About")),
           ],

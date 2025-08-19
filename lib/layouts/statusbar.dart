@@ -17,19 +17,17 @@ class _StatusbarState extends State<Statusbar> {
     final zoom = canvasCubit.state.zoom;
     final grid = canvasCubit.state.grid;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Row(
-          spacing: 8,
-          children: [
-            Text("Position: ${mousePosition.dx.toStringAsFixed(2)}, ${mousePosition.dy.toStringAsFixed(2)}"),
-            VerticalDivider(),
-            Text("Zoom: ${zoom.toStringAsFixed(2)}x"),
-            VerticalDivider(),
-            Text("Grid: ${grid.toStringAsFixed(2)}"),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Row(
+        spacing: 8,
+        children: [
+          Text("Position: ${mousePosition.dx.toStringAsFixed(2)}, ${mousePosition.dy.toStringAsFixed(2)}"),
+          VerticalDivider(),
+          Text("Zoom: ${zoom.toStringAsFixed(2)}x"),
+          VerticalDivider(),
+          Text("Grid: ${grid.toStringAsFixed(2)}"),
+        ],
       ),
     );
   }

@@ -17,6 +17,7 @@ Uint8List createBitmap(int width, int height) {
 void setPixel(Uint8List bitmap, int x, int y, int width, List<int> color) {
   final index = (y * width + x) * 4;
   bitmap[index] = color[0]; // R
+
   bitmap[index + 1] = color[1]; // G
   bitmap[index + 2] = color[2]; // B
   bitmap[index + 3] = color[3]; // A
