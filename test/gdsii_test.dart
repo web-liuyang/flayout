@@ -6,30 +6,30 @@ import 'package:flutter_test/flutter_test.dart';
 
 // 使用示例
 void main() async {
-  final prefix = Platform.isWindows ? r"C:\Users\xiaoyao\Desktop\ansys" : "/Users/xiaoyao/Desktop/ansys";
+  final prefix = Platform.isWindows ? r"C:\Users\xiaoyao\Desktop\ansys" : "/Users/liuyang/Desktop/xiaoyao/ansys";
 
   test("readGdsii: mmi.gds", () {
     Stopwatch stopwatch = Stopwatch()..start();
-    readGdsii('$prefix/mmi.gds');
+    readGDSII('$prefix/mmi.gds');
     stopwatch.stop();
     print('speed: ${stopwatch.elapsedMilliseconds}ms');
   });
 
   test("readGdsii: MZI_SYSTEM_FOR_2X2.py.gds", () {
     Stopwatch stopwatch = Stopwatch()..start();
-    readGdsii('$prefix/MZI_SYSTEM_FOR_2X2.py.gds');
+    readGDSII('$prefix/MZI_SYSTEM_FOR_2X2.py.gds');
     stopwatch.stop();
     print('speed: ${stopwatch.elapsedMilliseconds}ms');
   });
 
   test("readGdsii: WBBC2017_top_180531.gds", () {
     Stopwatch stopwatch = Stopwatch()..start();
-    readGdsii('$prefix/WBBC2017_top_180531.gds');
+    readGDSII('$prefix/WBBC2017_top_180531.gds');
     stopwatch.stop();
     print('speed: ${stopwatch.elapsedMilliseconds}ms');
   });
 
-  test("1", () {
+  test("1123", () {
     final view = Rect.fromLTRB(-536.9, -304.2, 536.9, 304.2);
     final g1 = Rect.fromLTRB(1634.8, -2253.1, 1634.8, -2253.1);
     final g2 = Rect.fromLTRB(1684.8, -2303.1, 1684.8, -2303.1);
@@ -37,8 +37,6 @@ void main() async {
     final g4 = Rect.fromLTRB(1634.8, -2761.8, 1634.8, -2761.8);
     final g5 = Rect.fromLTRB(1249.5, -2761.8, 1249.5, -2761.8);
 
-
-    
     // print(view.intersect(g1));
     // print(view.intersect(g1).width);
     // print(view.intersect(g1).height);

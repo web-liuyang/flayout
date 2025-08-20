@@ -76,7 +76,7 @@ class _CellPaneToolbarState extends State<CellPaneToolbar> {
   Future<void> createCell() async {
     final String? cellName = await CreateCellDialog.show(context);
     if (cellName == null) return;
-    final newCell = Cell(name: cellName, graphic: RootGraphic(children: []));
+    final newCell = Cell(name: cellName, graphic: RootGraphic(name: cellName, children: []));
     cellsCubit.addCell(newCell);
     cellsCubit.setCurrent(newCell);
     editorManager.createEditor(EditorConfig(cell: newCell));
@@ -93,6 +93,7 @@ class _CellPaneToolbarState extends State<CellPaneToolbar> {
     final title = cell.name;
     final newTitle = newCell.name;
     cell.name = newCell.name;
+    cell.graphic.name = newCell.name;
     cellsCubit.updateCell(cell);
     editorManager.updateEditorTitle(title, newTitle);
   }
@@ -240,7 +241,7 @@ class _CreateCellDialogState extends State<CreateCellDialog> {
   bool isError = true;
 
   void confirm() {
-    final Cell newCell = Cell(name: cell.name, graphic: RootGraphic(children: []));
+    final Cell newCell = Cell(name: cell.name, graphic: RootGraphic(name: cell.name, children: []));
     Navigator.pop(context, newCell);
   }
 
@@ -282,7 +283,7 @@ class _UpdateCellDialogState extends State<UpdateCellDialog> {
   bool isError = false;
 
   void confirm() {
-    final Cell newCell = Cell(name: cell.name, graphic: RootGraphic(children: []));
+    final Cell newCell = Cell(name: cell.name, graphic: RootGraphic(name: cell.name, children: []));
     Navigator.pop(context, newCell);
   }
 

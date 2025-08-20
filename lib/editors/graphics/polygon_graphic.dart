@@ -4,7 +4,12 @@ import '../../layouts/cubits/cubits.dart';
 import 'base_graphic.dart';
 
 class PolygonGraphic extends BaseGraphic {
-  PolygonGraphic({super.position, required super.layer, required this.vertices, this.close = false});
+  PolygonGraphic({
+    super.position,
+    required super.layer,
+    required this.vertices,
+    this.close = false,
+  });
 
   final List<Offset> vertices;
 

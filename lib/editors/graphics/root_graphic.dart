@@ -5,7 +5,9 @@ import 'package:flutter/rendering.dart';
 import 'base_graphic.dart';
 
 class RootGraphic extends BaseGraphic {
-  RootGraphic({required this.children});
+  RootGraphic({required this.name, required this.children});
+
+  String name;
 
   final List<BaseGraphic> children;
 
@@ -36,9 +38,15 @@ class RootGraphic extends BaseGraphic {
 
   @override
   RootGraphic clone() {
-    return RootGraphic(children: children.map((e) => e.clone()).toList());
+    return RootGraphic(name: name, children: children.map((e) => e.clone()).toList());
   }
 
   @override
-  Rect aabb() => Rect.zero;
+  Rect aabb() {
+    Rect aabb = Rect.zero;
+    for (final child in children) {
+      aabb = aabb.expandToInclude(child.aabb());
+    }
+    return aabb;
+  }
 }

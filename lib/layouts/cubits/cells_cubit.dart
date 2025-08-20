@@ -79,6 +79,7 @@ final CellsCubit cellsCubit = CellsCubit(
       Cell(
         name: "Cell_1",
         graphic: RootGraphic(
+          name: "Cell_1",
           children: [
             PolygonGraphic(
               layer: layersCubit.layers.first,
@@ -102,6 +103,7 @@ final CellsCubit cellsCubit = CellsCubit(
       Cell(
         name: "Cell_2",
         graphic: RootGraphic(
+          name: "Cell_2",
           children: [
             PolygonGraphic(
               layer: layersCubit.layers.first,
@@ -115,6 +117,7 @@ final CellsCubit cellsCubit = CellsCubit(
       Cell(
         name: "big Cell_3 10000",
         graphic: RootGraphic(
+          name: "big Cell_3 10000",
           children: [
             for (double i = 0; i < 1000_00; i++)
               PolygonGraphic(

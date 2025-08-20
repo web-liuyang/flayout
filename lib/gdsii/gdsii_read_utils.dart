@@ -55,18 +55,18 @@ String readString(ByteData data) {
   return String.fromCharCodes(bytes).trim();
 }
 
-Iterable<(GdsRecordType, ByteData)> recordReader(File file) sync* {
+Iterable<(GDSIIRecordType, ByteData)> recordReader(File file) sync* {
   final Uint8List bytes = file.readAsBytesSync();
   final ByteData stream = ByteData.view(bytes.buffer);
   final int length = stream.lengthInBytes;
-  final Set<GdsRecordType> records = {};
+  final Set<GDSIIRecordType> records = {};
 
   for (int offset = 0; offset < length;) {
     final currentRecordSize = stream.getUint16(offset);
     if (currentRecordSize == 0) break;
 
     final type = stream.getUint16(offset + 2);
-    final GdsRecordType? gdsRecordType = GdsRecordType.normalize(type);
+    final GDSIIRecordType? gdsRecordType = GDSIIRecordType.normalize(type);
     if (gdsRecordType == null) throw UnimplementedError("type: $type");
 
     records.add(gdsRecordType);

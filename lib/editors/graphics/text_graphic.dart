@@ -1,26 +1,34 @@
 import 'dart:ui';
 
+import 'package:flayout/editors/editor_config.dart';
+
 import 'base_graphic.dart';
 
 class TextGraphic extends BaseGraphic {
-  TextGraphic({required super.position, required this.text, required this.paragraph});
+  TextGraphic({
+    required super.position,
+    required super.layer,
+    required this.text,
+    // required this.paragraph,
+  });
 
   final String text;
 
-  final Paragraph paragraph;
+  late Paragraph paragraph;
 
   @override
   void paint(Context ctx, Offset offset) {
-    // final paragraph =
-    //     (ParagraphBuilder(ParagraphStyle())
-    //           ..pushStyle(kEditorTextStyle)
-    //           ..addText(text))
-    //         .build()
-    //       ..layout(ParagraphConstraints(width: double.infinity));
+    paragraph =
+        (ParagraphBuilder(ParagraphStyle())
+              ..pushStyle(kEditorTextStyle)
+              ..addText(text))
+            .build()
+          ..layout(ParagraphConstraints(width: double.infinity));
 
     // final offset = position * kEditorUnits;
 
     ctx.canvas.drawParagraph(paragraph, position + offset);
+    // ctx.canvas.drawParagraph(paragraph, position + offset);
   }
 
   @override
@@ -30,7 +38,7 @@ class TextGraphic extends BaseGraphic {
 
   @override
   TextGraphic clone() {
-    return TextGraphic(position: position, text: text, paragraph: paragraph);
+    return TextGraphic(position: position, text: text, layer: layer);
   }
 
   @override

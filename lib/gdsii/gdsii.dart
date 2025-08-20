@@ -5,7 +5,7 @@ import 'builder.dart';
 import 'gdsii_read_utils.dart';
 
 // GDSII 记录类型枚举（部分常用类型）
-enum GdsRecordType {
+enum GDSIIRecordType {
   /// 版本号
   ///
   /// 2-byte带符号整型
@@ -331,10 +331,10 @@ enum GdsRecordType {
 
   final int value;
 
-  const GdsRecordType(this.value);
+  const GDSIIRecordType(this.value);
 
-  static GdsRecordType? normalize(int value) {
-    for (final GdsRecordType type in GdsRecordType.values) {
+  static GDSIIRecordType? normalize(int value) {
+    for (final GDSIIRecordType type in GDSIIRecordType.values) {
       if (type.value == value) return type;
     }
 
@@ -364,8 +364,8 @@ class Cell {
   final List<Struct> srefs;
 }
 
-class Gdsii {
-  Gdsii({
+class GDSII {
+  GDSII({
     required this.version,
     required this.lastModificationTime,
     required this.lastAccessTime,
@@ -395,7 +395,7 @@ class Gdsii {
   }
 }
 
-Gdsii readGdsii(String path) {
+GDSII readGDSII(String path) {
   final file = File(path);
   late int version;
   late DateTime lastModificationTime;
@@ -406,25 +406,25 @@ Gdsii readGdsii(String path) {
   late StructBuilder builder;
   List<TempCell> tempCells = [];
 
-  for (final (GdsRecordType type, ByteData data) in recordReader(file)) {
+  for (final (GDSIIRecordType type, ByteData data) in recordReader(file)) {
     final _ = switch (type) {
-      GdsRecordType.header =>
+      GDSIIRecordType.header =>
         (() {
           version = data.getInt16(0);
         })(),
-      GdsRecordType.bgnlib =>
+      GDSIIRecordType.bgnlib =>
         (() {
           (lastModificationTime, lastAccessTime) = readTime(data);
         })(),
-      GdsRecordType.libname =>
+      GDSIIRecordType.libname =>
         (() {
           libname = readString(data);
         })(),
-      GdsRecordType.units =>
+      GDSIIRecordType.units =>
         (() {
           units = readf64(data);
         })(),
-      GdsRecordType.bgnstr => // Cell 开始
+      GDSIIRecordType.bgnstr => // Cell 开始
         (() {
           final bgnstr = readTime(data);
           final TempCell tempCell = TempCell();
@@ -432,57 +432,57 @@ Gdsii readGdsii(String path) {
           tempCell.lastAccessTime = bgnstr.$2;
           tempCells.add(tempCell);
         })(),
-      GdsRecordType.strname => // Cell 名称
+      GDSIIRecordType.strname => // Cell 名称
         (() {
           final strname = readString(data);
           tempCells.last.name = strname;
         })(),
 
-      GdsRecordType.box =>
+      GDSIIRecordType.box =>
         (() {
           print("box");
           // builder = BoundaryStructBuilder();
         })(),
-      GdsRecordType.node =>
+      GDSIIRecordType.node =>
         (() {
           print("node");
           // builder = BoundaryStructBuilder();
         })(),
-      GdsRecordType.text =>
+      GDSIIRecordType.text =>
         (() {
           builder = TextStructBuilder();
         })(),
-      GdsRecordType.boundary =>
+      GDSIIRecordType.boundary =>
         (() {
           builder = BoundaryStructBuilder();
         })(),
-      GdsRecordType.path =>
+      GDSIIRecordType.path =>
         (() {
           builder = PathStructBuilder();
         })(),
-      GdsRecordType.sref =>
+      GDSIIRecordType.sref =>
         (() {
           builder = SRefStructBuilder();
         })(),
-      GdsRecordType.aref =>
+      GDSIIRecordType.aref =>
         (() {
           builder = ARefStructBuilder();
         })(),
 
-      GdsRecordType.endel => // 元素结束
+      GDSIIRecordType.endel => // 元素结束
         (() {
           final value = builder.build();
           tempCells.last.srefs.add(value);
         })(),
-      GdsRecordType.endstr => // Cell 结构结束
+      GDSIIRecordType.endstr => // Cell 结构结束
         (() {
           // print("endstr");
         })(),
-      GdsRecordType.endlib =>
+      GDSIIRecordType.endlib =>
         (() {
           // print("endlib");
         })(),
-      (GdsRecordType other) =>
+      (GDSIIRecordType other) =>
         (() {
           builder.handle(other, data);
         })(),
@@ -491,9 +491,21 @@ Gdsii readGdsii(String path) {
 
   final cells = tempCells
       .map((item) {
-        return Cell(name: item.name, lastModificationTime: item.lastModificationTime, lastAccessTime: item.lastAccessTime, srefs: item.srefs);
+        return Cell(
+          name: item.name,
+          lastModificationTime: item.lastModificationTime,
+          lastAccessTime: item.lastAccessTime,
+          srefs: item.srefs,
+        );
       })
       .toList(growable: false);
 
-  return Gdsii(version: version, lastModificationTime: lastModificationTime, lastAccessTime: lastAccessTime, libname: libname, units: units, cells: cells);
+  return GDSII(
+    version: version,
+    lastModificationTime: lastModificationTime,
+    lastAccessTime: lastAccessTime,
+    libname: libname,
+    units: units,
+    cells: cells,
+  );
 }

@@ -10,7 +10,7 @@ import 'gdsii_read_utils.dart';
 abstract class Struct {}
 
 abstract class StructBuilder<T> {
-  void handle(GdsRecordType type, ByteData data);
+  void handle(GDSIIRecordType type, ByteData data);
 
   T build();
 
@@ -151,33 +151,33 @@ class BoundaryStructBuilder extends StructBuilder<BoundaryStruct> {
   late List<Point> points;
 
   @override
-  void handle(GdsRecordType type, ByteData data) {
+  void handle(GDSIIRecordType type, ByteData data) {
     switch (type) {
-      case GdsRecordType.elflags:
+      case GDSIIRecordType.elflags:
         {
           handleElflags(data);
           break;
         }
 
-      case GdsRecordType.plex:
+      case GDSIIRecordType.plex:
         {
           handlePlex(data);
           break;
         }
 
-      case GdsRecordType.layer:
+      case GDSIIRecordType.layer:
         {
           layer = handleLayer(data);
           break;
         }
 
-      case GdsRecordType.datatype:
+      case GDSIIRecordType.datatype:
         {
           datatype = handleDatatype(data);
           break;
         }
 
-      case GdsRecordType.xy:
+      case GDSIIRecordType.xy:
         {
           points = handleXY(data);
           break;
@@ -243,74 +243,74 @@ class TextStructBuilder extends StructBuilder<TextStruct> {
   late String string;
 
   @override
-  void handle(GdsRecordType type, ByteData data) {
+  void handle(GDSIIRecordType type, ByteData data) {
     switch (type) {
-      case GdsRecordType.elflags:
+      case GDSIIRecordType.elflags:
         {
           handleElflags(data);
           break;
         }
 
-      case GdsRecordType.plex:
+      case GDSIIRecordType.plex:
         {
           handlePlex(data);
           break;
         }
 
-      case GdsRecordType.layer:
+      case GDSIIRecordType.layer:
         {
           layer = handleLayer(data);
           break;
         }
 
-      case GdsRecordType.texttype:
+      case GDSIIRecordType.texttype:
         {
           texttype = handleTexttype(data);
           break;
         }
 
-      case GdsRecordType.presentation:
+      case GDSIIRecordType.presentation:
         {
           final result = handlePresentation(data);
           size = result.$1;
           alignment = result.$2;
           break;
         }
-      case GdsRecordType.pathtype:
+      case GDSIIRecordType.pathtype:
         {
           handlePathtype(data);
           break;
         }
-      case GdsRecordType.width:
+      case GDSIIRecordType.width:
         {
           width = handleWidth(data);
           break;
         }
-      case GdsRecordType.strans:
+      case GDSIIRecordType.strans:
         {
           vMirror = handleStrans(data);
           break;
         }
 
-      case GdsRecordType.mag:
+      case GDSIIRecordType.mag:
         {
           handleMag(data);
           break;
         }
 
-      case GdsRecordType.angle:
+      case GDSIIRecordType.angle:
         {
           handleAngle(data);
           break;
         }
 
-      case GdsRecordType.xy:
+      case GDSIIRecordType.xy:
         {
           points = handleXY(data);
           assert(points.length == 1, "The points length must be 1");
           break;
         }
-      case GdsRecordType.string:
+      case GDSIIRecordType.string:
         {
           string = handleString(data);
           break;
@@ -323,7 +323,16 @@ class TextStructBuilder extends StructBuilder<TextStruct> {
 
   @override
   TextStruct build() {
-    return TextStruct(layer: layer, texttype: texttype, size: size, alignment: alignment, width: width, vMirror: vMirror, string: string, offset: points.first);
+    return TextStruct(
+      layer: layer,
+      texttype: texttype,
+      size: size,
+      alignment: alignment,
+      width: width,
+      vMirror: vMirror,
+      string: string,
+      offset: points.first,
+    );
   }
 }
 
@@ -351,56 +360,56 @@ class PathStructBuilder extends StructBuilder<PathStruct> {
   late List<Point> points;
 
   @override
-  void handle(GdsRecordType type, ByteData data) {
+  void handle(GDSIIRecordType type, ByteData data) {
     switch (type) {
-      case GdsRecordType.elflags:
+      case GDSIIRecordType.elflags:
         {
           handleElflags(data);
           break;
         }
 
-      case GdsRecordType.plex:
+      case GDSIIRecordType.plex:
         {
           handlePlex(data);
           break;
         }
 
-      case GdsRecordType.layer:
+      case GDSIIRecordType.layer:
         {
           layer = handleLayer(data);
           break;
         }
 
-      case GdsRecordType.datatype:
+      case GDSIIRecordType.datatype:
         {
           datatype = handleDatatype(data);
           break;
         }
 
-      case GdsRecordType.pathtype:
+      case GDSIIRecordType.pathtype:
         {
           handlePathtype(data);
           break;
         }
-      case GdsRecordType.width:
+      case GDSIIRecordType.width:
         {
           width = handleWidth(data);
           break;
         }
 
-      case GdsRecordType.bgnextn:
+      case GDSIIRecordType.bgnextn:
         {
           handleBgnextn(data);
           break;
         }
 
-      case GdsRecordType.endextn:
+      case GDSIIRecordType.endextn:
         {
           handleEndextn(data);
           break;
         }
 
-      case GdsRecordType.xy:
+      case GDSIIRecordType.xy:
         {
           points = handleXY(data);
           break;
@@ -418,7 +427,13 @@ class PathStructBuilder extends StructBuilder<PathStruct> {
 }
 
 class SRefStruct extends Struct {
-  SRefStruct({required this.name, required this.vMirror, required this.magnification, required this.angle, required this.offset});
+  SRefStruct({
+    required this.name,
+    required this.vMirror,
+    required this.magnification,
+    required this.angle,
+    required this.offset,
+  });
 
   final String name;
 
@@ -445,33 +460,33 @@ class SRefStructBuilder extends StructBuilder<SRefStruct> {
   late List<Point> points;
 
   @override
-  void handle(GdsRecordType type, ByteData data) {
+  void handle(GDSIIRecordType type, ByteData data) {
     switch (type) {
-      case GdsRecordType.sname:
+      case GDSIIRecordType.sname:
         {
           name = handleSname(data);
           break;
         }
 
-      case GdsRecordType.strans:
+      case GDSIIRecordType.strans:
         {
           vMirror = handleStrans(data);
           break;
         }
 
-      case GdsRecordType.mag:
+      case GDSIIRecordType.mag:
         {
           magnification = handleMag(data);
           break;
         }
 
-      case GdsRecordType.angle:
+      case GDSIIRecordType.angle:
         {
           angle = handleAngle(data);
           break;
         }
 
-      case GdsRecordType.xy:
+      case GDSIIRecordType.xy:
         {
           points = handleXY(data);
           assert(points.length == 1, "points length must be 1");
@@ -537,39 +552,39 @@ class ARefStructBuilder extends StructBuilder<ARefStruct> {
   late List<Point> points;
 
   @override
-  void handle(GdsRecordType type, ByteData data) {
+  void handle(GDSIIRecordType type, ByteData data) {
     switch (type) {
-      case GdsRecordType.sname:
+      case GDSIIRecordType.sname:
         {
           name = handleSname(data);
           break;
         }
 
-      case GdsRecordType.strans:
+      case GDSIIRecordType.strans:
         {
           vMirror = handleStrans(data);
           break;
         }
 
-      case GdsRecordType.mag:
+      case GDSIIRecordType.mag:
         {
           magnification = handleMag(data);
           break;
         }
 
-      case GdsRecordType.angle:
+      case GDSIIRecordType.angle:
         {
           angle = handleAngle(data);
           break;
         }
 
-      case GdsRecordType.colrow:
+      case GDSIIRecordType.colrow:
         {
           colrow = handleColrow(data);
           break;
         }
 
-      case GdsRecordType.xy:
+      case GDSIIRecordType.xy:
         {
           points = handleXY(data);
           break;

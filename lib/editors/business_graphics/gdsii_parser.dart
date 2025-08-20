@@ -6,16 +6,16 @@ import 'package:flayout/gdsii/builder.dart';
 import 'package:flayout/gdsii/gdsii.dart';
 import 'package:flayout/layers/layers.dart';
 
-class ParseGdsiiResult {
-  ParseGdsiiResult({required this.cells, required this.layers});
+class ParseGDSIIResult {
+  ParseGDSIIResult({required this.cells, required this.layers});
 
   final List<CellBusinessGraphic> cells;
 
   final List<Layer> layers;
 }
 
-ParseGdsiiResult parseGdsii(String path) {
-  final Gdsii gdsii = readGdsii(path);
+ParseGDSIIResult parseGDSII(String path) {
+  final GDSII gdsii = readGDSII(path);
 
   final Map<String, CellBusinessGraphic> nameToCBG = {};
   final Map<String, Cell> nameToCell = {for (final cell in gdsii.cells) cell.name: cell};
@@ -27,10 +27,15 @@ ParseGdsiiResult parseGdsii(String path) {
     cells.add(parseCell(item, nameToCBG, nameToCell, nameToLayer));
   }
 
-  return ParseGdsiiResult(cells: cells, layers: nameToLayer.values.toList());
+  return ParseGDSIIResult(cells: cells, layers: nameToLayer.values.toList());
 }
 
-CellBusinessGraphic parseCell(Cell cell, Map<String, CellBusinessGraphic> nameToCBG, Map<String, Cell> nameToCell, Map<String, Layer> nameToLayer) {
+CellBusinessGraphic parseCell(
+  Cell cell,
+  Map<String, CellBusinessGraphic> nameToCBG,
+  Map<String, Cell> nameToCell,
+  Map<String, Layer> nameToLayer,
+) {
   final List<BaseBusinessGraphic> children = parseStructs(cell.srefs, nameToCBG, nameToCell, nameToLayer);
   return CellBusinessGraphic(name: cell.name, children: children);
 }
@@ -81,7 +86,13 @@ List<BaseBusinessGraphic> parseStructs(
       }
 
       final CellBusinessGraphic cellBusinessGraphic = nameToCBG[name]!;
-      final ins = InstanceBusinessGraphic(position: position, cell: cellBusinessGraphic, vMirror: vMirror, magnification: magnification, angle: angle);
+      final ins = InstanceBusinessGraphic(
+        position: position,
+        cell: cellBusinessGraphic,
+        vMirror: vMirror,
+        magnification: magnification,
+        angle: angle,
+      );
       items.add(ins);
     }
 
