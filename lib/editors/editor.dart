@@ -54,6 +54,7 @@ class _EditorState extends State<Editor> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     print("Editor Builder");
+    print("devicePixelRatio: ${MediaQuery.of(context).devicePixelRatio}");
     widget.context.buildContext = context;
     return StateMachine(context: widget.context, child: Scene(context: widget.context));
   }
@@ -80,7 +81,7 @@ Future<ui.Image> convertImageToFlutterUi(img.Image image) async {
     pixelFormat: ui.PixelFormat.rgba8888,
   );
 
-  ui.Codec codec = await id.instantiateCodec(targetHeight: image.height, targetWidth: image.width);
+  ui.Codec codec = await id.instantiateCodec(targetHeight: 100 ?? image.height, targetWidth: 100 ?? image.width);
   ui.FrameInfo fi = await codec.getNextFrame();
   ui.Image uiImage = fi.image;
 
@@ -93,8 +94,17 @@ class SceneRenderObject extends RenderBox {
   SceneRenderObject({required this.context}) {
     context.renderObject = this;
     (() async {
-      final t = img.Image(width: 100, height: 100, backgroundColor: img.ColorUint1.rgb(255, 0, 255));
-      img.drawCircle(t, x: 50, y: 50, radius: 50, color: img.ColorUint1.rgb(255, 255, 255), antialias: true);
+      final t = img.Image(width: 200, height: 200, numChannels: 2);
+
+      img.drawLine(
+        t,
+        x1: 0,
+        y1: 0,
+        x2: 200,
+        y2: 200,
+        color: img.ColorUint1.rgb(255, 0, 0),
+        thickness: 2,
+      );
       // final pngBytes = image.encodePng(img);
       flutterImage = await convertImageToFlutterUi(t);
     })();
@@ -135,9 +145,9 @@ class SceneRenderObject extends RenderBox {
           this.context.graphic.paint(ctx, Offset.zero);
 
           Selection(graphics: this.context.selectedGraphics).paint(ctx, Offset.zero);
-          // if (flutterImage != null) {
-          //   ctx.canvas.drawImage(flutterImage!, Offset.zero, Paint());
-          // }
+          if (flutterImage != null) {
+            ctx.canvas.drawImage(flutterImage!, Offset.zero, Paint());
+          }
         });
       });
     });
