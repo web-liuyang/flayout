@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 
 const double kMaxZoom = 100;
@@ -14,13 +12,15 @@ const Color kEditorAxisColor = Color(0xffff4500);
 const Color kEditorSelectedColor = Color(0xFFFF0000);
 const double kEditorSelectedStrokeWidth = 2;
 
+const List<Color> kMonochrome = [Colors.transparent, Colors.white, Colors.black];
+
 const List<Color> kEditorDrawingColors = [
-  Colors.transparent,
-  Colors.black,
-  Colors.white,
+  ...kMonochrome,
   ...Colors.primaries,
 ];
 
 // Temporary
 const double kEditorUnits = 0.001;
-final ui.TextStyle kEditorTextStyle = ui.TextStyle(fontSize: 20, color: Color(0xFF000000));
+
+const double kEditorTextSize = 20;
+const Color kEditorTextColor = Color(0xFF000000);

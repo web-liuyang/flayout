@@ -43,8 +43,10 @@ class RootGraphic extends BaseGraphic {
 
   @override
   Rect aabb() {
-    Rect aabb = Rect.zero;
-    for (final child in children) {
+    if (children.isEmpty) return Rect.zero;
+
+    Rect aabb = children.first.aabb();
+    for (final child in children.skip(1)) {
       aabb = aabb.expandToInclude(child.aabb());
     }
     return aabb;

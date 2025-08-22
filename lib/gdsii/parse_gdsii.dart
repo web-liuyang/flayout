@@ -1,11 +1,14 @@
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
+import 'package:flayout/editors/editor_config.dart';
 import 'package:flayout/editors/graphics/graphics.dart';
 import 'package:flayout/extensions/extensions.dart';
 import 'package:flayout/gdsii/builder.dart';
 import 'package:flayout/gdsii/gdsii.dart' as gdsii;
 import 'package:flayout/layouts/cubits/cells_cubit.dart';
 import 'package:flayout/layouts/cubits/layers_cubit.dart';
+import 'package:flutter/material.dart';
 
 class ParseGDSIIResult {
   ParseGDSIIResult({required this.cells, required this.layers});
@@ -45,6 +48,28 @@ Cell parseCell(
   return Cell(name: cell.name, graphic: RootGraphic(name: cell.name, children: children));
 }
 
+Color getColor() {
+  final usedColors = layersCubit.layers.map((item) => item.palette.outlineColor).toSet();
+  final availableColors = Colors.primaries.toSet().difference(usedColors);
+  return availableColors.isEmpty ? Colors.primaries.shuffled().first : availableColors.first;
+}
+
+Layer getLayer(int layer, int datatype) {
+  Layer? result = layersCubit.layers.firstWhereOrNull((item) => item.layer == layer && item.datatype == datatype);
+  if (result == null) {
+    final color = getColor();
+    result = Layer(
+      name: 'Layer $layer/$datatype',
+      layer: layer,
+      datatype: datatype,
+      palette: LayerPalette(outlineColor: color),
+    );
+    layersCubit.addLayer(result);
+  }
+
+  return result;
+}
+
 List<BaseGraphic> parseStructs(
   List<Struct> structs,
   Map<String, Cell> nameToCell,
@@ -54,56 +79,53 @@ List<BaseGraphic> parseStructs(
 
   for (final Struct struct in structs) {
     if (struct is TextStruct) {
+      // print('TextStruct');
       final position = struct.offset.toOffset();
       final text = struct.string;
       // final layerKey = combineIdentity(struct.layer, struct.texttype);
-      // final layer = nameToLayer[layerKey] ??= Layer(number: struct.layer, datatype: struct.texttype);
-      final layer = layersCubit.current!;
-      items.add(TextGraphic(text: text, position: position, layer: layer));
+      // final layer = nameToLayer[layerKey] ??= Layer(name: layerKey, layer: struct.layer, datatype: struct.texttype);
+      final layer = getLayer(struct.layer, struct.texttype);
+      // items.add(TextGraphic(text: text, position: position, layer: layer));
     }
 
     if (struct is BoundaryStruct) {
+      // print('BoundaryStruct');
       final vertices = struct.points.toOffsets();
       // final layerKey = combineIdentity(struct.layer, struct.datatype);
       // final layer = nameToLayer[layerKey] ??= Layer(number: struct.layer, datatype: struct.datatype);
-      final layer = layersCubit.current!;
+      // final layer = layersCubit.current!;
+      final layer = getLayer(struct.layer, struct.datatype);
       items.add(PolygonGraphic(vertices: vertices, layer: layer));
     }
 
     if (struct is PathStruct) {
+      // print('PathStruct');
       final vertices = struct.points.toOffsets();
       // final layerKey = combineIdentity(struct.layer, struct.datatype);
       // final layer = nameToLayer[layerKey] ??= Layer(number: struct.layer, datatype: struct.datatype);
       final halfWidth = struct.width / 2;
-      final layer = layersCubit.current!;
+      // final layer = layersCubit.current!;
+      final layer = getLayer(struct.layer, struct.datatype);
       items.add(PolylineGraphic(vertices: vertices, layer: layer, halfWidth: halfWidth));
     }
 
     if (struct is SRefStruct) {
-      print("SRefStruct");
+      // print("SRefStruct");
       final position = struct.offset.toOffset();
       final name = struct.name;
       final vMirror = struct.vMirror;
       final magnification = struct.magnification;
       final angle = struct.angle;
 
-      if (!nameToCell.containsKey(name)) {
-        final Cell cell = nameToCell[name]!;
-        // final CellBusinessGraphic cellBusinessGraphic = parseCell(cell, nameToCell, nameToLayer);
-        // nameToCBG[name] = cellBusinessGraphic;
-        // final Cell cell_ = parseCell(cell, nameToCell, nameToLayer);
-        // nameToCBG[name] = cellBusinessGraphic;
-      }
+      final RootRefGraphic rootRefGraphic = RootRefGraphic(
+        position: position,
+        name: name,
+        vMirror: vMirror,
+        magnification: magnification,
+        angle: angle,
+      );
 
-      final Cell cell = nameToCell[name]!;
-      // final ins = InstanceBusinessGraphic(
-      //   position: position,
-      //   cell: cellBusinessGraphic,
-      //   vMirror: vMirror,
-      //   magnification: magnification,
-      //   angle: angle,
-      // );
-      // items.add(cell.graphic);
+      items.add(rootRefGraphic);
     }
 
     if (struct is ARefStruct) {
@@ -142,4 +164,8 @@ List<BaseGraphic> parseStructs(
   }
 
   return items;
+}
+
+String combineIdentity(int number, int datatype) {
+  return "$number/$datatype";
 }

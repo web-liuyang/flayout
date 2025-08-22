@@ -7,6 +7,7 @@ import 'package:flayout/layouts/cubits/cubits.dart';
 import 'package:flutter/widgets.dart' hide Viewport;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:matrix4_transform/matrix4_transform.dart';
+import '../gdsii/parse_gdsii.dart';
 import 'editor_config.dart';
 import 'state_machines/state_machines.dart';
 import 'package:image/image.dart' as img;
@@ -53,6 +54,9 @@ class _EditorState extends State<Editor> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    // final result = parseGDSII("/Users/liuyang/Desktop/xiaoyao/ansys/mmi.gds");
+    // print(result.cells);
     print("Editor Builder");
     print("devicePixelRatio: ${MediaQuery.of(context).devicePixelRatio}");
     widget.context.buildContext = context;
@@ -146,7 +150,7 @@ class SceneRenderObject extends RenderBox {
 
           Selection(graphics: this.context.selectedGraphics).paint(ctx, Offset.zero);
           if (flutterImage != null) {
-            ctx.canvas.drawImage(flutterImage!, Offset.zero, Paint());
+            // ctx.canvas.drawImage(flutterImage!, Offset.zero, Paint());
           }
         });
       });

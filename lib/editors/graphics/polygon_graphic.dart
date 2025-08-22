@@ -15,15 +15,20 @@ class PolygonGraphic extends BaseGraphic {
 
   final bool close;
 
-  Path _path = Path();
+  final Path _path = Path();
 
   @override
   void paint(Context ctx, Offset offset) {
     if (layer == null) return;
+    final paint = layersCubit.getPaint(layer!, ctx);
+    if (paint == null) return;
+
     final List<Offset> vertices = this.vertices.map((e) => e + position + offset).toList();
-    _path = Path()..addPolygon(vertices, close);
+    _path
+      ..reset()
+      ..addPolygon(vertices, close);
+
     if (ctx.viewport.canSee(aabb())) {
-      final paint = layersCubit.getPaint(layer!, ctx);
       ctx.canvas.drawPath(_path, paint);
     }
   }

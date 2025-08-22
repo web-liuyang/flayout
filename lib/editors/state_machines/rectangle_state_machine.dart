@@ -147,8 +147,8 @@ class _RectangleGraphicDraft extends BaseGraphic {
     if (start == null || end == null) return;
     final layer = context.context.currentLayer;
     if (layer == null) return;
-
     final paint = layersCubit.getPaint(layer, context);
+    if (paint == null) return;
 
     final Rect rect = Rect.fromPoints(start!, end!);
     context.canvas.drawRect(rect, paint);

@@ -11,14 +11,19 @@ class RectangleGraphic extends BaseGraphic {
 
   double height;
 
-  Path _path = Path();
+  final Path _path = Path();
 
   @override
   void paint(Context ctx, Offset offset) {
     if (layer == null) return;
-    _path = Path()..addRect(Rect.fromLTWH(position.dx + offset.dx, position.dy + offset.dy, width, height));
+    final paint = layersCubit.getPaint(layer!, ctx);
+    if (paint == null) return;
+
+    _path
+      ..reset()
+      ..addRect(Rect.fromLTWH(position.dx + offset.dx, position.dy + offset.dy, width, height));
+
     if (ctx.viewport.canSee(aabb())) {
-      final paint = layersCubit.getPaint(layer!, ctx);
       ctx.canvas.drawPath(_path, paint);
     }
   }

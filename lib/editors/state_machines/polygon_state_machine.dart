@@ -166,6 +166,7 @@ class _PolygonStateMachineGraphicDraft extends BaseGraphic {
     final layer = context.context.currentLayer;
     if (layer == null) return;
     final paint = layersCubit.getPaint(layer, context);
+    if (paint == null) return;
 
     if (vertices.length == 1) {
       context.canvas.drawLine(vertices.first, auxiliary!, paint);

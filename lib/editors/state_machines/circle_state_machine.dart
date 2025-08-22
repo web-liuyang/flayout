@@ -130,8 +130,9 @@ class _CircleGraphicDraft extends BaseGraphic {
     if (center == null || radius == null) return;
     final layer = context.context.currentLayer;
     if (layer == null) return;
-
     final paint = layersCubit.getPaint(layer, context);
+    if (paint == null) return;
+
     context.canvas.drawCircle(center!, radius!, paint);
   }
 

@@ -9,7 +9,6 @@ class TextGraphic extends BaseGraphic {
     required super.position,
     required super.layer,
     required this.text,
-    // required this.paragraph,
   });
 
   final String text;
@@ -20,20 +19,19 @@ class TextGraphic extends BaseGraphic {
   void paint(Context ctx, Offset offset) {
     paragraph =
         (ParagraphBuilder(ParagraphStyle())
-              ..pushStyle(kEditorTextStyle)
+              ..pushStyle(TextStyle(fontSize: ctx.viewport.getLogicSize(kEditorTextSize), color: Color(0xFF000000)))
               ..addText(text))
             .build()
           ..layout(ParagraphConstraints(width: double.infinity));
-
-    // final offset = position * kEditorUnits;
-
+    ctx.canvas.save();
+    ctx.canvas.scale(1, -1);
     ctx.canvas.drawParagraph(paragraph, position + offset);
-    // ctx.canvas.drawParagraph(paragraph, position + offset);
+    ctx.canvas.restore();
   }
 
   @override
   bool contains(Offset position) {
-    return false;
+    return aabb().contains(position);
   }
 
   @override

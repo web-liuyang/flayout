@@ -15,17 +15,29 @@ class PolylineGraphic extends BaseGraphic {
 
   final double halfWidth;
 
+  final Path _path = Path();
+
   @override
   void paint(Context ctx, Offset offset) {
+    if (this.vertices.length < 2) return;
     if (layer == null) return;
-    final vertices = this.vertices.map((e) => e + position + offset).toList();
     final paint = layersCubit.getPaint(layer!, ctx);
-    ctx.canvas.drawPoints(PointMode.lines, vertices, paint);
+    if (paint == null) return;
+
+    final vertices = this.vertices.map((e) => e + position + offset).toList();
+    _path
+      ..reset()
+      ..moveTo(vertices.first.dx, vertices.first.dy);
+    for (int i = 1; i < vertices.length; i++) {
+      _path.lineTo(vertices[i].dx, vertices[i].dy);
+    }
+    _path.close();
+    ctx.canvas.drawPath(_path, paint);
   }
 
   @override
   bool contains(Offset position) {
-    return false;
+    return _path.contains(position);
   }
 
   @override

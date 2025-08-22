@@ -8,16 +8,20 @@ class LayerPalette {
   const LayerPalette({
     this.outlineWidth = 1,
     this.outlineColor = const Color(0xFF000000),
+    this.visible = true,
   });
 
   final double outlineWidth;
 
   final Color outlineColor;
 
-  LayerPalette copyWith({double? outlineWidth, Color? outlineColor}) {
+  final bool visible;
+
+  LayerPalette copyWith({double? outlineWidth, Color? outlineColor, bool? visible}) {
     return LayerPalette(
       outlineWidth: outlineWidth ?? this.outlineWidth,
       outlineColor: outlineColor ?? this.outlineColor,
+      visible: visible ?? this.visible,
     );
   }
 
@@ -25,11 +29,11 @@ class LayerPalette {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! LayerPalette) return false;
-    return outlineWidth == other.outlineWidth && outlineColor == other.outlineColor;
+    return outlineWidth == other.outlineWidth && outlineColor == other.outlineColor && visible == other.visible;
   }
 
   @override
-  int get hashCode => outlineWidth.hashCode ^ outlineColor.hashCode;
+  int get hashCode => outlineWidth.hashCode ^ outlineColor.hashCode ^ visible.hashCode;
 }
 
 class Layer {
@@ -124,7 +128,9 @@ class LayersCubit extends Cubit<LayersCubitState> {
     emit(state.copyWith(layers: layers.replacedAt(index, layer)));
   }
 
-  Paint getPaint(Layer layer, Context context) {
+  Paint? getPaint(Layer layer, Context context) {
+    if (!layer.palette.visible) return null;
+
     final paint = paints[layer.id] ??= Paint();
 
     paint.style = PaintingStyle.stroke;
@@ -141,16 +147,16 @@ class LayersCubit extends Cubit<LayersCubitState> {
 final LayersCubit layersCubit = LayersCubit(
   LayersCubitState(
     layers: [
-      Layer(
-        name: "Layer_1",
-        layer: 1,
-        datatype: 1,
-      ),
-      Layer(
-        name: "Layer_2",
-        layer: 1,
-        datatype: 2,
-      ),
+      // Layer(
+      //   name: "Layer_1",
+      //   layer: 1,
+      //   datatype: 1,
+      // ),
+      // Layer(
+      //   name: "Layer_2",
+      //   layer: 1,
+      //   datatype: 2,
+      // ),
     ],
   ),
 );

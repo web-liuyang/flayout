@@ -67,7 +67,7 @@ class _ToolbarState extends State<Toolbar> {
                 IconButton(onPressed: canUndo ? invoke(onUndo) : null, icon: const Icon(Icons.undo), tooltip: "Undo"),
                 IconButton(onPressed: canRedo ? invoke(onRedo) : null, icon: const Icon(Icons.redo), tooltip: "Redo"),
                 IconButton(
-                  onPressed: canDraw ? invoke(onSelection) : null,
+                  onPressed: invoke(onSelection),
                   isSelected: editorContext?.stateMachine is SelectionStateMachine,
                   icon: const Icon(Icons.north_west),
                   tooltip: "Selection",

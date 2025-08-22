@@ -1,4 +1,4 @@
-import 'dart:ui' hide kEditorTextStyle;
+import 'dart:ui';
 
 import 'package:flayout/editors/editor_config.dart';
 import 'package:flayout/layers/layers.dart';
@@ -27,7 +27,7 @@ class TextBusinessGraphic extends BaseBusinessGraphic {
   TextParagraph getTextParagraph() {
     final paragraph =
         (ParagraphBuilder(ParagraphStyle())
-              ..pushStyle(kEditorTextStyle)
+              ..pushStyle(TextStyle(fontSize: kEditorTextSize, color: kEditorTextColor))
               ..addText(text))
             .build()
           ..layout(ParagraphConstraints(width: double.infinity));
