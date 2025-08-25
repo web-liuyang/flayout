@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-const double kMaxZoom = 100;
-const double kMinZoom = 0.01;
+const double kMaxZoom = 1000;
+const double kMinZoom = 0.001;
 
 const double kEditorDotGap = 50;
 const double kEditorDotSize = 1;

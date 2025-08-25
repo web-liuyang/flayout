@@ -77,9 +77,9 @@ class CellsCubit extends Cubit<CellsCubitState> {
 final CellsCubit cellsCubit = CellsCubit(
   CellsCubitState(
     cells: [
-      ...parseGDSII("/Users/liuyang/Desktop/xiaoyao/ansys/mmi.gds").cells,
+      // ...parseGDSII("/Users/liuyang/Desktop/xiaoyao/ansys/mmi.gds").cells,
       // ...parseGDSII("/Users/liuyang/Desktop/xiaoyao/ansys/vias_45.gds").cells,
-      // ...parseGDSII("/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_2X2.py.gds").cells,
+      ...parseGDSII("/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_2X2.py.gds").cells,
       Cell(
         name: "Cell_1",
         graphic: RootGraphic(

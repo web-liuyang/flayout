@@ -27,7 +27,7 @@ class RootRefGraphic extends BaseGraphic {
 
   @override
   void paint(Context ctx, Offset offset) {
-    print("RootRefGraphic ${name}");
+    // print("RootRefGraphic ${name}");
     final cell = cellsCubit.cells.firstWhere((cell) => cell.name == name);
     _graphic = cell.graphic;
     _graphic!.paint(ctx, offset + position);
