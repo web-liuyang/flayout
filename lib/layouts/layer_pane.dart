@@ -204,16 +204,19 @@ class _LayerPaneToolbarState extends State<LayerPaneToolbar> {
 // }
 
 class EditableLayerPalette {
-  const EditableLayerPalette({required this.outlineWidth, required this.outlineColor});
+  const EditableLayerPalette({required this.outlineWidth, required this.outlineColor, this.visibility = true});
 
   final String outlineWidth;
 
   final Color outlineColor;
 
-  EditableLayerPalette copyWith({String? outlineWidth, Color? outlineColor}) {
+  final bool visibility;
+
+  EditableLayerPalette copyWith({String? outlineWidth, Color? outlineColor, bool? visibility}) {
     return EditableLayerPalette(
       outlineWidth: outlineWidth ?? this.outlineWidth,
       outlineColor: outlineColor ?? this.outlineColor,
+      visibility: visibility ?? this.visibility,
     );
   }
 
@@ -271,6 +274,7 @@ class _LayerEditorState extends State<LayerEditor> {
   late final TextEditingController nameController = TextEditingController(text: widget.value.name);
   late final TextEditingController layerController = TextEditingController(text: widget.value.layer.toString());
   late final TextEditingController datatypeController = TextEditingController(text: widget.value.datatype.toString());
+  late bool visibility = widget.value.palette.visibility;
   late final TextEditingController outlineWidthController = TextEditingController(
     text: widget.value.palette.outlineWidth.toString(),
   );
@@ -300,6 +304,7 @@ class _LayerEditorState extends State<LayerEditor> {
     if (nameController.text != widget.value.name) nameController.text = widget.value.name;
     if (layerController.text != widget.value.layer) layerController.text = widget.value.layer;
     if (datatypeController.text != widget.value.datatype) datatypeController.text = widget.value.datatype;
+    if (visibility != widget.value.palette.visibility) visibility = widget.value.palette.visibility;
     if (outlineWidthController.text != widget.value.palette.outlineWidth.toString()) {
       outlineWidthController.text = widget.value.palette.outlineWidth.toString();
     }
@@ -394,6 +399,11 @@ class _LayerEditorState extends State<LayerEditor> {
     widget.onChanged(widget.value.copyWith(datatype: value));
   }
 
+  void onActionVisibility(bool value) {
+    widget.onError(isError);
+    widget.onChanged(widget.value.copyWith(palette: widget.value.palette.copyWith(visibility: value)));
+  }
+
   void onActionOutlineWidth(String value) {
     final String? errorText = validateOutlineWidth(value);
     setState(() => outlineWidthErrorText = errorText);
@@ -437,7 +447,7 @@ class _LayerEditorState extends State<LayerEditor> {
             ),
           ),
           CellTile(
-            title: "Datatype:",
+            title: "Data Type:",
             trailing: InputBox(
               controller: datatypeController,
               decoration: InputDecoration(
@@ -446,6 +456,13 @@ class _LayerEditorState extends State<LayerEditor> {
                     datatypeErrorText != null ? Tooltip(message: datatypeErrorText, child: Icon(Icons.error)) : null,
               ),
               onAction: onActionDatatype,
+            ),
+          ),
+          CellTile(
+            title: "Visibility:",
+            trailing: Switch(
+              value: visibility,
+              onChanged: onActionVisibility,
             ),
           ),
           CellTile(
@@ -509,6 +526,7 @@ class _CreateLayerDialogState extends State<CreateLayerDialog> {
       palette: LayerPalette(
         outlineWidth: double.parse(layer.palette.outlineWidth),
         outlineColor: layer.palette.outlineColor,
+        visibility: layer.palette.visibility,
       ),
     );
 
@@ -555,6 +573,7 @@ class _UpdateLayerDialogState extends State<UpdateLayerDialog> {
     palette: EditableLayerPalette(
       outlineWidth: widget.layer.palette.outlineWidth.toString(),
       outlineColor: widget.layer.palette.outlineColor,
+      visibility: widget.layer.palette.visibility,
     ),
   );
 
@@ -568,6 +587,7 @@ class _UpdateLayerDialogState extends State<UpdateLayerDialog> {
       palette: LayerPalette(
         outlineWidth: double.parse(layer.palette.outlineWidth),
         outlineColor: layer.palette.outlineColor,
+        visibility: layer.palette.visibility,
       ),
     );
 

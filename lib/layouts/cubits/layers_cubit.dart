@@ -8,20 +8,20 @@ class LayerPalette {
   const LayerPalette({
     this.outlineWidth = 1,
     this.outlineColor = const Color(0xFF000000),
-    this.visible = true,
+    this.visibility = true,
   });
 
   final double outlineWidth;
 
   final Color outlineColor;
 
-  final bool visible;
+  final bool visibility;
 
-  LayerPalette copyWith({double? outlineWidth, Color? outlineColor, bool? visible}) {
+  LayerPalette copyWith({double? outlineWidth, Color? outlineColor, bool? visibility}) {
     return LayerPalette(
       outlineWidth: outlineWidth ?? this.outlineWidth,
       outlineColor: outlineColor ?? this.outlineColor,
-      visible: visible ?? this.visible,
+      visibility: visibility ?? this.visibility,
     );
   }
 
@@ -29,11 +29,11 @@ class LayerPalette {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! LayerPalette) return false;
-    return outlineWidth == other.outlineWidth && outlineColor == other.outlineColor && visible == other.visible;
+    return outlineWidth == other.outlineWidth && outlineColor == other.outlineColor && visibility == other.visibility;
   }
 
   @override
-  int get hashCode => outlineWidth.hashCode ^ outlineColor.hashCode ^ visible.hashCode;
+  int get hashCode => outlineWidth.hashCode ^ outlineColor.hashCode ^ visibility.hashCode;
 }
 
 class Layer {
@@ -129,7 +129,7 @@ class LayersCubit extends Cubit<LayersCubitState> {
   }
 
   Paint? getPaint(Layer layer, Context context) {
-    if (!layer.palette.visible) return null;
+    if (!layer.palette.visibility) return null;
 
     final paint = paints[layer.id] ??= Paint();
 
