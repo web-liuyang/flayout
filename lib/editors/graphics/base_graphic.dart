@@ -42,17 +42,19 @@ class Viewport {
   Matrix4Transform transform = Matrix4Transform();
 
   void setZoom(double zoom, {Offset? origin}) {
+    print("zoom $zoom");
     final newZoom = zoom.clamp(kMinZoom, kMaxZoom);
+    print("newZoom $newZoom");
     matrix4 = matrix4.setZoom(newZoom, origin: origin);
   }
 
   void zoomIn(Offset origin) {
-    final zoom = getZoom() + 0.1;
+    final zoom = getZoom() + 0.05;
     setZoom(zoom, origin: origin);
   }
 
   void zoomOut(Offset origin) {
-    final zoom = getZoom() - 0.1;
+    final zoom = getZoom() - 0.05;
     setZoom(zoom, origin: origin);
   }
 

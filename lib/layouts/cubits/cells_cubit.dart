@@ -79,7 +79,8 @@ final CellsCubit cellsCubit = CellsCubit(
     cells: [
       // ...parseGDSII("/Users/liuyang/Desktop/xiaoyao/ansys/mmi.gds").cells,
       // ...parseGDSII("/Users/liuyang/Desktop/xiaoyao/ansys/vias_45.gds").cells,
-      ...parseGDSII("/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_2X2.py.gds").cells,
+      // ...parseGDSII("/Users/liuyang/Desktop/xiaoyao/ansys/MZI_SYSTEM_FOR_2X2.py.gds").cells,
+      ...parseGDSII("d:\\data\\MZI_SYSTEM_FOR_2X2.py.gds").cells,
       Cell(
         name: "Cell_1",
         graphic: RootGraphic(

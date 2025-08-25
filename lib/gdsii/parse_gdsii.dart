@@ -80,7 +80,7 @@ List<BaseGraphic> parseStructs(
   for (final Struct struct in structs) {
     if (struct is TextStruct) {
       // print('TextStruct');
-      final position = struct.offset.toOffset();
+      final position = struct.offset.toOffset() / 1000;
       final text = struct.string;
       // final layerKey = combineIdentity(struct.layer, struct.texttype);
       // final layer = nameToLayer[layerKey] ??= Layer(name: layerKey, layer: struct.layer, datatype: struct.texttype);
@@ -90,7 +90,7 @@ List<BaseGraphic> parseStructs(
 
     if (struct is BoundaryStruct) {
       // print('BoundaryStruct');
-      final vertices = struct.points.toOffsets();
+      final vertices = struct.points.toOffsets() / 1000;
       // final layerKey = combineIdentity(struct.layer, struct.datatype);
       // final layer = nameToLayer[layerKey] ??= Layer(number: struct.layer, datatype: struct.datatype);
       // final layer = layersCubit.current!;
@@ -100,7 +100,7 @@ List<BaseGraphic> parseStructs(
 
     if (struct is PathStruct) {
       // print('PathStruct');
-      final vertices = struct.points.toOffsets();
+      final vertices = struct.points.toOffsets() / 1000;
       // final layerKey = combineIdentity(struct.layer, struct.datatype);
       // final layer = nameToLayer[layerKey] ??= Layer(number: struct.layer, datatype: struct.datatype);
       final halfWidth = struct.width / 2;
@@ -111,7 +111,7 @@ List<BaseGraphic> parseStructs(
 
     if (struct is SRefStruct) {
       // print("SRefStruct");
-      final position = struct.offset.toOffset();
+      final position = struct.offset.toOffset() / 1000;
       final name = struct.name;
       final vMirror = struct.vMirror;
       final magnification = struct.magnification;

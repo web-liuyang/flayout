@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 extension IterableExtension<T> on Iterable<T> {
   int get lastIndex => length - 1;
 
@@ -26,4 +28,10 @@ extension ListExtension<T> on List<T> {
   void replaceAt(int index, T item) => this[index] = item;
 
   List<T> removedAt(int index) => [...sublist(0, index), ...sublist(index + 1)];
+}
+
+extension ListOffsetExtension<T> on List<Offset> {
+  operator /(double other) {
+    return map((e) => e / other).toList();
+  }
 }

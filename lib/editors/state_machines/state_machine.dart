@@ -101,7 +101,7 @@ class _StateMachineState extends State<StateMachine> {
             position = viewport.windowToCanvas(event.localPosition);
           },
           onPointerPanZoomUpdate: (event) {
-            print(2);
+            // print(2);
             if (event.panDelta != Offset.zero) {
               final position = viewport.windowToCanvas(event.localPosition);
               final delta = viewport.transform.screenToPlane(event.panDelta);
@@ -118,7 +118,7 @@ class _StateMachineState extends State<StateMachine> {
             }
           },
           onPointerDown: (event) {
-            print(3);
+            // print(3);
             final position = viewport.windowToCanvas(event.localPosition);
             if (event.buttons == kPrimaryButton) {
               onPrimaryTapDown(TapDownCanvasEvent(position: position));
@@ -129,7 +129,7 @@ class _StateMachineState extends State<StateMachine> {
             }
           },
           onPointerMove: (event) {
-            print(4);
+            // print(4);
             final position = viewport.windowToCanvas(event.localPosition);
             final delta = viewport.transform.screenToPlane(event.delta);
             if (event.buttons == kPrimaryButton) {
@@ -141,7 +141,7 @@ class _StateMachineState extends State<StateMachine> {
             }
           },
           onPointerSignal: (event) {
-            print(5);
+            // print(5);
             if (event is PointerScrollEvent) {
               final position = viewport.windowToCanvas(event.localPosition);
               final direction = event.scrollDelta.dy > 0 ? ZoomDirection.zoomOut : ZoomDirection.zoomIn;
