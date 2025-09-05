@@ -40,9 +40,9 @@ class _MenubarState extends State<Menubar> {
   @override
   Widget build(BuildContext context) {
     final recent = [
-      "/Users/liuyang/Desktop/project_test/project1.bm",
-      "/Users/liuyang/Desktop/project_test/project2.bm",
-      "/Users/liuyang/Desktop/project_test/project3.bm",
+      "/Users/liuyang/Desktop/project_test/project1.fdb",
+      "/Users/liuyang/Desktop/project_test/project2.fdb",
+      "/Users/liuyang/Desktop/project_test/project3.fdb",
     ];
 
     return MenuBar(

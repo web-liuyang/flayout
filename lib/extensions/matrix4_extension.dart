@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -11,8 +12,12 @@ extension Matrix4TransformExtension on Matrix4Transform {
     return Offset(m.entry(0, 3), m.entry(1, 3));
   }
 
+  double getZoom() {
+    return max(m.entry(0, 0), m.entry(1, 1));
+  }
+
   Matrix4Transform setZoom(double zoom, {Offset? origin}) {
-    if (zoom == 1) {
+    if (zoom <= 1 && getZoom() <= 1) {
       return this;
     } else if ((origin == null) || (origin.dx == 0.0 && origin.dy == 0.0)) {
       return Matrix4Transform.from(

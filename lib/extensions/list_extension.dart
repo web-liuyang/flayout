@@ -31,7 +31,11 @@ extension ListExtension<T> on List<T> {
 }
 
 extension ListOffsetExtension<T> on List<Offset> {
-  operator /(double other) {
+  List<Offset> operator /(double other) {
     return map((e) => e / other).toList();
+  }
+
+  List<Offset> operator *(double other) {
+    return map((e) => e * other).toList();
   }
 }

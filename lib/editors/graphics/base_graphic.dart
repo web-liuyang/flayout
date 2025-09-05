@@ -42,24 +42,26 @@ class Viewport {
   Matrix4Transform transform = Matrix4Transform();
 
   void setZoom(double zoom, {Offset? origin}) {
-    print("zoom $zoom");
-    final newZoom = zoom.clamp(kMinZoom, kMaxZoom);
-    print("newZoom $newZoom");
-    matrix4 = matrix4.setZoom(newZoom, origin: origin);
+    // clamp first, then quantize to kZoomStep (0.5) multiple
+    final clamped = zoom.clamp(kMinZoom, kMaxZoom);
+    final quantized = (clamped / kZoomStep).roundToDouble() * kZoomStep;
+    matrix4 = matrix4.setZoom(quantized, origin: origin);
   }
 
   void zoomIn(Offset origin) {
-    final zoom = getZoom() + 0.05;
-    setZoom(zoom, origin: origin);
+    final currentStep = (getZoom() / kZoomStep).roundToDouble();
+    final target = (currentStep + 1) * kZoomStep;
+    setZoom(target, origin: origin);
   }
 
   void zoomOut(Offset origin) {
-    final zoom = getZoom() - 0.05;
-    setZoom(zoom, origin: origin);
+    final currentStep = (getZoom() / kZoomStep).roundToDouble();
+    final target = (currentStep - 1) * kZoomStep;
+    setZoom(target, origin: origin);
   }
 
   double getZoom() {
-    return max(matrix4.m.entry(0, 0), matrix4.m.entry(1, 1));
+    return matrix4.getZoom();
   }
 
   void translate(Offset offset) {

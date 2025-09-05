@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-const double kMaxZoom = 1000;
-const double kMinZoom = 0.001;
+const double kMaxZoom = 100;
+const double kMinZoom = 1;
+const double kZoomStep = 0.5;
 
 const double kEditorDotGap = 50;
 const double kEditorDotSize = 1;
@@ -20,7 +21,7 @@ const List<Color> kEditorDrawingColors = [
 ];
 
 // Temporary
-const double kEditorUnits = 0.001;
+const double kEditorUnits = 0.0001;
 
 const double kEditorTextSize = 20;
 const Color kEditorTextColor = Color(0xFF000000);
