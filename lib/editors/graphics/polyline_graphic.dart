@@ -31,7 +31,7 @@ class PolylineGraphic extends BaseGraphic {
     for (int i = 1; i < vertices.length; i++) {
       _path.lineTo(vertices[i].dx, vertices[i].dy);
     }
-    _path.close();
+
     ctx.canvas.drawPath(_path, paint);
   }
 
@@ -46,5 +46,5 @@ class PolylineGraphic extends BaseGraphic {
   }
 
   @override
-  Rect aabb() => Rect.fromPoints(vertices.first, vertices.last);
+  Rect aabb() => _path.getBounds();
 }

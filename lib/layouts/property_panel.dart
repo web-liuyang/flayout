@@ -47,6 +47,12 @@ class _PropertyPanelState extends State<PropertyPanel> {
                         onChanged: (graphics) => onChanged(editorContext, graphics),
                       );
                     }
+                    if (graphics.first is PolylineGraphic) {
+                      child = _PolylinePropertyPane(
+                        graphics: graphics,
+                        onChanged: (graphics) => onChanged(editorContext, graphics),
+                      );
+                    }
                     if (graphics.first is CircleGraphic) {
                       child = _CirclePropertyPane(
                         graphics: graphics,
@@ -73,6 +79,18 @@ class _PolygonPropertyPane extends _BasePropertyPane {
 }
 
 class _PolygonPropertyPaneState extends _BasePropertyPaneState<PolygonGraphic> {
+  @override
+  List<Offset> get vertices => firstGraphic.vertices;
+}
+
+class _PolylinePropertyPane extends _BasePropertyPane {
+  const _PolylinePropertyPane({required super.graphics, required super.onChanged});
+
+  @override
+  _PolylinePropertyPaneState createState() => _PolylinePropertyPaneState();
+}
+
+class _PolylinePropertyPaneState extends _BasePropertyPaneState<PolylineGraphic> {
   @override
   List<Offset> get vertices => firstGraphic.vertices;
 }
@@ -228,15 +246,27 @@ abstract class _BasePropertyPaneState<T extends BaseGraphic> extends State<_Base
   }
 
   void onChangedVertex(Offset vertex, int index) {
-    assert(firstGraphic is PolygonGraphic);
+    assert(firstGraphic is PolygonGraphic || firstGraphic is PolylineGraphic);
 
-    final verticesLength = (firstGraphic as PolygonGraphic).vertices.length;
-    for (final item in widget.graphics) {
-      if (item is PolygonGraphic && item.vertices.length == verticesLength) {
-        item.vertices[index] = vertex;
+    if (firstGraphic is PolygonGraphic) {
+      final verticesLength = (firstGraphic as PolygonGraphic).vertices.length;
+      for (final item in widget.graphics) {
+        if (item is PolygonGraphic && item.vertices.length == verticesLength) {
+          item.vertices[index] = vertex;
+        }
       }
+      onChanged(widget.graphics);
     }
-    onChanged(widget.graphics);
+
+    if (firstGraphic is PolylineGraphic) {
+      final verticesLength = (firstGraphic as PolylineGraphic).vertices.length;
+      for (final item in widget.graphics) {
+        if (item is PolylineGraphic && item.vertices.length == verticesLength) {
+          item.vertices[index] = vertex;
+        }
+      }
+      onChanged(widget.graphics);
+    }
   }
 
   @override

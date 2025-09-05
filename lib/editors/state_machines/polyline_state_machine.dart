@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flayout/commands/commands.dart';
 import 'package:flayout/editors/graphics/graphics.dart';
 import 'package:flayout/extensions/extensions.dart';
@@ -9,12 +7,12 @@ import 'package:flutter/services.dart';
 import '../../layouts/cubits/cubits.dart';
 import 'state_machines.dart';
 
-class PolygonStateMachine extends BaseStateMachine {
-  PolygonStateMachine({required super.context});
+class PolylineStateMachine extends BaseStateMachine {
+  PolylineStateMachine({required super.context});
 
-  late BaseStateMachine _state = _DrawInitFirstPointState(context: context, state: this);
+  late BaseStateMachine _state = _DrawInitState(context: context, state: this);
 
-  late final _PolygonStateMachineGraphicDraft _draft = _PolygonStateMachineGraphicDraft();
+  late final _PolylineStateMachineGraphicDraft _draft = _PolylineStateMachineGraphicDraft();
 
   @override
   void onPrimaryTapDown(event) {
@@ -56,7 +54,7 @@ class PolygonStateMachine extends BaseStateMachine {
   @override
   void done() {
     super.done();
-    _state = _DrawInitFirstPointState(context: context, state: this);
+    _state = _DrawInitState(context: context, state: this);
     context.graphic.children.remove(_draft);
     context.render();
     Actions.invoke(context.buildContext, AddGraphicIntent(context, [_draft.toGraphic()]));
@@ -67,7 +65,7 @@ class PolygonStateMachine extends BaseStateMachine {
   @override
   void exit() {
     super.exit();
-    _state = _DrawInitFirstPointState(context: context, state: this);
+    _state = _DrawInitState(context: context, state: this);
     final result = context.graphic.children.remove(_draft);
     context.render();
     if (!result) context.stateMachineNotifier.value = SelectionStateMachine(context: context);
@@ -76,50 +74,24 @@ class PolygonStateMachine extends BaseStateMachine {
   }
 }
 
-class _DrawInitFirstPointState extends BaseStateMachine {
-  _DrawInitFirstPointState({required super.context, required this.state});
+class _DrawInitState extends BaseStateMachine {
+  _DrawInitState({required super.context, required this.state});
 
-  final PolygonStateMachine state;
+  final PolylineStateMachine state;
 
   @override
   void onPrimaryTapDown(event) {
     state._draft.vertices.add(event.position);
     context.graphic.children.add(state._draft);
     context.render();
-    state._state = _DrawInitSecondPointState(context: context, state: state);
-  }
-}
-
-class _DrawInitSecondPointState extends BaseStateMachine {
-  _DrawInitSecondPointState({required super.context, required this.state});
-
-  final PolygonStateMachine state;
-
-  @override
-  void onPrimaryTapDown(event) {
-    super.onPrimaryTapDown(event);
-    state._draft.vertices.add(state._draft.auxiliary!);
-    context.render();
     state._state = _DrawStartedState(context: context, state: state);
-  }
-
-  @override
-  void onMove(event) {
-    super.onMove(event);
-    final isShift =
-        HardwareKeyboard.instance.logicalKeysPressed
-            .intersection(LogicalKeyboardKey.expandSynonyms({LogicalKeyboardKey.shift}))
-            .isNotEmpty;
-
-    state._draft.auxiliary = isShift ? state._draft.vertices.last.snapTo45Degree(event.position) : event.position;
-    context.render();
   }
 }
 
 class _DrawStartedState extends BaseStateMachine {
   _DrawStartedState({required super.context, required this.state});
 
-  final PolygonStateMachine state;
+  final PolylineStateMachine state;
 
   @override
   void onPrimaryTapDown(event) {
@@ -148,10 +120,12 @@ class _DrawStartedState extends BaseStateMachine {
   }
 }
 
-class _PolygonStateMachineGraphicDraft extends BaseGraphic {
-  _PolygonStateMachineGraphicDraft();
+class _PolylineStateMachineGraphicDraft extends BaseGraphic {
+  _PolylineStateMachineGraphicDraft();
 
   List<Offset> vertices = [];
+
+  double halfWidth = 1;
 
   Offset? auxiliary;
 
@@ -160,6 +134,8 @@ class _PolygonStateMachineGraphicDraft extends BaseGraphic {
     auxiliary = null;
   }
 
+  Path _path = Path();
+
   @override
   void paint(Context context, Offset offset) {
     if (vertices.isEmpty || auxiliary == null) return;
@@ -167,19 +143,21 @@ class _PolygonStateMachineGraphicDraft extends BaseGraphic {
     if (layer == null) return;
     final paint = layersCubit.getPaint(layer, context);
     if (paint == null) return;
-
-    if (vertices.length == 1) {
-      context.canvas.drawLine(vertices.first, auxiliary!, paint);
-    } else {
-      context.canvas.drawPoints(ui.PointMode.polygon, [...vertices, auxiliary!, vertices.first], paint);
+    _path
+      ..reset()
+      ..moveTo(vertices.first.dx, vertices.first.dy);
+    for (int i = 1; i < vertices.length; i++) {
+      _path.lineTo(vertices[i].dx, vertices[i].dy);
     }
+    _path.lineTo(auxiliary!.dx, auxiliary!.dy);
+    context.canvas.drawPath(_path, paint);
   }
 
-  PolygonGraphic toGraphic() {
-    return PolygonGraphic(
+  PolylineGraphic toGraphic() {
+    return PolylineGraphic(
       layer: layersCubit.current!,
       vertices: [...vertices, auxiliary!],
-      close: true,
+      halfWidth: 1,
     );
   }
 
@@ -188,12 +166,13 @@ class _PolygonStateMachineGraphicDraft extends BaseGraphic {
 
   @override
   BaseGraphic clone() {
-    return _PolygonStateMachineGraphicDraft()
+    return _PolylineStateMachineGraphicDraft()
       ..layer = layer
       ..position = position
-      ..vertices = vertices;
+      ..vertices = vertices
+      ..halfWidth = halfWidth;
   }
 
   @override
-  Rect aabb() => throw UnimplementedError("_PolygonStateMachineGraphicDraft aabb()");
+  Rect aabb() => throw UnimplementedError("_PolylineStateMachineGraphicDraft aabb()");
 }

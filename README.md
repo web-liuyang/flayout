@@ -18,6 +18,7 @@ TODO
 [√] 按住 Shift 绘制 Rectangle => Square 与 Polygon => Poylygon 45 degree
 [√] 当 Layer 没有被使用时可以被删除
 [√] 按下 Backspace/Delete 删除选中的图形
+[√] PolylineGraphic AABB 是错误的
 
 [] Delete 图形加入Redo/Undo
 [] 目前只支持单个选中, 后期会加上多选
@@ -25,4 +26,3 @@ TODO
 [] PropertyPanel 改变图形没有校验数值
 [] 当 Layer 删除时没有进行正在使用的判断
 [] 网格吸附
-[] PolylineGraphic AABB 是错误的

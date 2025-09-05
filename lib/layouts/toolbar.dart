@@ -57,6 +57,10 @@ class _ToolbarState extends State<Toolbar> {
               editorContext.stateMachineNotifier.value = PolygonStateMachine(context: editorContext);
             }
 
+            void onPolyline(EditorContext editorContext) {
+              editorContext.stateMachineNotifier.value = PolylineStateMachine(context: editorContext);
+            }
+
             void onCircle(EditorContext editorContext) {
               editorContext.stateMachineNotifier.value = CircleStateMachine(context: editorContext);
             }
@@ -83,6 +87,12 @@ class _ToolbarState extends State<Toolbar> {
                   isSelected: editorContext?.stateMachine is PolygonStateMachine,
                   icon: const Icon(Icons.tab),
                   tooltip: "Polygon",
+                ),
+                IconButton(
+                  onPressed: canDraw ? invoke(onPolyline) : null,
+                  isSelected: editorContext?.stateMachine is PolylineStateMachine,
+                  icon: const Icon(Icons.polyline_outlined),
+                  tooltip: "Polyline",
                 ),
                 IconButton(
                   onPressed: canDraw ? invoke(onCircle) : null,
