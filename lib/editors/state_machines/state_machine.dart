@@ -97,7 +97,7 @@ class _StateMachineState extends State<StateMachine> {
             onMove(MoveCanvasEvent(position: position));
           },
           onPointerPanZoomStart: (event) {
-            print(1);
+            // print(1);
             position = viewport.windowToCanvas(event.localPosition);
           },
           onPointerPanZoomUpdate: (event) {

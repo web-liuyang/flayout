@@ -74,12 +74,12 @@ class CellPaneToolbar extends StatefulWidget {
 
 class _CellPaneToolbarState extends State<CellPaneToolbar> {
   Future<void> createCell() async {
-    final String? cellName = await CreateCellDialog.show(context);
-    if (cellName == null) return;
-    final newCell = Cell(name: cellName, graphic: RootGraphic(name: cellName, children: []));
-    cellsCubit.addCell(newCell);
-    cellsCubit.setCurrent(newCell);
-    editorManager.createEditor(EditorConfig(cell: newCell));
+    final Cell? cell = await CreateCellDialog.show(context);
+    if (cell == null) return;
+
+    cellsCubit.addCell(cell);
+    cellsCubit.setCurrent(cell);
+    editorManager.createEditor(EditorConfig(cell: cell));
   }
 
   void deleteCell(Cell cell) {
@@ -223,8 +223,8 @@ class _CellEditorState extends State<CellEditor> {
 class CreateCellDialog extends StatefulWidget {
   const CreateCellDialog({super.key});
 
-  static Future<String?> show(BuildContext context) {
-    return showDialog<String>(
+  static Future<Cell?> show(BuildContext context) {
+    return showDialog<Cell>(
       context: context,
       barrierDismissible: false,
       builder: (context) => const CreateCellDialog(),
