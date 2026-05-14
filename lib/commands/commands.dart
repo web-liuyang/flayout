@@ -190,14 +190,14 @@ Map<ShortcutActivator, Intent> createEditorShortcuts() {
     case TargetPlatform.fuchsia:
     case TargetPlatform.linux:
     case TargetPlatform.windows:
-      return _createEditorShortcuts();
+      return _createEditorShortcutsWindows();
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
       return _createEditorShortcutsAppleOs();
   }
 }
 
-Map<ShortcutActivator, Intent> _createEditorShortcuts() {
+Map<ShortcutActivator, Intent> _createEditorShortcutsWindows() {
   return {
     SingleActivator(LogicalKeyboardKey.keyZ, control: true): UndoIntent(),
     SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true): RedoIntent(),
