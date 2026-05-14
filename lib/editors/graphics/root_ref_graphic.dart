@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flayout/layouts/cubits/cubits.dart';
@@ -27,10 +28,22 @@ class RootRefGraphic extends BaseGraphic {
 
   @override
   void paint(Context ctx, Offset offset) {
-    // print("RootRefGraphic ${name}");
     final cell = cellsCubit.cells.firstWhere((cell) => cell.name == name);
     _graphic = cell.graphic;
-    _graphic!.paint(ctx, offset + position);
+
+    ctx.canvas.save();
+
+    // GDSII SRef 变换：V' = T(pos) * S_mirror * R_angle * S_mag * V
+    // 使用从左到右的调用顺序，避免平移被旋转/缩放污染。
+    ctx.canvas.translate(offset.dx + position.dx, offset.dy + position.dy);
+    if (vMirror) {
+      ctx.canvas.scale(1, -1);
+    }
+    ctx.canvas.rotate(angle * pi / 180);
+    ctx.canvas.scale(magnification.toDouble(), magnification.toDouble());
+
+    _graphic!.paint(ctx, Offset.zero);
+    ctx.canvas.restore();
   }
 
   @override

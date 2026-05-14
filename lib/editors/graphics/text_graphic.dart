@@ -25,7 +25,7 @@ class TextGraphic extends BaseGraphic {
           ..layout(ParagraphConstraints(width: double.infinity));
     ctx.canvas.save();
     ctx.canvas.scale(1, -1);
-    ctx.canvas.drawParagraph(paragraph, position + offset);
+    // ctx.canvas.drawParagraph(paragraph, position + offset);
     ctx.canvas.restore();
   }
 

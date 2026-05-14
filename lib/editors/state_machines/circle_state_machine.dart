@@ -45,7 +45,7 @@ class CircleStateMachine extends BaseStateMachine {
       ZoomDirection.zoomIn => context.viewport.zoomIn,
       ZoomDirection.zoomOut => context.viewport.zoomOut,
     };
-
+    
     zoomFn(event.position);
     context.render();
   }

@@ -52,7 +52,10 @@ List<Point> readXY(ByteData data) {
 
 String readString(ByteData data) {
   final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-  return String.fromCharCodes(bytes).trim();
+  // GDSII 字符串可能包含尾随的 null 字节，需要去除
+  final end = bytes.indexWhere((b) => b == 0);
+  final trimmed = end >= 0 ? bytes.sublist(0, end) : bytes;
+  return String.fromCharCodes(trimmed).trim();
 }
 
 Iterable<(GDSIIRecordType, ByteData)> recordReader(File file) sync* {

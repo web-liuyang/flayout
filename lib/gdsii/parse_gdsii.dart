@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
@@ -23,28 +24,15 @@ ParseGDSIIResult parseGDSII(String path) {
 
   final List<Cell> cells = [];
 
-  // final Map<String, CellBusinessGraphic> nameToCBG = {};
-  // final Map<String, Cell> nameToCell = {for (final cell in gdsii.cells) cell.name: cell};
-  // final Map<String, Layer> nameToLayer = {};
-  final Map<String, Cell> nameToCell = {
-    for (final cell in g.cells) cell.name: Cell(name: cell.name, graphic: RootGraphic(name: cell.name, children: [])),
-  };
-  final Map<String, Layer> nameToLayer = {};
-
   for (final gdsii.Cell item in g.cells) {
-    // item.
-    cells.add(parseCell(item, nameToCell, nameToLayer));
+    cells.add(parseCell(item));
   }
 
-  return ParseGDSIIResult(cells: cells, layers: []);
+  return ParseGDSIIResult(cells: cells, layers: layersCubit.layers.toList());
 }
 
-Cell parseCell(
-  gdsii.Cell cell,
-  Map<String, Cell> nameToCell,
-  Map<String, Layer> nameToLayer,
-) {
-  final List<BaseGraphic> children = parseStructs(cell.srefs, nameToCell, nameToLayer);
+Cell parseCell(gdsii.Cell cell) {
+  final List<BaseGraphic> children = parseStructs(cell.srefs);
   return Cell(name: cell.name, graphic: RootGraphic(name: cell.name, children: children));
 }
 
@@ -70,102 +58,94 @@ Layer getLayer(int layer, int datatype) {
   return result;
 }
 
-List<BaseGraphic> parseStructs(
-  List<Struct> structs,
-  Map<String, Cell> nameToCell,
-  Map<String, Layer> nameToLayer,
-) {
+List<BaseGraphic> parseStructs(List<Struct> structs) {
   final List<BaseGraphic> items = [];
 
   for (final Struct struct in structs) {
     if (struct is TextStruct) {
-      // print('TextStruct');
       final position = struct.offset.toOffset() * kEditorUnits;
       final text = struct.string;
-      // final layerKey = combineIdentity(struct.layer, struct.texttype);
-      // final layer = nameToLayer[layerKey] ??= Layer(name: layerKey, layer: struct.layer, datatype: struct.texttype);
       final layer = getLayer(struct.layer, struct.texttype);
-      // items.add(TextGraphic(text: text, position: position, layer: layer));
+      items.add(TextGraphic(text: text, position: position, layer: layer));
     }
 
     if (struct is BoundaryStruct) {
-      // print('BoundaryStruct');
       final vertices = struct.points.toOffsets() * kEditorUnits;
-      // final layerKey = combineIdentity(struct.layer, struct.datatype);
-      // final layer = nameToLayer[layerKey] ??= Layer(number: struct.layer, datatype: struct.datatype);
-      // final layer = layersCubit.current!;
       final layer = getLayer(struct.layer, struct.datatype);
       items.add(PolygonGraphic(vertices: vertices, layer: layer));
     }
 
     if (struct is PathStruct) {
-      // print('PathStruct');
       final vertices = struct.points.toOffsets() * kEditorUnits;
-      // final layerKey = combineIdentity(struct.layer, struct.datatype);
-      // final layer = nameToLayer[layerKey] ??= Layer(number: struct.layer, datatype: struct.datatype);
-      final halfWidth = struct.width / 2;
-      // final layer = layersCubit.current!;
+      final halfWidth = (struct.width * kEditorUnits) / 2.0;
       final layer = getLayer(struct.layer, struct.datatype);
       items.add(PolylineGraphic(vertices: vertices, layer: layer, halfWidth: halfWidth));
     }
 
     if (struct is SRefStruct) {
-      // print("SRefStruct");
       final position = struct.offset.toOffset() * kEditorUnits;
       final name = struct.name;
       final vMirror = struct.vMirror;
       final magnification = struct.magnification;
       final angle = struct.angle;
 
-      final RootRefGraphic rootRefGraphic = RootRefGraphic(
+      items.add(RootRefGraphic(
         position: position,
         name: name,
         vMirror: vMirror,
         magnification: magnification,
         angle: angle,
-      );
-
-      items.add(rootRefGraphic);
+      ));
     }
 
     if (struct is ARefStruct) {
-      print("ARefStruct");
-      // final Offset position = struct.offset.toOffset();
-      // final String name = struct.name;
-      // final bool vMirror = struct.vMirror;
-      // final num magnification = struct.magnification;
-      // final num angle = struct.angle;
-      // final int col = struct.col;
-      // final int row = struct.row;
-      // final double colSpacing = struct.colSpacing;
-      // final double rowSpacing = struct.rowSpacing;
+      final position = struct.offset.toOffset() * kEditorUnits;
+      final name = struct.name;
+      final vMirror = struct.vMirror;
+      final magnification = struct.magnification;
+      final angle = struct.angle;
+      final int col = struct.col;
+      final int row = struct.row;
+      final double colSpacing = struct.colSpacing * kEditorUnits;
+      final double rowSpacing = struct.rowSpacing * kEditorUnits;
 
-      // if (!nameToCBG.containsKey(name)) {
-      //   final Cell cell = nameToCell[name]!;
-      //   final CellBusinessGraphic cellBusinessGraphic = parseCell(cell, nameToCBG, nameToCell, nameToLayer);
-      //   nameToCBG[name] = cellBusinessGraphic;
-      // }
+      // GDSII ARef 变换：镜像和旋转作用于整个阵列晶格，而非单个元素
+      // 预计算每个元素的世界坐标位置
+      final double rad = angle * pi / 180;
+      final double cosA = cos(rad);
+      final double sinA = sin(rad);
+      final double signY = vMirror ? -1.0 : 1.0;
+      final double mag = magnification.toDouble();
 
-      // final CellBusinessGraphic cellBusinessGraphic = nameToCBG[name]!;
-      // final arr = ArrayBusinessGraphic(
-      //   position: position,
-      //   cell: cellBusinessGraphic,
-      //   vMirror: vMirror,
-      //   magnification: magnification,
-      //   angle: angle,
-      //   col: col,
-      //   row: row,
-      //   colSpacing: colSpacing,
-      //   rowSpacing: rowSpacing,
-      // );
+      final List<BaseGraphic> arrayChildren = [];
+      for (int c = 0; c < col; c++) {
+        for (int r = 0; r < row; r++) {
+          // 网格位置
+          double dx = c * colSpacing;
+          double dy = r * rowSpacing * signY; // mirror first
 
-      // items.add(arr);
+          // rotate around array reference point
+          double rx = dx * cosA - dy * sinA;
+          double ry = dx * sinA + dy * cosA;
+
+          // scale
+          rx *= mag;
+          ry *= mag;
+
+          final Offset cellOffset = position + Offset(rx, ry);
+          // 变换已在 world-space 位置中体现，子元素不需要再变换
+          arrayChildren.add(RootRefGraphic(
+            position: cellOffset,
+            name: name,
+            vMirror: false,
+            magnification: 1,
+            angle: 0,
+          ));
+        }
+      }
+      items.add(GroupGraphic(position: Offset.zero, children: arrayChildren));
     }
   }
 
   return items;
-}
-
-String combineIdentity(int number, int datatype) {
-  return "$number/$datatype";
 }

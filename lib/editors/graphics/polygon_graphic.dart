@@ -28,9 +28,9 @@ class PolygonGraphic extends BaseGraphic {
       ..reset()
       ..addPolygon(vertices, close);
 
-    if (ctx.viewport.canSee(aabb())) {
-      ctx.canvas.drawPath(_path, paint);
-    }
+    // 对于被 SRef/ARef 通过 canvas 变换绘制的图形，局部 AABB 与世界坐标不一致，
+    // 这里不做可见性裁剪，避免误删大部分引用图形。
+    ctx.canvas.drawPath(_path, paint);
   }
 
   @override

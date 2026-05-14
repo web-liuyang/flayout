@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import '../editors/editors.dart';
+import '../editors/editors.dart' hide Axis;
 
 class CanvasArea extends StatefulWidget {
   const CanvasArea({super.key});
@@ -40,31 +40,35 @@ class CanvasAreaState extends State<CanvasArea> {
             final Editor? currentEditor = editorManager.currentEditor;
 
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: tabs
-                      .mapIndexed<Widget>(
-                        (index, tab) => Container(
-                          decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))),
-                          child: IntrinsicWidth(
-                            child: ListTile(
-                              minTileHeight: 32,
-                              contentPadding: EdgeInsets.only(left: 8),
-                              selected: currentEditor == tab.editor,
-                              leading: Text(tab.title),
-                              trailing: IconButton(
-                                iconSize: 12,
-                                onPressed: () => editorManager.removeEditor(tab.title),
-                                icon: Icon(Icons.close),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: tabs
+                        .mapIndexed<Widget>(
+                          (index, tab) => Container(
+                            decoration: BoxDecoration(border: Border(right: BorderSide(width: 1))),
+                            child: IntrinsicWidth(
+                              child: ListTile(
+                                minTileHeight: 32,
+                                contentPadding: EdgeInsets.only(left: 8),
+                                selected: currentEditor == tab.editor,
+                                leading: Text(tab.title),
+                                trailing: IconButton(
+                                  iconSize: 12,
+                                  onPressed: () => editorManager.removeEditor(tab.title),
+                                  icon: Icon(Icons.close),
+                                ),
+                                onTap: () {
+                                  editorManager.currentEditorNotifier.value = tab.editor;
+                                },
                               ),
-                              onTap: () {
-                                editorManager.currentEditorNotifier.value = tab.editor;
-                              },
                             ),
                           ),
-                        ),
-                      )
-                      .toList(growable: false),
+                        )
+                        .toList(growable: false),
+                  ),
                 ),
                 if (tabs.isNotEmpty) Divider(height: 1, thickness: 2),
                 Expanded(

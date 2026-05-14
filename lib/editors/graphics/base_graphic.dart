@@ -44,19 +44,19 @@ class Viewport {
   void setZoom(double zoom, {Offset? origin}) {
     // clamp first, then quantize to kZoomStep (0.5) multiple
     final clamped = zoom.clamp(kMinZoom, kMaxZoom);
-    final quantized = (clamped / kZoomStep).roundToDouble() * kZoomStep;
+    final quantized = clamped;
     matrix4 = matrix4.setZoom(quantized, origin: origin);
   }
 
   void zoomIn(Offset origin) {
-    final currentStep = (getZoom() / kZoomStep).roundToDouble();
-    final target = (currentStep + 1) * kZoomStep;
+    final currentStep = getZoom();
+    final target = (currentStep * 1.1);
     setZoom(target, origin: origin);
   }
 
   void zoomOut(Offset origin) {
-    final currentStep = (getZoom() / kZoomStep).roundToDouble();
-    final target = (currentStep - 1) * kZoomStep;
+    final currentStep = getZoom();
+    final target = (currentStep * 0.9);
     setZoom(target, origin: origin);
   }
 

@@ -32,10 +32,7 @@ class _LayerPaneState extends State<LayerPane> {
       children: [
         LayerPaneToolbar(current: current),
         InputBox(
-          decoration: InputDecoration(
-            hintText: "Search",
-            prefixIcon: Icon(Icons.search),
-          ),
+          decoration: InputDecoration(hintText: "Search", prefixIcon: Icon(Icons.search)),
           controller: controller,
           onSubmitted: (value) => setState(() => controller.text = value),
         ),
@@ -460,9 +457,12 @@ class _LayerEditorState extends State<LayerEditor> {
           ),
           CellTile(
             title: "Visibility:",
-            trailing: Switch(
-              value: visibility,
-              onChanged: onActionVisibility,
+            trailing: Align(
+              alignment: Alignment.centerLeft,
+              child: Switch(
+                value: visibility,
+                onChanged: onActionVisibility,
+              ),
             ),
           ),
           CellTile(

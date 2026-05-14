@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import '../../layouts/cubits/cubits.dart';
@@ -23,6 +24,7 @@ class PolylineGraphic extends BaseGraphic {
     if (layer == null) return;
     final paint = layersCubit.getPaint(layer!, ctx);
     if (paint == null) return;
+    paint.strokeWidth = max(paint.strokeWidth, halfWidth * 2);
 
     final vertices = this.vertices.map((e) => e + position + offset).toList();
     _path

@@ -98,19 +98,20 @@ class SceneRenderObject extends RenderBox {
   SceneRenderObject({required this.context}) {
     context.renderObject = this;
     (() async {
-      final t = img.Image(width: 200, height: 200, numChannels: 2);
 
-      img.drawLine(
-        t,
-        x1: 0,
-        y1: 0,
-        x2: 200,
-        y2: 200,
-        color: img.ColorUint1.rgb(255, 0, 0),
-        thickness: 2,
-      );
-      // final pngBytes = image.encodePng(img);
-      flutterImage = await convertImageToFlutterUi(t);
+      // final t = img.Image(width: 200, height: 200, numChannels: 2);
+
+      // img.drawLine(
+      //   t,
+      //   x1: 0,
+      //   y1: 0,
+      //   x2: 200,
+      //   y2: 200,
+      //   color: img.ColorUint1.rgb(255, 0, 0),
+      //   thickness: 2,
+      // );
+      // // final pngBytes = image.encodePng(img);
+      // flutterImage = await convertImageToFlutterUi(t);
     })();
   }
 
@@ -157,6 +158,7 @@ class SceneRenderObject extends RenderBox {
     });
 
     canvasCubit.set(zoom: viewport.getZoom(), grid: viewport.getLogicSize(kEditorDotGap));
+    // viewport.setZoom(500.0);
   }
 
   @override

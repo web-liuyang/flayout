@@ -22,6 +22,10 @@ abstract class StructBuilder<T> {
     print("Plex");
   }
 
+  void handlePropattr(ByteData data) {}
+
+  void handlePropvalue(ByteData data) {}
+
   int handleLayer(ByteData data) {
     // print("Layer");
     return data.getUint16(0);
@@ -88,8 +92,8 @@ abstract class StructBuilder<T> {
 
   bool handleStrans(ByteData data) {
     assert(data.lengthInBytes == 2, "Strans length must be 2");
-    // AREF 没有处理, 还没有遇到
-    final vMirror = data.getUint8(0) == 1;
+    // STRANS 第 0 bit（最高位）表示是否关于 X 轴镜像
+    final vMirror = (data.getUint8(0) & 0x80) != 0;
     return vMirror;
   }
 
@@ -180,6 +184,18 @@ class BoundaryStructBuilder extends StructBuilder<BoundaryStruct> {
       case GDSIIRecordType.xy:
         {
           points = handleXY(data);
+          break;
+        }
+
+      case GDSIIRecordType.propattr:
+        {
+          handlePropattr(data);
+          break;
+        }
+
+      case GDSIIRecordType.propvalue:
+        {
+          handlePropvalue(data);
           break;
         }
 
@@ -316,6 +332,18 @@ class TextStructBuilder extends StructBuilder<TextStruct> {
           break;
         }
 
+      case GDSIIRecordType.propattr:
+        {
+          handlePropattr(data);
+          break;
+        }
+
+      case GDSIIRecordType.propvalue:
+        {
+          handlePropvalue(data);
+          break;
+        }
+
       default:
         throw UnimplementedError("$runtimeType: ${type.name}");
     }
@@ -415,6 +443,18 @@ class PathStructBuilder extends StructBuilder<PathStruct> {
           break;
         }
 
+      case GDSIIRecordType.propattr:
+        {
+          handlePropattr(data);
+          break;
+        }
+
+      case GDSIIRecordType.propvalue:
+        {
+          handlePropvalue(data);
+          break;
+        }
+
       default:
         throw UnimplementedError("$runtimeType: ${type.name}");
     }
@@ -490,6 +530,18 @@ class SRefStructBuilder extends StructBuilder<SRefStruct> {
         {
           points = handleXY(data);
           assert(points.length == 1, "points length must be 1");
+          break;
+        }
+
+      case GDSIIRecordType.propattr:
+        {
+          handlePropattr(data);
+          break;
+        }
+
+      case GDSIIRecordType.propvalue:
+        {
+          handlePropvalue(data);
           break;
         }
 
@@ -590,6 +642,18 @@ class ARefStructBuilder extends StructBuilder<ARefStruct> {
           break;
         }
 
+      case GDSIIRecordType.propattr:
+        {
+          handlePropattr(data);
+          break;
+        }
+
+      case GDSIIRecordType.propvalue:
+        {
+          handlePropvalue(data);
+          break;
+        }
+
       default:
         throw UnimplementedError("$runtimeType: ${type.name}");
     }
@@ -598,8 +662,10 @@ class ARefStructBuilder extends StructBuilder<ARefStruct> {
   @override
   ARefStruct build() {
     final [offset, totalColOffset, totalRowOffset] = points;
-    final colSpacing = ((totalColOffset - offset) / colrow.$1.toDouble()).dx;
-    final rowSpacing = ((totalRowOffset - offset) / colrow.$2.toDouble()).dy;
+    final colDivisor = max(colrow.$1 - 1, 1).toDouble();
+    final rowDivisor = max(colrow.$2 - 1, 1).toDouble();
+    final colSpacing = ((totalColOffset - offset) / colDivisor).dx;
+    final rowSpacing = ((totalRowOffset - offset) / rowDivisor).dy;
     return ARefStruct(
       name: name,
       vMirror: vMirror,

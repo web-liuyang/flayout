@@ -34,10 +34,7 @@ class _CellPaneState extends State<CellPane> {
       children: [
         CellPaneToolbar(current: current),
         InputBox(
-          decoration: InputDecoration(
-            hintText: "Search",
-            prefixIcon: Icon(Icons.search),
-          ),
+          decoration: InputDecoration(hintText: "Search", prefixIcon: Icon(Icons.search)),
           controller: controller,
           onSubmitted: (value) => setState(() => controller.text = value),
         ),
